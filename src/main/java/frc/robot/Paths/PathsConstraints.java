@@ -20,5 +20,7 @@ public class PathsConstraints {
 
     public static final double MAX_POSITION_THRESHOLD = 0.03;
     public static final double MAX_TRAJECTORY_DISTANCE_THRESHOLD = 0.1;
+    public static final double MAX_ANGLE_FIX = Math.toRadians(30);
+    public static final double MIN_ANGLE_FIX = Math.toRadians(5);
 
 }

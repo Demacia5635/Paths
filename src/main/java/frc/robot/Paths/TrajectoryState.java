@@ -6,7 +6,6 @@ package frc.robot.Paths;
 
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.interpolation.Interpolatable;
 import frc.robot.Paths.PathsConstraints.DRIVE_CONSTRAINTS;
 
 /** Add your docs here. */
