@@ -14,23 +14,22 @@ public class Trapezoid {
     private final double maxJerk;
     private final double finalVelocity;
 
-    public Trapezoid(double maxVelocity, double maxAcceleration, double maxJerk, double finalVelocity){
+    public Trapezoid(double maxVelocity, double maxAcceleration, double maxJerk, double finalVelocity) {
         this.maxVelocity = maxVelocity;
         this.maxAcceleration = maxAcceleration;
         this.maxJerk = maxJerk;
         this.finalVelocity = finalVelocity;
     }
 
-    
-    public Trapezoid(double maxVelocity, double maxAcceleration, double finalVelocity){
+    public Trapezoid(double maxVelocity, double maxAcceleration, double finalVelocity) {
         this(maxVelocity, maxAcceleration, Double.POSITIVE_INFINITY, finalVelocity);
     }
 
-    public Trapezoid(double maxVelocity, double maxAcceleration){
+    public Trapezoid(double maxVelocity, double maxAcceleration) {
         this(maxVelocity, maxAcceleration, Double.POSITIVE_INFINITY, 0);
     }
-    
-    public double calculate(double currentVelocity, double distanceLeft){
+
+    public double calculate(double currentVelocity, double distanceLeft) {
         double absDistanceLeft = Math.abs(distanceLeft);
         double absCurrentVelocity = Math.abs(currentVelocity);
         double absFinalVelocity = Math.abs(finalVelocity);
@@ -39,12 +38,13 @@ public class Trapezoid {
         double v = 0;
         double a = 0;
 
-        if(absDistanceLeft < stoppingDistance){
+        if (absDistanceLeft < stoppingDistance) {
             a = -maxAcceleration;
-        }
-        else{
-            if(absCurrentVelocity < maxVelocity) a = maxAcceleration;
-            else a = 0;
+        } else {
+            if (absCurrentVelocity < maxVelocity)
+                a = maxAcceleration;
+            else
+                a = 0;
         }
 
         v = currentVelocity + (a * 0.02);
@@ -52,24 +52,21 @@ public class Trapezoid {
         a *= Math.signum(distanceLeft);
 
         return v;
-        
 
     };
 
-    private double getStoppingDistance(double velocity, double finalVelocity){
-        if(velocity < finalVelocity) return 0; //no need to deAccelerate to stop
+    private double getStoppingDistance(double velocity, double finalVelocity) {
+        if (velocity < finalVelocity) return 0; // no need to deAccelerate to stop
 
         double accelDistanceToStop = ((velocity * velocity) - (finalVelocity * finalVelocity)) / (2 * maxAcceleration);
 
-        if(maxJerk == Double.POSITIVE_INFINITY) return accelDistanceToStop;
+        if (maxJerk == Double.POSITIVE_INFINITY)
+            return accelDistanceToStop;
 
         double jerkDistanceToStop = (maxAcceleration * maxAcceleration) / (2 * maxJerk);
 
         return accelDistanceToStop + jerkDistanceToStop;
-        
-        
+
     }
-
-
 
 }

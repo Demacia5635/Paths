@@ -5,7 +5,7 @@
 package frc.robot.Paths;
 
 /** Add your docs here. */
-public class PathsConstants {
+public class PathsConstraints {
     public static class DRIVE_CONSTRAINTS {
 
         public static final double MAX_VELOCITY = 3;

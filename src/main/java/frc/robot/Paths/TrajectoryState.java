@@ -6,10 +6,11 @@ package frc.robot.Paths;
 
 
 import edu.wpi.first.math.geometry.Pose2d;
-import frc.robot.Paths.PathsConstants.DRIVE_CONSTRAINTS;
+import edu.wpi.first.math.interpolation.Interpolatable;
+import frc.robot.Paths.PathsConstraints.DRIVE_CONSTRAINTS;
 
 /** Add your docs here. */
-public class TrajectoryState extends Pose2d {
+public class TrajectoryState extends Pose2d{
     public static TrajectoryState kEmptyState = new TrajectoryState(new Pose2d(), 0);
 
     private double velocityAtPoint;
@@ -25,5 +26,6 @@ public class TrajectoryState extends Pose2d {
 
     public double getVelocityAtPoint(){return this.velocityAtPoint;}
     public void setVelocityAtPoint(double velocity){this.velocityAtPoint = velocity;}
+
 
 }
