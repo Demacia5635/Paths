@@ -12,7 +12,7 @@ import frc.robot.Paths.PathsConstraints.DRIVE_CONSTRAINTS;
 public class TrajectoryState extends Pose2d{
     public static TrajectoryState kEmptyState = new TrajectoryState(new Pose2d(), 0);
 
-    private double velocityAtPoint;
+    private double maxVelocityAtPoint;
 
     
     public TrajectoryState(Pose2d pose){
@@ -20,11 +20,11 @@ public class TrajectoryState extends Pose2d{
     }
     public TrajectoryState(Pose2d pose, double velocityAtPoint){
         super(pose.getTranslation(), pose.getRotation());
-        this.velocityAtPoint = velocityAtPoint;
+        this.maxVelocityAtPoint = velocityAtPoint;
     }
 
-    public double getVelocityAtPoint(){return this.velocityAtPoint;}
-    public void setVelocityAtPoint(double velocity){this.velocityAtPoint = velocity;}
+    public double getMaxVelocityAtPoint(){return this.maxVelocityAtPoint;}
+    public void setMaxVelocityAtPoint(double velocity){this.maxVelocityAtPoint = velocity;}
 
 
 }

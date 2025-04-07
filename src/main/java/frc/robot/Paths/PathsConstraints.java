@@ -6,6 +6,7 @@ package frc.robot.Paths;
 
 /** Add your docs here. */
 public class PathsConstraints {
+
     public static class DRIVE_CONSTRAINTS {
 
         public static final double MAX_VELOCITY = 3;
@@ -22,5 +23,6 @@ public class PathsConstraints {
     public static final double MAX_TRAJECTORY_DISTANCE_THRESHOLD = 0.1;
     public static final double MAX_ANGLE_FIX = Math.toRadians(30);
     public static final double MIN_ANGLE_FIX = Math.toRadians(5);
+    public static final double MAX_RADIAL_ACCELERATION = Math.toRadians(360);
 
 }

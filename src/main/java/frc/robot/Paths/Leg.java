@@ -51,11 +51,20 @@ public class Leg extends Segment {
         return new Translation2d(kDefaultVelocity, wantedAngle); //need to normal the vector when finished
     }
 
+    @Override
     public void updateCurrentPosition(Translation2d chassisPose) {
         this.currentPosition = chassisPose;
         this.relativePosition = currentPosition
                 .plus(new Translation2d(PathsUtils.distanceOfPointFromLine(pointA, pointB, currentPosition),
                         legVector.getAngle().plus(Rotation2d.kCW_90deg)));
     }
+
+    @Override
+    public boolean hasFinishedSegment() {
+        return Math.abs(getDistanceLeftOnSegment()) < PathsConstraints.MAX_TRAJECTORY_DISTANCE_THRESHOLD
+            || PathsUtils.isPoseClose(currentPosition, pointB, PathsConstraints.MAX_TRAJECTORY_DISTANCE_THRESHOLD);
+    }
+
+
 
 }

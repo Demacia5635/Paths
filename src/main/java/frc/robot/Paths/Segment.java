@@ -27,7 +27,9 @@ public abstract class Segment {
     public Translation2d getPointA(){return this.pointA;}
     public Translation2d getPointB(){return this.pointB;}
 
-    
+    public boolean hasFinishedSegment(){return false;}
+
+    public void updateCurrentPosition(Translation2d chassisPose){}
     
 
 

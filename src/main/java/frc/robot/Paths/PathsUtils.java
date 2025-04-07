@@ -4,6 +4,7 @@
 
 package frc.robot.Paths;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 /** Add your docs here. */
@@ -23,6 +24,18 @@ public class PathsUtils {
     }
     public static Translation2d normalVector(Translation2d vector, double scalar){
         return (vector.div(vector.getNorm())).times(scalar);
+    }
+    public static boolean isPoseClose(Translation2d pos, Translation2d point, double maxDistance){
+        return pos.getDistance(point) <= maxDistance;
+    }
+    public static double getLengthOfArc(double radius, Rotation2d arcAngle){
+        return Math.abs(arcAngle.getDegrees()) < 3 ? 0 : Math.abs(radius * arcAngle.getRadians());
+    }
+    public static double getMinRadiusPossible(double entryVelocity){
+        return Math.pow(entryVelocity, 2) / PathsConstraints.MAX_RADIAL_ACCELERATION;
+    }
+    public static double getMaxVelocityGivenRadius(double radius){
+        return Math.sqrt(radius * PathsConstraints.MAX_RADIAL_ACCELERATION);
     }
 
 }
