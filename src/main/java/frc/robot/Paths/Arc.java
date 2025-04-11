@@ -61,7 +61,7 @@ public class Arc extends Segment{
     @Override
     public Translation2d calculate() {
         double realDistanceFromCenter = currentPosition.getDistance(pointB);
-        Rotation2d wantedVelocityAngle = relativePosition.getAngle().plus(Rotation2d.fromDegrees(90 * Math.signum(arcAngle.getDegrees())));
+        Rotation2d wantedVelocityAngle = centerToRelative.getAngle().plus(Rotation2d.fromDegrees(90 * Math.signum(arcAngle.getDegrees())));
 
         Rotation2d wantedAngleFixed = wantedVelocityAngle.times((realDistanceFromCenter / radius));
         //fix angle = turn angle, multiplied by a ratio.
