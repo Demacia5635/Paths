@@ -5,6 +5,8 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.utils.LogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -16,12 +18,34 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+
+  public static boolean isComp = DriverStation.isFMSAttached();
+  private static boolean hasRemovedFromLog = false;
+
   // The robot's subsystems and commands are defined here...
+
+  // Replace with CommandPS4Controller or CommandJoystick if needed
+  private final CommandXboxController m_driverController =
+      new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    new LogManager();
     // Configure the trigger bindings
     configureBindings();
+  }
+
+  public static boolean isComp() {
+    return isComp;
+  }
+
+  public static void setIsComp(boolean isComp) {
+    RobotContainer.isComp = isComp;
+    if(!hasRemovedFromLog && isComp) {
+      hasRemovedFromLog = true;
+      LogManager.removeInComp();
+    }
   }
 
   /**
@@ -34,6 +58,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    
   }
 
   /**
