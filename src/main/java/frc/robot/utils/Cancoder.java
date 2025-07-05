@@ -59,26 +59,12 @@ public class Cancoder extends CANcoder {
     }
 
     private void addLog() {
-        // LogManager.addEntry(name + "/Position", positionSignal, 2);
-        // LogManager.addEntry(name + "/Absolute position", this::getCurrentAbsPosition, 2);
-        // LogManager.addEntry(name + "/Velocity", velocitySignal, 2);
-        // LogManager.addEntry(name + "/Acceleration", this::getCurrentAcceleration, 2);
 
-        // LogManager.addEntry(name + "",  new DoubleSupplier[] {
-        //     positionSignal,
-        //     this::getCurrentAbsPosition,
-        //     velocitySignal,
-        //     this::getCurrentAcceleration
-        // }, 2);
-
-        LogManager.addEntry(name + "Position and Velocity",  new DoubleSupplier[] {
-            this::getCurrentAbsPosition,
-            this::getCurrentAcceleration
-        }, 2);
-
-        LogManager.addEntry(name + "Absolute position and Acceleration",  new StatusSignal[] {
-            positionSignal,
-            velocitySignal,
+        LogManager.addEntry(name + "Position and Velocity",  () -> new double[] {
+            getCurrentAbsPosition(),
+            getCurrentAcceleration(),
+            positionSignal.getValueAsDouble(),
+            velocitySignal.getValueAsDouble()
         }, 2);
     }
 

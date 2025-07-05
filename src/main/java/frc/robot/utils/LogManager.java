@@ -4,32 +4,24 @@
 
 package frc.robot.utils;
 
-import static frc.robot.utils.constants.UtilsContants.*;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 
+import edu.wpi.first.networktables.Publisher;
 import edu.wpi.first.networktables.BooleanPublisher;
-import edu.wpi.first.networktables.BooleanTopic;
 import edu.wpi.first.networktables.BooleanArrayPublisher;
-import edu.wpi.first.networktables.BooleanArrayTopic;
 import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
-import edu.wpi.first.networktables.DoubleArrayTopic;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.BooleanArrayLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DataLogEntry;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -44,63 +36,36 @@ public class LogManager extends SubsystemBase {
   public static LogManager logManager; // singleton reference
 
   private DataLog log;
-  private NetworkTableInstance ntInst = NetworkTableInstance.getDefault();
-  private NetworkTable table = ntInst.getTable("Log");
+  private NetworkTable table = NetworkTableInstance.getDefault().getTable("Log");
 
   private static ArrayList<ConsoleAlert> activeConsole;
   
   // Optimization: Configurable skip cycles for better performance
-  private int skipCycles1 = 0;
-  private static int STATIC_SKIP_INTERVAL = 1; // Default: log every cycle, can be changed for optimization
+  private static int SkipedCycles1 = 0;
+  private static int SKIP_CYCLES = 1; // Default: log every cycle, can be changed for optimization
   private static boolean issenabled = true;
 
   /*
    * class for a single data entry
    */
-  public class LogEntry {
-    DoubleLogEntry doubleEntry; // wpilib log entry
-    DoubleArrayLogEntry doubleArrayEntry;
-    BooleanLogEntry booleanEntry;
-    BooleanArrayLogEntry booleanArrayEntry;
-    @SuppressWarnings("rawtypes")
-    StatusSignal phoenix6Status; // supplier of phoenix 6 status signal
-    StatusSignal[] phoenix6Statuses;
-    DoubleSupplier getterDouble; // supplier for double data - if no status signal provider
-    DoubleSupplier[] getterDoubleArray;
-    BooleanSupplier getterBoolean;
-    BooleanSupplier[] getterBooleanArray;
-    BiConsumer<Double, Long> doubleConsumer = null; // optional consumer when data changed - data value and time
-    BiConsumer<double[], Long> doubleArrayConsumer = null;
-    BiConsumer<Boolean, Long> booleanConsumer = null;
-    BiConsumer<boolean[], Long> booleanArrayConsumer = null;
+  public class LogEntry<T> {
+    DataLogEntry entry;
+    StatusSignal<T> phoenix6Status; // supplier of phoenix 6 status signal
+    StatusSignal<T>[] phoenix6StatusArray;
+    Supplier<T> getter;
+    BiConsumer<T, Long> consumer = null;
     String name;
-    DoublePublisher ntPublisherDouble; // network table punlisher
-    DoubleArrayPublisher ntPublisherDoubleArray;
-    BooleanPublisher ntPublisherBoolean;
-    BooleanArrayPublisher ntPublisherBooleanArray;
-    double lastValue = Double.MAX_VALUE; // last value - only logging when value changes
-    double[] lastArrayValue = new double[0];
+    Publisher ntPublisher;
+    T lastValue;
     private double precision = 0; // Configurable precision for change detection
-    private int skipCycles2 = 0;
+    private int skipedCycles2 = 0;
     private int SkipCycle = 1; // Default: log every cycle, can be changed for optimization
-    
-    // Optimization: Cache type checks
-    private final boolean isBooleanType;
-    private final boolean isDoubleType;
-    private final boolean isDoubleArrayType;
-    private final boolean isBooleanArrayType;
+    private final Class<T> classType;
 
-    public boolean isBooleanType(BooleanSupplier getterBoolean, StatusSignal phoenix6Status){
-        return getterBoolean != null || (phoenix6Status != null && phoenix6Status.getTypeClass() == Boolean.class);
-    }
-
-    public boolean isDoubleType(DoubleSupplier getterDouble, StatusSignal phoenix6Status){
-        return getterDouble != null || (phoenix6Status != null && phoenix6Status.getTypeClass() == Double.class);
-    }
-
-    public boolean isDoubleArrayType(DoubleSupplier[] getterDoubleArray, StatusSignal[] phoenix6Statuses){
-        return getterDoubleArray != null || (phoenix6Statuses != null && phoenix6Statuses.length > 0 && phoenix6Statuses[0].getTypeClass().equals(Double.class));
-    }
+    private boolean isDoubleType;
+    private boolean isBooleanType;
+    private boolean isDoubleArrayType;
+    private boolean isBooleanArrayType;
 
     /*
      * the log levels are this:
@@ -114,54 +79,28 @@ public class LogManager extends SubsystemBase {
     /*
      * Constructor with the suppliers and boolean if add to network table
      */
-    @SuppressWarnings("rawtypes")
-    LogEntry(String name, StatusSignal phoenix6Status, StatusSignal[] phoenix6Statuses, DoubleSupplier getterDouble, BooleanSupplier getterBoolean, DoubleSupplier[] getterDoubleArray, BooleanSupplier[] getterBooleanArray,
-        int logLevel) {
+    LogEntry(String name, StatusSignal<T> phoenix6Status, StatusSignal<T>[] phoenix6StatusArray, Supplier<T> getter, int logLevel, Class<T> classType) {
 
       this.name = name;
       this.logLevel = logLevel;
-      
-      // Cache type checks for better performance
-      this.isBooleanType = isBooleanType(getterBoolean, phoenix6Status);
-      this.isDoubleType = isDoubleType(getterDouble, phoenix6Status);
-      this.isDoubleArrayType = isDoubleArrayType(getterDoubleArray, phoenix6Statuses);
-      this.isBooleanArrayType = !isBooleanType && !isDoubleType && !isDoubleArrayType;
-      
-      if (isBooleanType) {
-        this.booleanEntry = new BooleanLogEntry(log, name);
-      } else if (isDoubleType) {
-        this.doubleEntry = new DoubleLogEntry(log, name);
-      } else if (isDoubleArrayType) {
-        this.doubleArrayEntry = new DoubleArrayLogEntry(log, name);
-      } else{
-        this.booleanArrayEntry = new BooleanArrayLogEntry(log, name);
-      }
+      this.classType = classType;
       this.phoenix6Status = phoenix6Status;
-      this.phoenix6Statuses = phoenix6Statuses;
-      this.getterDouble = getterDouble;
-      this.getterDoubleArray = getterDoubleArray;
-      this.getterBoolean = getterBoolean;
-      this.getterBooleanArray = getterBooleanArray;
+      this.phoenix6StatusArray = phoenix6StatusArray;
+      this.getter = getter;
+
+      isDoubleType = classType == Double.class;
+      isBooleanType = classType == Boolean.class;
+      isDoubleArrayType = classType == double[].class;
+      isBooleanArrayType = classType == boolean[].class;
+
+      this.entry = createLogEntry(log, name);
+
       if (logLevel == 4 || (logLevel == 3 && !RobotContainer.isComp())) {
-        if (isBooleanType) {
-          BooleanTopic bt = table.getBooleanTopic(name);
-          ntPublisherBoolean = bt.publish();
-        }else if (isDoubleType) {
-          DoubleTopic bt = table.getDoubleTopic(name);
-          ntPublisherDouble = bt.publish();
-        } else if (isDoubleArrayType) {
-          DoubleArrayTopic bt = table.getDoubleArrayTopic(name);
-          ntPublisherDoubleArray = bt.publish();
-        } else {
-          BooleanArrayTopic bt = table.getBooleanArrayTopic(name);
-          ntPublisherBooleanArray = bt.publish();
-        }
+        this.ntPublisher = createPublisher(table, name);
       } else {
-        ntPublisherDouble = null;
-        ntPublisherDoubleArray = null;
-        ntPublisherBoolean = null;
-        ntPublisherBooleanArray = null;
+        this.ntPublisher = null;
       }
+      
     }
 
     /*
@@ -169,79 +108,73 @@ public class LogManager extends SubsystemBase {
      * get the data from the getters and call the actual log
      */
     void log() {
-      skipCycles2++;
-      if (skipCycles2 < SkipCycle) {
+      skipedCycles2++;
+      if (skipedCycles2 < SkipCycle) {
         return;
       }
-      skipCycles2 = 0;
-      double v = 0;
+      skipedCycles2 = 0;
+      T value  = null;
       long time = 0;
 
       if (phoenix6Status != null) {
-        var st = phoenix6Status.refresh();
+        var st  = phoenix6Status.refresh();
         if (st.getStatus() == StatusCode.OK) {
-            v = st.getValueAsDouble();
-            time = (long) (st.getTimestamp().getTime() * 1000);
-            log(v, time);
-            return;
+          value = (T) Double.valueOf(st.getValueAsDouble());
+          time = (long) (st.getTimestamp().getTime() * 1000);
         } else {
-            v = 1000000 + st.getStatus().value;
-            log(v, time);
-            return;
+          return;
         }
-      } else if(phoenix6Statuses != null) {
-
-        StatusCode  st = StatusSignal.refreshAll(phoenix6Statuses);
-          if (st == StatusCode.OK) {
-            double[] arrV = new double[phoenix6Statuses.length];
-              for (int i = 0; i < phoenix6Statuses.length; i++) {
-                arrV[i] = phoenix6Statuses[i].getValueAsDouble();
-    
-                if (i == 0) {
-                    time = (long) (phoenix6Statuses[i].getTimestamp().getTime() * 1000);
-                }
-              }
-              log(arrV, time);
-              return;
-          } else {
-              v = 1000000 + st.value;
-              log(v, time);
-              return;
+      } else if (phoenix6StatusArray != null) {
+        StatusCode  st = StatusSignal.refreshAll(phoenix6StatusArray);
+        if (st == StatusCode.OK) {
+          double[] arrV = new double[phoenix6StatusArray.length];
+          for (int i = 0; i < phoenix6StatusArray.length; i++) {
+            arrV[i] = phoenix6StatusArray[i].getValueAsDouble();
+            if (i == 0) {
+              time = (long) (phoenix6StatusArray[i].getTimestamp().getTime() * 1000);
+            }
           }
-      } else if (getterBoolean != null) {
-          v = getterBoolean.getAsBoolean() ? 1 : 0;
-          time = 0;
-          log(v, time);
+          value = (T) arrV;
+        } else {
           return;
-      } else if (getterDouble != null) {
-          v = getterDouble.getAsDouble();
-          time = 0;
-          log(v, time);
-          return;
-      } else if (getterDoubleArray != null) {
-        double[] arrV = new double[getterDoubleArray.length];
-        for (int i = 0; i < getterDoubleArray.length; i++) {
-          arrV[i] = getterDoubleArray[i].getAsDouble();
         }
+      } else if (getter != null){
+        value = getter.get();
         time = 0;
-        log(arrV, time);
-        return;
-      } else if (getterBooleanArray != null) {
-        double[] arrV = new double[getterBooleanArray.length];
-        for (int i = 0; i < getterBooleanArray.length; i++) {
-          arrV[i] = getterBooleanArray[i].getAsBoolean() ? 1 : 0;
-        }
-          time = 0;
-          log(arrV, time);
-          return;
+      } if (value != null) {
+        log(value, time);
       }
   }
 
     /*
      * log a value use zero (current) time
      */
-    public void log(double v) {
-      log(v, 0);
+    public void log(T value) {
+      log(value, 0);
+    }
+
+    private boolean hasSignificantChange(T value) {
+      if (lastValue == null) {
+        return true;
+      }
+      
+      if (isDoubleType) {
+        return Math.abs((Double) value - (Double) lastValue) >= precision;
+      } else if (isDoubleArrayType) {
+        double[] arrV = (double[]) value;
+        double[] lastArrV = (double[]) lastValue;
+        if (arrV.length != lastArrV.length) {
+          return true;
+        }
+        for (int i = 0; i < arrV.length; i++) {
+          if (Math.abs(arrV[i] - lastArrV[i]) >= precision) {
+            return true;
+          }
+        }
+        return false;
+      } else {
+        return !value.equals(lastValue);
+      }
     }
 
     /*
@@ -249,79 +182,73 @@ public class LogManager extends SubsystemBase {
      * also publish to network table (if required)
      * also call consumer if set
      */
-    public void log(double v, long time) {
-      if (Math.abs(v - lastValue) < precision) {
-        return ;
+    public void log(T value, long time) {
+      if (!hasSignificantChange(value)) {
+        return;
       }
-      if (isBooleanType) {
-        booleanEntry.append(v == 1, time);
-        if (ntPublisherBoolean != null) {
-          ntPublisherBoolean.set(v == 1);
-        }
-        if (doubleConsumer != null) {
-          doubleConsumer.accept(v, time);
-        }
-        if (booleanConsumer != null) {
-          booleanConsumer.accept(v == 1, time);
-        }
-      } else  {
-        doubleEntry.append(v, time);
-        if (ntPublisherDouble != null) {
-          ntPublisherDouble.set(v);
-        }
-        if (doubleConsumer != null) {
-          doubleConsumer.accept(v, time);
-        }
-      }
-      lastValue = v;
-    }
 
-    public void log(double[] arrV) {
-      log(arrV, 0);
-    }
+      appendEntry(value, time);
 
-    private boolean hasSignificantChange(double[] arrV) {
-      if (arrV.length != lastArrayValue.length) {
-        return true;
+      if (ntPublisher != null) {
+        publishToNetworkTable(value);
       }
       
-      for (int i = 0; i < arrV.length; i++) {
-        if (Math.abs(arrV[i] - lastArrayValue[i]) >= precision) {
-          return true;
-        }
+      // Call consumer if set
+      if (consumer != null) {
+        consumer.accept(value, time);
       }
-      return false;
+      
+      lastValue = value;
     }
 
-    public void log(double[] arrV, long time) {
-      if (!hasSignificantChange(arrV)){
-        return ;
+    private DataLogEntry createLogEntry(DataLog log, String name) {
+      if (isDoubleType) {
+        return new DoubleLogEntry(log, name);
+      } else if (isBooleanType) {
+        return new BooleanLogEntry(log, name);
+      } else if (isDoubleArrayType) {
+        return new DoubleArrayLogEntry(log, name);
+      } else if (isBooleanArrayType) {
+        return new BooleanArrayLogEntry(log, name);
       }
-      if (isBooleanArrayType) {
-        boolean[] boolArrV = new boolean[arrV.length];
-        for (int i = 0; i < arrV.length; i++){
-          boolArrV[i] = (arrV[i] == 1);
-        }
-        booleanArrayEntry.append(boolArrV, time);
-        if (ntPublisherBooleanArray != null) {
-          ntPublisherBooleanArray.set(boolArrV);
-        }
-        if (doubleArrayConsumer != null) {
-          doubleArrayConsumer.accept(arrV, time);
-        }
-        if (booleanArrayConsumer != null) {
-          booleanArrayConsumer.accept(boolArrV, time);
-        }
-      } else  {
-        doubleArrayEntry.append(arrV, time);
-        if (ntPublisherDoubleArray != null) {
-            ntPublisherDoubleArray.set(arrV);
-        }
-        if (doubleArrayConsumer != null) {
-            doubleArrayConsumer.accept(arrV, time);
-        }
+      throw new IllegalArgumentException("Unsupported type: " + classType);
+    }
+
+    private Publisher createPublisher(NetworkTable table, String name) {
+      if (isDoubleType) {
+        return table.getDoubleTopic(name).publish();
+      } else if (isBooleanType) {
+        return table.getBooleanTopic(name).publish();
+      } else if (isDoubleArrayType) {
+        return table.getDoubleArrayTopic(name).publish();
+      } else if (isBooleanArrayType) {
+        return table.getBooleanArrayTopic(name).publish();
       }
-      lastArrayValue = Arrays.copyOf(arrV, arrV.length);
+      throw new IllegalArgumentException("Unsupported type: " + classType);
+    }
+
+    private void appendEntry(T value, long time) {
+      if (isDoubleType) {
+        ((DoubleLogEntry) entry).append((Double) value, time);
+      } else if (isBooleanType) {
+        ((BooleanLogEntry) entry).append((Boolean) value, time);
+      } else if (isDoubleArrayType) {
+        ((DoubleArrayLogEntry) entry).append((double[]) value, time);
+      } else if (isBooleanArrayType) {
+        ((BooleanArrayLogEntry) entry).append((boolean[]) value, time);
+      }
+    }
+
+    private void publishToNetworkTable(T value) {
+      if (isDoubleType) {
+        ((DoublePublisher) ntPublisher).set((Double) value);
+      } else if (isBooleanType) {
+        ((BooleanPublisher) ntPublisher).set((Boolean) value);
+      } else if (isDoubleArrayType) {
+        ((DoubleArrayPublisher) ntPublisher).set((double[]) value);
+      } else if (isBooleanArrayType) {
+        ((BooleanArrayPublisher) ntPublisher).set((boolean[]) value);
+      }
     }
 
     public void setPrecision(double precision) {
@@ -347,42 +274,19 @@ public class LogManager extends SubsystemBase {
     }
 
     // set the consumer
-    public void setDoubleConsumer(BiConsumer<Double, Long> consumer) {
-      this.doubleConsumer = consumer;
-    }
-
-    public void setDoubleArrayConsumer(BiConsumer<double[], Long> consumer) {
-      this.doubleArrayConsumer = consumer;
-    }
-
-    public void setBooleanConsumer(BiConsumer<Boolean, Long> consumer) {
-      this.booleanConsumer = consumer;
-    }
-
-    public void setBooleanArrayConsumer(BiConsumer<boolean[], Long> consumer) {
-      this.booleanArrayConsumer = consumer;
+    public void setConsumer(BiConsumer<T, Long> consumer) {
+      this.consumer = consumer;
     }
 
     public void removeInComp() {
-      if (logLevel == 3) {
-        if (isBooleanType) {
-          ntPublisherBoolean.close();
-        } else if (isDoubleType) {
-          ntPublisherDouble.close();
-        } else if (isDoubleArrayType) {
-          ntPublisherDoubleArray.close();
-        } else {
-          ntPublisherBooleanArray.close();
-        }
+      if (logLevel == 3 && ntPublisher != null) {
+        ntPublisher.close();
       }
     }
   }
 
   // array of log entries
-  ArrayList<LogEntry> logEntries = new ArrayList<>();
-  
-  // HashMap for faster name-based lookups
-  private Map<String, LogEntry> entryMap = new HashMap<>();
+  ArrayList<LogEntry<?>> logEntries = new ArrayList<>();
 
   // Log managerconstructor
   public LogManager() {
@@ -400,138 +304,93 @@ public class LogManager extends SubsystemBase {
   /*
    * add a log entry with all data
    */
-  @SuppressWarnings("rawtypes")
-  private LogEntry add(String name, StatusSignal phoenix6Status, StatusSignal[] phoenix6Statuses, DoubleSupplier getterDouble,
-      BooleanSupplier getterBoolean, DoubleSupplier[] getterDoubleArray, BooleanSupplier[] getterBooleanArray, int logLevel) {
-    // Check if entry already exists
-    LogEntry existingEntry = entryMap.get(name);
-    if (existingEntry != null) {
-      return existingEntry;
-    }
-    
-    LogEntry entry = new LogEntry(name, phoenix6Status, phoenix6Statuses, getterDouble, getterBoolean, getterDoubleArray, getterBooleanArray, logLevel);
+  private <T> LogEntry<T> add(String name, StatusSignal<T> phoenix6Status, StatusSignal<T>[] phoenix6StatusArray, Supplier<T> getter, int logLevel, Class<T> classType) {
+    LogEntry<T> entry = new LogEntry<T>(name, phoenix6Status, phoenix6StatusArray, getter,  logLevel, classType);
     logEntries.add(entry);
-    entryMap.put(name, entry);
     return entry;
   }
 
   /*
    * get a log entry - if not found, create one
    */
-  private LogEntry get(String name) {
-    LogEntry e = entryMap.get(name);
-    if (e != null) {
-      return e;
-    }
-    LogEntry newEntry = new LogEntry(name, null, null, null, null, null, null, 1);
-    entryMap.put(name, newEntry);
-    return newEntry;
+  private LogEntry<?> get(String name) {
+    LogEntry<?> e = find(name);
+    return e != null 
+    ?e 
+    :new LogEntry(name, null, null, null, 1, (Class<Double>) Double.class);
   }
 
   public static void removeInComp() {
-    ArrayList<LogEntry> entries = logManager.logEntries;
+    ArrayList<LogEntry<?>> entries = logManager.logEntries;
     for (int i = entries.size()-1; i >= 0; i--) {
-      LogEntry entry = entries.get(i);
+      LogEntry<?> entry = entries.get(i);
       entry.removeInComp();
       if (entry.logLevel == 1) {
         entries.remove(entry);
-        logManager.entryMap.remove(entry.name);
       }
     }
   }
 
   /*
-   * find a log entry by name - now using HashMap for O(1) lookup
+   * find a log entry by name
    */
-  private LogEntry find(String name) {
-    return entryMap.get(name);
+  private LogEntry<?> find(String name) {
+    for (LogEntry<?> entry : logEntries) {
+      if (entry.name.equals(name)) {
+        return entry;
+      }
+    }
+    return null;
+  }
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T> phoenixStatus, int logLevel) {
+    Class<T> classType;
+    try{
+      phoenixStatus.getValueAsDouble();
+      classType = (Class<T>) Double.class;
+    } catch(Exception e){
+      classType = (Class<T>) phoenixStatus.getValue().getClass();
+    }
+    return logManager.add(name, phoenixStatus, null, null, logLevel, classType);
   }
 
-  /*
-   * Static function - add log entry with all data
-   */
-  @SuppressWarnings("rawtypes")
-  public static LogEntry addEntry(String name, StatusSignal phoenixStatus, DoubleSupplier getterDouble, int logLevel) {
-    return logManager.add(name, phoenixStatus, null, getterDouble, null, null, null, logLevel);
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T> phoenix6Status) {
+    return addEntry(name, phoenix6Status, 4);
   }
 
-  @SuppressWarnings("rawtypes")
-  public static LogEntry addEntry(String name, StatusSignal[] phoenixStatuses, DoubleSupplier getterDouble, int logLevel) {
-    return logManager.add(name, null, phoenixStatuses, getterDouble, null, null, null, logLevel);
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatusArray, int logLevel) {
+    Class<T> classType;
+    try {
+      phoenixStatusArray[0].getValueAsDouble();
+      classType = (Class<T>) double[].class;
+    } catch (Exception e) {
+      classType = (Class<T>) boolean[].class;
+    }
+    return logManager.add(name, null, phoenixStatusArray, null, logLevel, classType);
   }
 
-  /*
-   * Static function - add log entry for status signal with option to add to
-   * network table
-   */
-  @SuppressWarnings("rawtypes")
-  public static LogEntry addEntry(String name, StatusSignal phoenixStatus, int logLevel) {
-    return logManager.add(name, phoenixStatus, null, null, null, null, null, logLevel);
-  }
-
-  @SuppressWarnings("rawtypes")
-  public static LogEntry addEntry(String name, StatusSignal[] phoenixStatuses, int logLevel) {
-    return logManager.add(name, null, phoenixStatuses, null, null, null, null, logLevel);
-  }
-
-  /*
-   * Static function - add log entry for status signal with network table
-   */
-  @SuppressWarnings("rawtypes")
-  public static LogEntry addEntry(String name, StatusSignal phoenix6Status) {
-    return logManager.add(name, phoenix6Status, null, null, null, null, null, 4);
-  }
-
-  @SuppressWarnings("rawtypes")
-  public static LogEntry addEntry(String name, StatusSignal[] phoenix6Statuses) {
-    return logManager.add(name, null, phoenix6Statuses, null, null, null, null, 4);
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatusArray) {
+    return addEntry(name, phoenixStatusArray, 4);
   }
 
   /*
    * Static function - add log entry for double supplier with option to add to
    * network table
    */
-  public static LogEntry addEntry(String name, DoubleSupplier getterDouble, int logLevel) {
-    return logManager.add(name, null, null, getterDouble, null, null, null, logLevel);
+  public static <T> LogEntry<T> addEntry(String name, Supplier<T> getter, int logLevel) {
+    T value = getter.get();
+    Class<T> classType = (Class<T>) value.getClass();
+    return logManager.add(name, null, null, getter, logLevel, classType);
   }
 
-  public static LogEntry addEntry(String name, DoubleSupplier[] getterDoubleArray, int logLevel) {
-    return logManager.add(name, null, null, null, null, getterDoubleArray, null, logLevel);
+  public static <T> LogEntry<T> addEntry(String name, Supplier<T> getter) {
+    return addEntry(name, getter, 4);
   }
-
-  /*
-   * Static function - add log entry for double supplier with network table
-   */
-  public static LogEntry addEntry(String name, DoubleSupplier getterDouble) {
-    return logManager.add(name, null, null, getterDouble, null, null, null,  4);
-  }
-
-  public static LogEntry addEntry(String name, DoubleSupplier[] getterDoubleArray) {
-    return logManager.add(name, null, null, null, null, getterDoubleArray, null,  4);
-  }
-
-  public static LogEntry addEntry(String name, BooleanSupplier getterBoolean) {
-    return logManager.add(name, null, null, null, getterBoolean, null, null, 4);
-  }
-
-  public static LogEntry addEntry(String name, BooleanSupplier[] getterBooleanArray) {
-    return logManager.add(name, null, null, null, null, null, getterBooleanArray, 4);
-  }
-
-  public static LogEntry addEntry(String name, BooleanSupplier getterBoolean, int logLevel) {
-    return logManager.add(name, null, null, null, getterBoolean, null, null, logLevel);
-  }
-
-  public static LogEntry addEntry(String name, BooleanSupplier[] getterBooleanArray, int logLevel) {
-    return logManager.add(name, null, null, null, null, null, getterBooleanArray, logLevel);
-  }
-  
 
   /*
    * Static function - get an entry, create if not foune - will see network table
    * is crating new
    */
-  public static LogEntry getEntry(String name) {
+  public static LogEntry<?> getEntry(String name) {
     return logManager.get(name);
   }
 
@@ -558,13 +417,13 @@ public class LogManager extends SubsystemBase {
   @Override
   public void periodic() {
     // Configurable cycle skipping for performance optimization
-    skipCycles1++;
-    if (skipCycles1 < STATIC_SKIP_INTERVAL || !issenabled) {
+    SkipedCycles1++;
+    if (SkipedCycles1 < SKIP_CYCLES || !issenabled) {
       return;
     }
-    skipCycles1 = 0;
+    SkipedCycles1 = 0;
 
-    for (LogEntry e : logEntries) {
+    for (LogEntry<?> e : logEntries) {
       e.log();
     }
   }
@@ -572,15 +431,15 @@ public class LogManager extends SubsystemBase {
   /*
    * Set skip interval for periodic logging (1 = every cycle, 2 = every other cycle, etc.)
    */
-  public static void setStaticSkipInterval(int interval) {
-    STATIC_SKIP_INTERVAL = Math.max(1, interval);
+  public static void setStaticSkipCycles(int cycles) {
+    SKIP_CYCLES = Math.max(1, cycles);
   }
 
   /*
    * Get current skip interval
    */
-  public static int getStaticSkipInterval() {
-    return STATIC_SKIP_INTERVAL;
+  public static int getSStaticSkipCycles() {
+    return SKIP_CYCLES;
   }
   
   /*
@@ -608,7 +467,6 @@ public class LogManager extends SubsystemBase {
   public static void clearEntries() {
     if (logManager != null) {
       logManager.logEntries.clear();
-      logManager.entryMap.clear();
     }
   }
 }
