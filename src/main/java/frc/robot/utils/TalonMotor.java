@@ -146,19 +146,12 @@ public class TalonMotor extends TalonFX {
     lastAcceleration = accelerationSignal.getValueAsDouble();
   }
 
-  private void addLog() {    
-    // LogManager.addEntry(name + "/Position", getPosition(), 2);
-    // LogManager.addEntry(name + "/Velocity", getVelocity(), 2);
-    // LogManager.addEntry(name + "/Acceleration", getAcceleration(), 2);
-    // LogManager.addEntry(name + "/Voltage", getMotorVoltage(), 2);
-    // LogManager.addEntry(name + "/Current", getStatorCurrent(), 2);
-    // LogManager.addEntry(name + "/CloseLoopError", getClosedLoopError(), 2);
+  private void addLog() {  
     // LogManager.addEntry(name + "/CloseLoopOutput", getClosedLoopOutput(), 1);
     // LogManager.addEntry(name + "/CloseLoopP", getClosedLoopProportionalOutput(), 1);
     // LogManager.addEntry(name + "/CloseLoopI", getClosedLoopIntegratedOutput(), 1);
     // LogManager.addEntry(name + "/CloseLoopD", getClosedLoopDerivativeOutput(), 1);
     // LogManager.addEntry(name + "/CloseLoopFF", getClosedLoopFeedForward(), 1);
-    // LogManager.addEntry(name + "/CloseLoopSP", getClosedLoopReference(), 2);
 
     LogManager.addEntry(name + "Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP",  new StatusSignal[] {
       getPosition(),
@@ -167,13 +160,16 @@ public class TalonMotor extends TalonFX {
       getMotorVoltage(),
       getStatorCurrent(),
       getClosedLoopError(),
-      getClosedLoopOutput(),
-      getClosedLoopProportionalOutput(),
-      getClosedLoopIntegratedOutput(),
-      getClosedLoopDerivativeOutput(),
-      getClosedLoopFeedForward(),
       getClosedLoopReference(),
-  }, 3);
+  }, 2);
+
+//   LogManager.addEntry(name + "getClosedLoopOutput and getClosedLoopProportionalOutput and getClosedLoopIntegratedOutput and getClosedLoopDerivativeOutput and getClosedLoopFeedForward",  new StatusSignal[] {
+//     getClosedLoopOutput(),
+//     getClosedLoopProportionalOutput(),
+//     getClosedLoopIntegratedOutput(),
+//     getClosedLoopDerivativeOutput(),
+//     getClosedLoopFeedForward()
+// }, 1);
 
   }
 
