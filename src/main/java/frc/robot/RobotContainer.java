@@ -5,6 +5,11 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.DriveTestMotor;
+import frc.robot.commands.TestMotorCommand;
+import frc.robot.subsystems.TestMotor;
+import frc.robot.utils.CommandController;
+import frc.robot.utils.CommandController.ControllerType;
 import frc.robot.utils.LogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,16 +27,24 @@ public class RobotContainer {
   public static boolean isComp = DriverStation.isFMSAttached();
   private static boolean hasRemovedFromLog = false;
 
+  public static TestMotor testMotor;
+
   // The robot's subsystems and commands are defined here...
+  public Command driveCommand;
+  public static Command testMotorCommand;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  public static CommandController controller;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
     new LogManager();
+    testMotor = new TestMotor();
+    controller = new CommandController(OperatorConstants.kDriverControllerPort, ControllerType.kXbox);
+    
+    driveCommand = new DriveTestMotor(testMotor, controller);
+    testMotorCommand = new TestMotorCommand(testMotor,5);
     // Configure the trigger bindings
     configureBindings();
   }
@@ -68,6 +81,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;
+    return driveCommand;
+    //return testMotorCommand;
   }
 }

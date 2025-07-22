@@ -1,0 +1,46 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems;
+
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.utils.LogManager;
+import frc.robot.Constants.motorConstants;
+import frc.robot.utils.TalonMotor;
+
+public class TestMotor extends SubsystemBase {
+
+  private final TalonMotor motor;
+
+  /** Creates a new TestMotor. */
+  public TestMotor() {
+    motor = new TalonMotor(motorConstants.CONFIG);
+  }
+
+  public void addNT() {
+    /* add to log the important stuff */
+    LogManager.addEntry(getName() + "/Arm Angle Limit Switch", this::getVelocity, 3);
+  }
+
+  public void setPower(double power) {
+    motor.setDuty(power);
+  }
+
+  public void setVelocityWithFeedForward(double velocity){
+    motor.setVelocityWithFeedForward(velocity);
+  }
+
+  public double getVelocity(){
+    return motor.getVelocity().getValueAsDouble();
+  }
+
+  public void stop() {
+    motor.stopMotor();
+  }
+
+  @Override
+  public void periodic() {
+    
+  }
+}
