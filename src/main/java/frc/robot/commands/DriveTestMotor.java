@@ -24,6 +24,7 @@ private double power;
     // Use addRequirements() here to declare subsystem dependencies.
     this.testMotor = testMotor;
     this.controller = controller;
+    addRequirements(testMotor);
   }
 
   // Called when the command is initially scheduled.

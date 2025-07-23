@@ -30,8 +30,8 @@ public class RobotContainer {
   public static TestMotor testMotor;
 
   // The robot's subsystems and commands are defined here...
-  public Command driveCommand;
-  public static Command testMotorCommand;
+  public DriveTestMotor driveCommand;
+  public static TestMotorCommand testMotorCommand;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   public static CommandController controller;
@@ -46,6 +46,8 @@ public class RobotContainer {
     driveCommand = new DriveTestMotor(testMotor, controller);
     testMotorCommand = new TestMotorCommand(testMotor,5);
     // Configure the trigger bindings
+    testMotor.setDefaultCommand(driveCommand);
+    //testMotor.setDefaultCommand(testMotorCommand);
     configureBindings();
   }
 
@@ -81,7 +83,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return driveCommand;
-    //return testMotorCommand;
+    return null;
   }
 }

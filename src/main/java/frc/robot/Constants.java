@@ -24,9 +24,9 @@ public final class Constants {
 
   public static class motorConstants {
         /* all the main configs of the motor */
-        public static final int ID = 20;
-        public static final CANBus CAN_BUS = new CANBus("rio");
-        public static final String NAME = "Arm Angle Motor";
+        public static final int ID = 5;
+        public static final CANBus CAN_BUS = new CANBus("canivor");
+        public static final String NAME = "Test Motor";
 
         /* the pid and ff constants of the motor */
         public static final double KP = 0;
@@ -48,20 +48,10 @@ public final class Constants {
         /* the basic configues of the motor */
         public static final boolean IS_BRAKE = true;
         public static final boolean IS_INVERTED = false;
-        public static final double GEAR_RATIO = 36.0 * (105.0 / 16.0);
+        public static final double GEAR_RATIO = 1;
 
         /* the ramp time of the motor */
         public static final double RAMP_TIME = 0.5;
-
-        /*
-         * all the angles of the motor
-         * base -> where the limit switch
-         * back limit -> the minimum angle
-         * forward limit -> the maximum angle
-         */
-        public static final double BASE_ANGLE = Math.toRadians(33.7);
-        public static final double BACK_LIMIT = Math.toRadians(33.7);
-        public static final double FWD_LIMIT = 2.904541015625;
 
         /* The config of the motors based on the constants above */
         public static final TalonConfig CONFIG = new TalonConfig(ID, CAN_BUS, NAME)

@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.wpilibj.DataLogManager;
 
 public class Sysid {
 
@@ -410,7 +412,9 @@ public class Sysid {
 
   public static void main(String[] args) {
     
-    String logFile = new File("logs").listFiles()[0].getAbsolutePath();
+    
+    String logFile = LogManager.getCurrentLogFilePath();
+    System.out.println(logFile);
 
     Map<String, SysIDResults> results = getReasult(logFile);
     
@@ -418,7 +422,7 @@ public class Sysid {
     for (Map.Entry<String, SysIDResults> entry : results.entrySet()) {
         System.out.println(entry.getKey() + ": " + entry.getValue());
     }
-}
+  }
 
 
 }

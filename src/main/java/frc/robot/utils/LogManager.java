@@ -4,7 +4,10 @@
 
 package frc.robot.utils;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -39,6 +42,8 @@ public class LogManager extends SubsystemBase {
   private NetworkTable table = NetworkTableInstance.getDefault().getTable("Log");
 
   private static ArrayList<ConsoleAlert> activeConsole;
+
+  private static String currentLogFilePath = null;
   
   // Optimization: Configurable skip cycles for better performance
   private static int SkipedCycles1 = 0;
@@ -299,6 +304,66 @@ public class LogManager extends SubsystemBase {
     
     activeConsole = new ArrayList<>();
     log("log manager is ready");
+
+    updateCurrentLogFilePath();
+  }
+
+  private void updateCurrentLogFilePath() {
+    // המתן קצת למערכת להתחיל
+    // Timer.delay(0.1);
+    
+    String logDir = DataLogManager.getLogDir();
+    if (logDir != null && !logDir.isEmpty()) {
+      File logsDir = new File(logDir);
+      File[] files = logsDir.listFiles((d, name) -> name.endsWith(".wpilog"));
+      if (files != null && files.length > 0) {
+        Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
+        currentLogFilePath = files[0].getAbsolutePath();
+        log("Current log file: " + currentLogFilePath);
+      }
+    }
+  }
+
+  public static String getCurrentLogFilePath() {
+    if (currentLogFilePath != null) {
+      return currentLogFilePath;
+    }
+    
+    // אם אין נתיב נוכחי, חפש את הקובץ האחרון
+    return findLatestLogFile();
+  }
+
+  // **שינוי 1: פונקציה לחיפוש קובץ הלוג האחרון**
+  private static String findLatestLogFile() {
+    String[] possiblePaths = {
+      DataLogManager.getLogDir(), // אם רץ על רובוט
+      System.getProperty("user.home") + "/wpilib/logs", // Windows/Linux/Mac
+      System.getProperty("user.dir") + "/logs", // תיקיית הפרויקט
+      "./logs", // יחסי לתיקיה נוכחית
+      "../logs" // תיקיה אחת למעלה
+    };
+    
+    File latestFile = null;
+    long latestTime = 0;
+    
+    for (String path : possiblePaths) {
+      if (path == null || path.isEmpty()) continue;
+      
+      File dir = new File(path);
+      if (!dir.exists() || !dir.isDirectory()) continue;
+      
+      File[] files = dir.listFiles((d, name) -> name.endsWith(".wpilog"));
+      if (files == null) continue;
+      
+      for (File file : files) {
+        if (file.lastModified() > latestTime) {
+          latestTime = file.lastModified();
+          latestFile = file;
+        }
+      }
+    }
+    
+    return latestFile != null ? latestFile.getAbsolutePath() : null;
   }
 
   /*
