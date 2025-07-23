@@ -150,7 +150,9 @@ public class Sysid {
       int metaLength = Integer.reverseBytes(dataInputStream.readInt());
       String metadata = readString(dataInputStream, metaLength);
       
-      entries.put(entryId, new EntryDescription(entryId, name, type, metadata));
+      if ("motor".equals(metadata)){
+        entries.put(entryId, new EntryDescription(entryId, name, type, metadata));
+      }
     } else {
       dataInputStream.skipBytes(payloadSize - 1);
     }
@@ -202,14 +204,13 @@ public class Sysid {
         String group = name.substring(0, lastSlash);
         groups.add(group);
       }
-    }
-        
+    }  
     return groups;
   }
   private static SysIDResults analyzeGroup(String groupName) {
     EntryDescription entry = findEntry(groupName + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP");
 
-    if (entry == null) {
+    if (entry == null || entry.data.size() == 0) {
       System.out.println("Missing data for group: " + groupName);
       return null;
     }
@@ -284,7 +285,6 @@ public class Sysid {
     
     // Solve the system (simplified - in practice you'd use proper matrix decomposition)
     double[] solution = solveLinearSystem(AtA, Atb);
-    System.out.println("dui");
     if (solution == null) {
       System.err.println("there is no solution");
       return null;

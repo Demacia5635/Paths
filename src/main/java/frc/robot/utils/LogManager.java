@@ -26,9 +26,11 @@ import edu.wpi.first.util.datalog.BooleanArrayLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DataLogEntry;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -60,6 +62,7 @@ public class LogManager extends SubsystemBase {
     Supplier<T> getter;
     BiConsumer<T, Long> consumer = null;
     String name;
+    String metaData;
     Publisher ntPublisher;
     T lastValue;
     private double precision = 0; // Configurable precision for change detection
@@ -84,7 +87,7 @@ public class LogManager extends SubsystemBase {
     /*
      * Constructor with the suppliers and boolean if add to network table
      */
-    LogEntry(String name, StatusSignal<T> phoenix6Status, StatusSignal<T>[] phoenix6StatusArray, Supplier<T> getter, int logLevel, Class<T> classType) {
+    LogEntry(String name, StatusSignal<T> phoenix6Status, StatusSignal<T>[] phoenix6StatusArray, Supplier<T> getter, int logLevel, String metaData, Class<T> classType) {
 
       this.name = name;
       this.logLevel = logLevel;
@@ -92,13 +95,14 @@ public class LogManager extends SubsystemBase {
       this.phoenix6Status = phoenix6Status;
       this.phoenix6StatusArray = phoenix6StatusArray;
       this.getter = getter;
+      this.metaData = metaData;
 
       isDoubleType = classType == Double.class;
       isBooleanType = classType == Boolean.class;
       isDoubleArrayType = classType == double[].class;
       isBooleanArrayType = classType == boolean[].class;
 
-      this.entry = createLogEntry(log, name);
+      this.entry = createLogEntry(log, name, metaData);
 
       if (logLevel == 4 || (logLevel == 3 && !RobotContainer.isComp())) {
         this.ntPublisher = createPublisher(table, name);
@@ -206,15 +210,15 @@ public class LogManager extends SubsystemBase {
       lastValue = value;
     }
 
-    private DataLogEntry createLogEntry(DataLog log, String name) {
+    private DataLogEntry createLogEntry(DataLog log, String name, String metaData) {
       if (isDoubleType) {
-        return new DoubleLogEntry(log, name);
+        return new DoubleLogEntry(log, name, metaData);
       } else if (isBooleanType) {
-        return new BooleanLogEntry(log, name);
+        return new BooleanLogEntry(log, name, metaData);
       } else if (isDoubleArrayType) {
-        return new DoubleArrayLogEntry(log, name);
+        return new DoubleArrayLogEntry(log, name, metaData);
       } else if (isBooleanArrayType) {
-        return new BooleanArrayLogEntry(log, name);
+        return new BooleanArrayLogEntry(log, name, metaData);
       }
       throw new IllegalArgumentException("Unsupported type: " + classType);
     }
@@ -288,6 +292,7 @@ public class LogManager extends SubsystemBase {
         ntPublisher.close();
       }
     }
+
   }
 
   // array of log entries
@@ -369,8 +374,8 @@ public class LogManager extends SubsystemBase {
   /*
    * add a log entry with all data
    */
-  private <T> LogEntry<T> add(String name, StatusSignal<T> phoenix6Status, StatusSignal<T>[] phoenix6StatusArray, Supplier<T> getter, int logLevel, Class<T> classType) {
-    LogEntry<T> entry = new LogEntry<T>(name, phoenix6Status, phoenix6StatusArray, getter,  logLevel, classType);
+  private <T> LogEntry<T> add(String name, StatusSignal<T> phoenix6Status, StatusSignal<T>[] phoenix6StatusArray, Supplier<T> getter, int logLevel, String metaData, Class<T> classType) {
+    LogEntry<T> entry = new LogEntry<T>(name, phoenix6Status, phoenix6StatusArray, getter,  logLevel, metaData, classType);
     logEntries.add(entry);
     return entry;
   }
@@ -382,7 +387,7 @@ public class LogManager extends SubsystemBase {
     LogEntry<?> e = find(name);
     return e != null 
     ?e 
-    :new LogEntry(name, null, null, null, 1, (Class<Double>) Double.class);
+    :new LogEntry(name, null, null, null, 1, "", (Class<Double>) Double.class);
   }
 
   public static void removeInComp() {
@@ -407,7 +412,7 @@ public class LogManager extends SubsystemBase {
     }
     return null;
   }
-  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T> phoenixStatus, int logLevel) {
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T> phoenixStatus, int logLevel, String metaData) {
     Class<T> classType;
     try{
       phoenixStatus.getValueAsDouble();
@@ -415,14 +420,22 @@ public class LogManager extends SubsystemBase {
     } catch(Exception e){
       classType = (Class<T>) phoenixStatus.getValue().getClass();
     }
-    return logManager.add(name, phoenixStatus, null, null, logLevel, classType);
+    return logManager.add(name, phoenixStatus, null, null, logLevel, metaData, classType);
+  }
+
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T> phoenix6Status, int logLevel) {
+    return addEntry(name, phoenix6Status, logLevel, "");
+  }
+
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T> phoenix6Status, String metaData) {
+    return addEntry(name, phoenix6Status, 4, metaData);
   }
 
   public static <T> LogEntry<T> addEntry(String name, StatusSignal<T> phoenix6Status) {
-    return addEntry(name, phoenix6Status, 4);
+    return addEntry(name, phoenix6Status, 4, "");
   }
 
-  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatusArray, int logLevel) {
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatusArray, int logLevel, String metaData) {
     Class<T> classType;
     try {
       phoenixStatusArray[0].getValueAsDouble();
@@ -430,25 +443,41 @@ public class LogManager extends SubsystemBase {
     } catch (Exception e) {
       classType = (Class<T>) boolean[].class;
     }
-    return logManager.add(name, null, phoenixStatusArray, null, logLevel, classType);
+    return logManager.add(name, null, phoenixStatusArray, null, logLevel, metaData, classType);
+  }
+
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatusArray, int logLevel) {
+    return addEntry(name, phoenixStatusArray, logLevel, "");
+  }
+
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatusArray, String metaData) {
+    return addEntry(name, phoenixStatusArray, 4, metaData);
   }
 
   public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatusArray) {
-    return addEntry(name, phoenixStatusArray, 4);
+    return addEntry(name, phoenixStatusArray, 4, "");
   }
 
   /*
    * Static function - add log entry for double supplier with option to add to
    * network table
    */
-  public static <T> LogEntry<T> addEntry(String name, Supplier<T> getter, int logLevel) {
+  public static <T> LogEntry<T> addEntry(String name, Supplier<T> getter, int logLevel, String metaData) {
     T value = getter.get();
     Class<T> classType = (Class<T>) value.getClass();
-    return logManager.add(name, null, null, getter, logLevel, classType);
+    return logManager.add(name, null, null, getter, logLevel, metaData, classType);
+  }
+
+  public static <T> LogEntry<T> addEntry(String name, Supplier<T> getter, int logLevel) {
+    return addEntry(name, getter, logLevel, "");
+  }
+
+  public static <T> LogEntry<T> addEntry(String name, Supplier<T> getter, String metaData) {
+    return addEntry(name, getter, 4, metaData);
   }
 
   public static <T> LogEntry<T> addEntry(String name, Supplier<T> getter) {
-    return addEntry(name, getter, 4);
+    return addEntry(name, getter, 4, "");
   }
 
   /*
