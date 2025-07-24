@@ -161,7 +161,7 @@ public class TalonMotor extends TalonFX {
       getStatorCurrent(),
       getClosedLoopError(),
       getClosedLoopReference(),
-  }, 2);
+  }, 2,"motor");
 
 //   LogManager.addEntry(name + "getClosedLoopOutput and getClosedLoopProportionalOutput and getClosedLoopIntegratedOutput and getClosedLoopDerivativeOutput and getClosedLoopFeedForward",  new StatusSignal[] {
 //     getClosedLoopOutput(),
