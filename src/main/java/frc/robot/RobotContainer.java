@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.DriveTestMotor;
+import frc.robot.commands.SysidCommand;
 import frc.robot.commands.TestMotorCommand;
 import frc.robot.subsystems.TestMotor;
 import frc.robot.utils.CommandController;
@@ -13,6 +14,7 @@ import frc.robot.utils.CommandController.ControllerType;
 import frc.robot.utils.LogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -30,8 +32,7 @@ public class RobotContainer {
   public static TestMotor testMotor;
 
   // The robot's subsystems and commands are defined here...
-  public DriveTestMotor driveCommand;
-  public static TestMotorCommand testMotorCommand;
+
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   public static CommandController controller;
@@ -43,11 +44,9 @@ public class RobotContainer {
     testMotor = new TestMotor();
     controller = new CommandController(OperatorConstants.kDriverControllerPort, ControllerType.kXbox);
     
-    driveCommand = new DriveTestMotor(testMotor, controller);
-    testMotorCommand = new TestMotorCommand(testMotor,5);
     // Configure the trigger bindings
-    testMotor.setDefaultCommand(driveCommand);
-    //testMotor.setDefaultCommand(testMotorCommand);
+    testMotor.setDefaultCommand(new DriveTestMotor(testMotor, controller));
+    // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
     configureBindings();
   }
 
@@ -73,7 +72,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    
+    controller.rightButton().onTrue(new SysidCommand());
   }
 
   /**
