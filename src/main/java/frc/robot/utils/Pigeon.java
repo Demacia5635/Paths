@@ -1,6 +1,7 @@
 package frc.robot.utils;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.configs.Pigeon2Configuration;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -8,7 +9,6 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.Pigeon2Configuration;;
 
 public class Pigeon extends Pigeon2{
     PigeonConfig config;
@@ -139,5 +139,9 @@ public class Pigeon extends Pigeon2{
 
     public double getZAccelerationSignal() {
         return getStatusSignal(zAccelerationSignal, lastZAcceleration);
+    }
+
+    public void reset() {
+        super.reset();
     }
 }
