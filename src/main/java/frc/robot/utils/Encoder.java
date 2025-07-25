@@ -1,5 +1,6 @@
 package frc.robot.utils;
 
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 
 public class Encoder extends DutyCycleEncoder{
@@ -21,9 +22,10 @@ public class Encoder extends DutyCycleEncoder{
         setAssumedFrequency(config.frequency);
     }
 
-    @Override
-    public boolean isConnected() {
-        return super.isConnected();
+    public void checkElectronics() {
+        if (!isConnected()) {
+            LogManager.log(name + " encoder disconnected", AlertType.kWarning);
+        }
     }
 
     private void addLog() {
