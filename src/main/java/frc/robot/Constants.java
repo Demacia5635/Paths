@@ -25,7 +25,7 @@ public final class Constants {
   public static class motorConstants {
         /* all the main configs of the motor */
         public static final int ID = 5;
-        public static final CANBus CAN_BUS = new CANBus("canivor");
+        public static final CANBus CAN_BUS = new CANBus("canivore");
         public static final String NAME = "Test Motor";
 
         /* the pid and ff constants of the motor */

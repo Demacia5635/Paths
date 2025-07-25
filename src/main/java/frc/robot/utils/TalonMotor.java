@@ -153,7 +153,7 @@ public class TalonMotor extends TalonFX {
     // LogManager.addEntry(name + "/CloseLoopD", getClosedLoopDerivativeOutput(), 1);
     // LogManager.addEntry(name + "/CloseLoopFF", getClosedLoopFeedForward(), 1);
 
-    LogManager.addEntry(name + "Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP",  new StatusSignal[] {
+    LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP",  new StatusSignal[] {
       getPosition(),
       getVelocity(),
       getAcceleration(),

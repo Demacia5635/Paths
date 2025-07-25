@@ -16,11 +16,12 @@ public class TestMotor extends SubsystemBase {
   /** Creates a new TestMotor. */
   public TestMotor() {
     motor = new TalonMotor(motorConstants.CONFIG);
+    addNT();
   }
 
   public void addNT() {
     /* add to log the important stuff */
-    LogManager.addEntry(getName() + "/Arm Angle Limit Switch", this::getVelocity, 3);
+    LogManager.addEntry("/vel", this::getVelocity, 3);
   }
 
   public void setPower(double power) {

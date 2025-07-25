@@ -4,10 +4,14 @@
 
 package frc.robot.commands;
 
+import java.util.Map;
+
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.utils.LogManager;
 import frc.robot.utils.Sysid;
+import frc.robot.utils.Sysid.SysIDResults;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class SysidCommand extends Command {
@@ -20,10 +24,14 @@ public class SysidCommand extends Command {
   @Override
   public void initialize() {
     DataLogManager.stop();
+    // Timer.delay(1);
     String logFile = LogManager.getCurrentLogFilePath();
-    System.out.println(logFile);
 
-    Sysid.getReasult(logFile);
+    Map<String, SysIDResults> results = Sysid.getReasult(logFile);
+    for (Map.Entry<String, SysIDResults> entry : results.entrySet()) {
+        System.out.println(entry.getKey() + ": " + entry.getValue());
+        LogManager.addEntry(entry.getKey() + ": " + entry.getValue(), ()->5.0);
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.

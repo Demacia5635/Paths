@@ -310,12 +310,12 @@ public class LogManager extends SubsystemBase {
     activeConsole = new ArrayList<>();
     log("log manager is ready");
 
-    updateCurrentLogFilePath();
+    // updateCurrentLogFilePath();
   }
 
   private void updateCurrentLogFilePath() {
     // המתן קצת למערכת להתחיל
-    // Timer.delay(0.1);
+    //  Timer.delay(1);
     
     String logDir = DataLogManager.getLogDir();
     if (logDir != null && !logDir.isEmpty()) {
@@ -330,9 +330,10 @@ public class LogManager extends SubsystemBase {
   }
 
   public static String getCurrentLogFilePath() {
-    if (currentLogFilePath != null) {
-      return currentLogFilePath;
-    }
+    // LogManager.addEntry(currentLogFilePath+"2", ()->5.0);
+    // if (currentLogFilePath != null&&false) {
+    //   return currentLogFilePath;
+    // }
     
     // אם אין נתיב נוכחי, חפש את הקובץ האחרון
     return findLatestLogFile();
