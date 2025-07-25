@@ -21,7 +21,7 @@ public class TestMotor extends SubsystemBase {
 
   public void addNT() {
     /* add to log the important stuff */
-    LogManager.addEntry("/vel", this::getVelocity, 3);
+    LogManager.addEntry("vel", this::getVelocity, 3);
   }
 
   public void setPower(double power) {

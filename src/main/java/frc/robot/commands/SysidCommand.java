@@ -29,8 +29,7 @@ public class SysidCommand extends Command {
 
     Map<String, SysIDResults> results = Sysid.getReasult(logFile);
     for (Map.Entry<String, SysIDResults> entry : results.entrySet()) {
-        System.out.println(entry.getKey() + ": " + entry.getValue());
-        LogManager.addEntry(entry.getKey() + ": " + entry.getValue(), ()->5.0);
+        LogManager.log(entry.getKey() + ": " + entry.getValue());
     }
   }
 
