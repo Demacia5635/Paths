@@ -27,10 +27,10 @@ public class Encoder extends DutyCycleEncoder{
     }
 
     private void addLog() {
-        LogManager.addEntry(name + "/Rotitions", this::getRotitions, 2);
+        LogManager.addEntry(name + "/Radians", this::getRadians, 2);
     }
     
-    public double getRotitions(){
-        return get();
+    public double getRadians(){
+        return get() * 2 * Math.PI;
     }
 }
