@@ -13,7 +13,7 @@ public class Encoder extends DutyCycleEncoder{
 		name = config.name;
         configEncoder();
         addLog();
-		LogManager.log(name + " eancoder initialized");
+		LogManager.log(name + " encoder initialized");
     }
     
     private void configEncoder() {
@@ -22,14 +22,14 @@ public class Encoder extends DutyCycleEncoder{
         setAssumedFrequency(config.frequency);
     }
 
+    private void addLog() {
+        LogManager.addEntry(name + "/Radians", this::getRadians, 2);
+    }
+
     public void checkElectronics() {
         if (!isConnected()) {
             LogManager.log(name + " encoder disconnected", AlertType.kWarning);
         }
-    }
-
-    private void addLog() {
-        LogManager.addEntry(name + "/Radians", this::getRadians, 2);
     }
     
     public double getRadians(){

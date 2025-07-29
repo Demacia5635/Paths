@@ -4,12 +4,12 @@ public class EncoderConfig {
     public int channel;
     public String name;
 
-    public double scalar;
-    public double minRange;
-    public double maxRange;
-    public double offset;
-    public double frequency;
-    public double connectedFrequencyThreshold;
+    public double scalar = 1;
+    public double minRange = 0;
+    public double maxRange = 1;
+    public double offset = 0;
+    public double frequency = 1000;
+    public double connectedFrequencyThreshold = 100;
     public boolean inverted = false;
     
     public EncoderConfig(int channel, String name) {
@@ -19,6 +19,12 @@ public class EncoderConfig {
 
     public EncoderConfig withScalar(double scalar){
         this.scalar = scalar;
+        return this;
+    }
+
+    public EncoderConfig withRange(double minRange, double maxRange){
+        this.minRange = minRange;
+        this.maxRange = maxRange;
         return this;
     }
 
