@@ -6,12 +6,19 @@ public class LimitSwitch extends DigitalInput{
     LimitSwitchConfig config;
     String name;
 
+    boolean inverted;
+
     public LimitSwitch(LimitSwitchConfig config){
         super(config.channel);
         this.config = config;
 		name = config.name;
+        configLimitSwitch();
         addLog();
 		LogManager.log(name + " limit switch initialized");
+    }
+
+    private void configLimitSwitch() {
+        inverted = config.inverted;
     }
 
     private void addLog() {
@@ -19,6 +26,6 @@ public class LimitSwitch extends DigitalInput{
     }
 
     public boolean isTriggered(){
-        return get();
+        return !(inverted == get());
     }
 }
