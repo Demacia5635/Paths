@@ -12,9 +12,9 @@ public class PigeonConfig {
     public double xScalar = 1;
     public double yScalar = 1;
     public double zScalar = 1;
-    public boolean enableCompass = true;
-    public boolean temperatureCompensation = true;
-    public boolean noMotionCalibration = true;
+    public boolean compass = false;
+    public boolean temperatureCompensation = false;
+    public boolean noMotionCalibration = false;
     /** 
      * Constructor
      * @param id - canbus ID
@@ -64,8 +64,8 @@ public class PigeonConfig {
     }
 
 
-    public PigeonConfig withEnableCompass(boolean enableCompass) {
-        this.enableCompass = enableCompass;
+    public PigeonConfig withCompass(boolean compass) {
+        this.compass = compass;
         return this;
     }
 

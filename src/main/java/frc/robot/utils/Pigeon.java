@@ -41,7 +41,7 @@ public class Pigeon extends Pigeon2{
         configPigeon();
         setStatusSignals();
         addLog();
-		LogManager.log(name + " cancoder initialized");
+		LogManager.log(name + " pigeon initialized");
     }
     private void configPigeon() {
         Pigeon2Configuration pigeonConfig = new Pigeon2Configuration();
@@ -51,7 +51,7 @@ public class Pigeon extends Pigeon2{
         pigeonConfig.GyroTrim.GyroScalarX = config.xScalar;
         pigeonConfig.GyroTrim.GyroScalarY = config.yScalar;
         pigeonConfig.GyroTrim.GyroScalarZ = config.zScalar;
-        pigeonConfig.Pigeon2Features.EnableCompass = config.enableCompass;
+        pigeonConfig.Pigeon2Features.EnableCompass = config.compass;
         pigeonConfig.Pigeon2Features.DisableTemperatureCompensation = !config.temperatureCompensation;
         pigeonConfig.Pigeon2Features.DisableNoMotionCalibration = !config.noMotionCalibration;
         getConfigurator().apply(pigeonConfig);
@@ -92,7 +92,10 @@ public class Pigeon extends Pigeon2{
             rollSignal,
             xVelocitySignal,
             yVelocitySignal,
-            zVelocitySignal
+            zVelocitySignal,
+            xAccelerationSignal,
+            yAccelerationSignal,
+            zAccelerationSignal
         }, 2);
     }
 
@@ -100,48 +103,107 @@ public class Pigeon extends Pigeon2{
     private double getStatusSignal(StatusSignal statusSignal, double lastValue) {
         statusSignal.refresh();
         if (statusSignal.getStatus() == StatusCode.OK) {
-            lastValue = statusSignal.getValueAsDouble() * 2 * Math.PI;
+            lastValue = statusSignal.getValueAsDouble();
         }
         return lastValue;
     }
 
+    @SuppressWarnings("rawtypes")
+    private double getStatusSignalInRad(StatusSignal statusSignal, double lastValue) {
+        statusSignal.refresh();
+        if (statusSignal.getStatus() == StatusCode.OK) {
+            lastValue = statusSignal.getValueAsDouble() * Math.PI / 180;
+        }
+        return lastValue;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private double getAngularAccelerationStatusSignal(StatusSignal velocitySignal, double lastVelocity) {
+        velocitySignal.refresh();
+        if (velocitySignal.getStatus() == StatusCode.OK) {
+            return (velocitySignal.getValueAsDouble()) - lastVelocity;
+        }
+        return 0;
+    }
+
     public double getYawSignal() {
-        return getStatusSignal(yawSignal, lastYaw);
+        lastYaw = getStatusSignalInRad(yawSignal, lastYaw);
+        return lastYaw;
+    }
+
+    public double getYawSignalInZeroToPi() {
+        return (getYawSignal()% (2* Math.PI) + (2* Math.PI)) % (2* Math.PI);
     }
 
     public double getPitchSignal() {
-        return getStatusSignal(pitchSignal, lastPitch);
+        lastPitch = getStatusSignalInRad(pitchSignal, lastPitch);;
+        return lastPitch;
+    }
+
+    public double getPitchSignalInZeroToPi() {
+        return (getPitchSignal() % (2* Math.PI) + (2* Math.PI)) % (2* Math.PI);
     }
 
     public double getRollSignal() {
-        return getStatusSignal(rollSignal, lastRoll);
+        lastRoll = getStatusSignalInRad(rollSignal, lastRoll);
+        return lastRoll;
+    }
+
+    public double getRollSignalInZeroToPi() {
+        return (getRollSignal()% (2* Math.PI) + (2* Math.PI)) % (2* Math.PI);
     }
 
     public double getXVelocitySignal() {
-        return getStatusSignal(xVelocitySignal, lastXVelocity);
+        lastXVelocity = getStatusSignal(xVelocitySignal, lastXVelocity);
+        return lastXVelocity;
     }
 
     public double getYVelocitySignal() {
-        return getStatusSignal(yVelocitySignal, lastYVelocity);
+        lastYVelocity = getStatusSignal(yVelocitySignal, lastYVelocity);
+        return lastYVelocity;
     }
 
     public double getZVelocitySignal() {
-        return getStatusSignal(zVelocitySignal, lastZVelocity);
+        lastZVelocity = getStatusSignal(zVelocitySignal, lastZVelocity);
+        return lastZVelocity;
     }
 
     public double getXAccelerationSignal() {
-        return getStatusSignal(xAccelerationSignal, lastXAcceleration);
+        lastXAcceleration = getStatusSignal(xAccelerationSignal, lastXAcceleration);
+        return lastXAcceleration;
     }
 
     public double getYAccelerationSignal() {
-        return getStatusSignal(yAccelerationSignal, lastYAcceleration);
+        lastYAcceleration = getStatusSignal(yAccelerationSignal, lastYAcceleration);
+        return lastYAcceleration;
     }
 
     public double getZAccelerationSignal() {
-        return getStatusSignal(zAccelerationSignal, lastZAcceleration);
+        lastZAcceleration = getStatusSignal(zAccelerationSignal, lastZAcceleration);
+        return lastZAcceleration;
+    }
+
+    public double getXAngularAccelerationSignal() {
+        double acceleration = getAngularAccelerationStatusSignal(xVelocitySignal, lastXVelocity);
+        lastXVelocity = xVelocitySignal.getValueAsDouble();
+        return acceleration;
+    }
+
+    public double getYAngularAccelerationSignal() {
+        double acceleration = getAngularAccelerationStatusSignal(yVelocitySignal, lastYVelocity);
+        lastYVelocity = yVelocitySignal.getValueAsDouble();
+        return acceleration;
+    }
+
+    public double getZAngularAccelerationSignal() {
+        double acceleration = getAngularAccelerationStatusSignal(zVelocitySignal, lastZVelocity);
+        lastZVelocity = zVelocitySignal.getValueAsDouble();
+        return acceleration;
     }
 
     public void reset() {
         super.reset();
     }
+
+
 }
