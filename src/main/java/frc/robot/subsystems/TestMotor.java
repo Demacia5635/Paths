@@ -5,9 +5,9 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.utils.LogManager;
 import frc.robot.Constants.motorConstants;
-import frc.robot.utils.TalonMotor;
+import frc.utils.LogManager;
+import frc.utils.TalonMotor;
 
 public class TestMotor extends SubsystemBase {
 

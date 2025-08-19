@@ -9,9 +9,9 @@ import java.util.Map;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.utils.LogManager;
-import frc.robot.utils.Sysid;
-import frc.robot.utils.Sysid.SysIDResults;
+import frc.utils.LogManager;
+import frc.utils.Sysid;
+import frc.utils.Sysid.SysIDResults;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class SysidCommand extends Command {
