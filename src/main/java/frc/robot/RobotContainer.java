@@ -31,6 +31,9 @@ public class RobotContainer {
 
   public static TestMotor testMotor;
 
+  public static int N_CYCLE = 0;
+  public static double CYCLE_TIME = 0.02;
+
   // The robot's subsystems and commands are defined here...
 
 
