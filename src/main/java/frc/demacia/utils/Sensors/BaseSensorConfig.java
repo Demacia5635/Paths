@@ -8,7 +8,7 @@ public abstract class BaseSensorConfig<T extends BaseSensorConfig<T>> {
     public String name;
 
     public int channel;
-
+ 
     public boolean isInverted;
 
     /**
