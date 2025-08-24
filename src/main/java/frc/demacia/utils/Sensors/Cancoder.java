@@ -1,6 +1,4 @@
-package frc.utils;
- 
-import java.util.function.DoubleSupplier;
+package frc.demacia.utils.Sensors;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
@@ -10,11 +8,9 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.Timer;
-import frc.utils.CancoderConfig;
-import frc.utils.LogManager;
+import frc.demacia.utils.Log.LogManager;
 
-public class Cancoder extends CANcoder {
+public class Cancoder extends CANcoder implements AnalogSensorInterface{
 
     CancoderConfig config;
     String name;
@@ -40,7 +36,7 @@ public class Cancoder extends CANcoder {
     private void configCancoder() {
         CANcoderConfiguration canConfig = new CANcoderConfiguration();
 		canConfig.MagnetSensor.MagnetOffset = config.offset;
-        canConfig.MagnetSensor.SensorDirection = config.inverted ? SensorDirectionValue.Clockwise_Positive: SensorDirectionValue.CounterClockwise_Positive;
+        canConfig.MagnetSensor.SensorDirection = config.isInverted ? SensorDirectionValue.Clockwise_Positive: SensorDirectionValue.CounterClockwise_Positive;
         getConfigurator().apply(canConfig);
     }
     
@@ -70,13 +66,12 @@ public class Cancoder extends CANcoder {
         }, 2);
     }
 
-    @SuppressWarnings("rawtypes")
-    private double getStatusSignal(StatusSignal statusSignal, double lastValue) {
-        statusSignal.refresh();
-        if (statusSignal.getStatus() == StatusCode.OK) {
-            lastValue = statusSignal.getValueAsDouble() * 2 * Math.PI;
-        }
-        return lastValue;
+    public String getName(){
+        return config.name;
+    }
+
+    public double get(){
+        return getCurrentPosition();
     }
     
     /**
@@ -84,19 +79,18 @@ public class Cancoder extends CANcoder {
      * @return the none absolute amaunt of rotations the motor did in Radians
      */
     public double getCurrentPosition() {
-        return getStatusSignal(positionSignal, lastPosition);
+        lastPosition = StatusSignalHelper.getStatusSignalWith2Pi(positionSignal, lastPosition);
+        return lastPosition;
     }
-    /**
-     * @return the absolute amaunt of rotations the motor did in Radians
-     */
+
     public double getCurrentAbsPosition() {
-        return getStatusSignal(absPositionSignal, lastAbsPosition);
+        lastAbsPosition = StatusSignalHelper.getStatusSignalWith2Pi(absPositionSignal, lastAbsPosition);
+        return lastAbsPosition;
     }
-    /** 
-     * @return the amount of rotations the motor do per second in Radians
-     */
+
     public double getCurrentVelocity(){
-        return getStatusSignal(velocitySignal, lastVelocity);
+        lastVelocity = StatusSignalHelper.getStatusSignalWith2Pi(velocitySignal, lastVelocity);
+        return lastVelocity;
     }
 
     public double getCurrentAcceleration() {

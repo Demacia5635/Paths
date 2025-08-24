@@ -14,8 +14,8 @@ public abstract class BaseSensorConfig<T extends BaseSensorConfig<T>> {
     /**
      * Constructor for DIO/Analog sensors
      */
-    public BaseSensorConfig(int channle, String name){
-        this.channel = channle;
+    public BaseSensorConfig(int channel, String name){
+        this.channel = channel;
         this.name = name;
     }
 

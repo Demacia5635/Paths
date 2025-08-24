@@ -1,4 +1,4 @@
-package frc.utils;
+package frc.demacia.utils.Sensors;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
@@ -6,13 +6,12 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
-import frc.utils.LogManager;
-import frc.utils.PigeonConfig;
+import frc.demacia.utils.Log.LogManager;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 
-public class Pigeon extends Pigeon2{
+public class Pigeon extends Pigeon2 implements SensorInterface{
     PigeonConfig config;
     String name;
 
@@ -50,9 +49,9 @@ public class Pigeon extends Pigeon2{
         pigeonConfig.MountPose.MountPosePitch = config.pitchOffset;
         pigeonConfig.MountPose.MountPoseRoll = config.rollOffset;
         pigeonConfig.MountPose.MountPoseYaw = config.yawOffset;
-        pigeonConfig.GyroTrim.GyroScalarX = config.xScalar;
-        pigeonConfig.GyroTrim.GyroScalarY = config.yScalar;
-        pigeonConfig.GyroTrim.GyroScalarZ = config.zScalar;
+        pigeonConfig.GyroTrim.GyroScalarX = config.isInverted?-config.xScalar:config.xScalar;
+        pigeonConfig.GyroTrim.GyroScalarY = config.isInverted?-config.yScalar:config.yScalar;
+        pigeonConfig.GyroTrim.GyroScalarZ = config.isInverted?-config.zScalar:config.zScalar;
         pigeonConfig.Pigeon2Features.EnableCompass = config.compass;
         pigeonConfig.Pigeon2Features.DisableTemperatureCompensation = !config.temperatureCompensation;
         pigeonConfig.Pigeon2Features.DisableNoMotionCalibration = !config.noMotionCalibration;
@@ -101,104 +100,81 @@ public class Pigeon extends Pigeon2{
         }, 2);
     }
 
-    @SuppressWarnings("rawtypes")
-    private double getStatusSignal(StatusSignal statusSignal, double lastValue) {
-        statusSignal.refresh();
-        if (statusSignal.getStatus() == StatusCode.OK) {
-            lastValue = statusSignal.getValueAsDouble();
-        }
-        return lastValue;
+    public String getName(){
+        return config.name;
     }
 
-    @SuppressWarnings("rawtypes")
-    private double getStatusSignalInRad(StatusSignal statusSignal, double lastValue) {
-        statusSignal.refresh();
-        if (statusSignal.getStatus() == StatusCode.OK) {
-            lastValue = statusSignal.getValueAsDouble() * Math.PI / 180;
-        }
-        return lastValue;
-    }
-
-    @SuppressWarnings("rawtypes")
-    private double getAngularAccelerationStatusSignal(StatusSignal velocitySignal, double lastVelocity) {
-        velocitySignal.refresh();
-        if (velocitySignal.getStatus() == StatusCode.OK) {
-            return (velocitySignal.getValueAsDouble()) - lastVelocity;
-        }
-        return 0;
-    }
-
-    public double getYawSignal() {
-        lastYaw = getStatusSignalInRad(yawSignal, lastYaw);
+    public double getCurrentYaw() {
+        lastYaw = StatusSignalHelper.getStatusSignalInRad(yawSignal, lastYaw);
         return lastYaw;
     }
 
-    public double getYawSignalInZeroToPi() {
-        return (getYawSignal()% (2* Math.PI) + (2* Math.PI)) % (2* Math.PI);
+    public double getYawInZeroTo2Pi() {
+        return (getCurrentYaw()% (2* Math.PI) + (2* Math.PI)) % (2* Math.PI);
     }
 
-    public double getPitchSignal() {
-        lastPitch = getStatusSignalInRad(pitchSignal, lastPitch);;
+    public double getCurrentPitch() {
+        lastPitch = StatusSignalHelper.getStatusSignalInRad(pitchSignal, lastPitch);
         return lastPitch;
     }
 
-    public double getPitchSignalInZeroToPi() {
-        return (getPitchSignal() % (2* Math.PI) + (2* Math.PI)) % (2* Math.PI);
+    public double getPitchInZeroTo2Pi() {
+        return (getCurrentPitch() % (2* Math.PI) + (2* Math.PI)) % (2* Math.PI);
     }
 
-    public double getRollSignal() {
-        lastRoll = getStatusSignalInRad(rollSignal, lastRoll);
+    public double getCurrentRoll() {
+        lastRoll = StatusSignalHelper.getStatusSignalInRad(rollSignal, lastRoll);
         return lastRoll;
     }
 
-    public double getRollSignalInZeroToPi() {
-        return (getRollSignal()% (2* Math.PI) + (2* Math.PI)) % (2* Math.PI);
+    public double getRollInZeroTo2Pi() {
+        return (getCurrentRoll()% (2* Math.PI) + (2* Math.PI)) % (2* Math.PI);
     }
 
-    public double getXVelocitySignal() {
-        lastXVelocity = getStatusSignal(xVelocitySignal, lastXVelocity);
+    public double getXVelocity() {
+        lastXVelocity = StatusSignalHelper.getStatusSignalBasic(xVelocitySignal, lastXVelocity);
         return lastXVelocity;
     }
 
-    public double getYVelocitySignal() {
-        lastYVelocity = getStatusSignal(yVelocitySignal, lastYVelocity);
+    public double getYVelocity() {
+        lastYVelocity = StatusSignalHelper.getStatusSignalBasic(yVelocitySignal, lastYVelocity);
         return lastYVelocity;
     }
 
-    public double getZVelocitySignal() {
-        lastZVelocity = getStatusSignal(zVelocitySignal, lastZVelocity);
+    public double getZVelocity() {
+        lastZVelocity = StatusSignalHelper.getStatusSignalBasic(zVelocitySignal, lastZVelocity);
         return lastZVelocity;
     }
 
-    public double getXAccelerationSignal() {
-        lastXAcceleration = getStatusSignal(xAccelerationSignal, lastXAcceleration);
+    public double getXAcceleration() {
+        lastXAcceleration = StatusSignalHelper.getStatusSignalBasic(xAccelerationSignal, lastXAcceleration);
         return lastXAcceleration;
     }
 
-    public double getYAccelerationSignal() {
-        lastYAcceleration = getStatusSignal(yAccelerationSignal, lastYAcceleration);
+    public double getYAcceleration() {
+        lastYAcceleration = StatusSignalHelper.getStatusSignalBasic(yAccelerationSignal, lastYAcceleration);
         return lastYAcceleration;
     }
 
-    public double getZAccelerationSignal() {
-        lastZAcceleration = getStatusSignal(zAccelerationSignal, lastZAcceleration);
+    public double getZAcceleration() {
+        lastZAcceleration = StatusSignalHelper.getStatusSignalBasic(zAccelerationSignal, lastZAcceleration);
         return lastZAcceleration;
     }
 
-    public double getXAngularAccelerationSignal() {
-        double acceleration = getAngularAccelerationStatusSignal(xVelocitySignal, lastXVelocity);
+    public double getXAngularAcceleration() {
+        double acceleration = (StatusSignalHelper.getStatusSignalBasic(xVelocitySignal, lastXVelocity)) - lastXVelocity;
         lastXVelocity = xVelocitySignal.getValueAsDouble();
         return acceleration;
     }
 
-    public double getYAngularAccelerationSignal() {
-        double acceleration = getAngularAccelerationStatusSignal(yVelocitySignal, lastYVelocity);
+    public double getYAngularAcceleration() {
+        double acceleration = (StatusSignalHelper.getStatusSignalBasic(yVelocitySignal, lastYVelocity)) - lastYVelocity;
         lastYVelocity = yVelocitySignal.getValueAsDouble();
         return acceleration;
     }
 
-    public double getZAngularAccelerationSignal() {
-        double acceleration = getAngularAccelerationStatusSignal(zVelocitySignal, lastZVelocity);
+    public double getZAngularAcceleration() {
+        double acceleration = (StatusSignalHelper.getStatusSignalBasic(zVelocitySignal, lastZVelocity)) - lastZVelocity;
         lastZVelocity = zVelocitySignal.getValueAsDouble();
         return acceleration;
     }
