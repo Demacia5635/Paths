@@ -1,4 +1,4 @@
-package frc.utils.Motors;
+package frc.demacia.utils.Motors;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -24,9 +24,9 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.utils.StatusSignalData;
-import frc.utils.Elastics.UpdateArray;
-import frc.utils.Log.LogManager;
+import frc.demacia.utils.Motors.StatusSignalData;
+import frc.demacia.utils.Motors.UpdateArray;
+import frc.demacia.utils.Log.LogManager;
 
 public class TalonMotor extends TalonFX implements MotorInterface {
 
@@ -54,12 +54,6 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     StatusSignalData<Current> currentSignal;
 
     String lastControlMode;
-    double lastClosedLoopSP;
-    double lastClosedLoopError;
-    double lastPosition;
-    double lastVelocity;
-    double lastAcceleration;
-    double lastVoltage;
 
     public TalonMotor(TalonConfig config) {
         super(config.id, config.canbus.canbus);

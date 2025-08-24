@@ -1,4 +1,4 @@
-package frc.utils.Elastics;
+package frc.demacia.utils.Motors;
 
 import java.util.function.Consumer;
 

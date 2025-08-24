@@ -47,14 +47,15 @@ public class LogReader {
         public double kS;
         public double kV;
         public double kA;
-        public double kp;
+        public double kP;
         public double error;
         public int dataPoints;
         
-        public SysIDResults(double kS, double kV, double kA, double error, int points) {
+        public SysIDResults(double kS, double kV, double kA, double kP, double error, int points) {
             this.kS = kS;
             this.kV = kV; 
             this.kA = kA;
+            this.kP = kP;
             this.error = error;
             this.dataPoints = points;
         }
@@ -228,15 +229,17 @@ public class LogReader {
   }
   private static class SyncedDataPoint {
     double velocity;
+    double position;
     double acceleration;
     double voltage;
     long timestamp;
     
-    SyncedDataPoint(double v, double a, double volt, long time) {
-        this.velocity = v;
-        this.acceleration = a;
-        this.voltage = volt;
-        this.timestamp = time;
+    SyncedDataPoint(double velocity, double position, double acceleration, double voltage, long timestamp) {
+        this.velocity = velocity;
+        this.position = position;
+        this.acceleration = acceleration;
+        this.voltage = voltage;
+        this.timestamp = timestamp;
     }
   }
   private static List<SyncedDataPoint> synchronizeData(List<DataPoint> dataPointList) {
@@ -248,19 +251,19 @@ public class LogReader {
       DataPoint dataPoint = dataPointList.get(index);
         
       double velocity = dataPoint.value[1];
-      double position = dataPoint.value[1];
+      double position = dataPoint.value[0];
       double acceleration = dataPoint.value[2];
       double voltage = dataPoint.value[3];
 
       long time = dataPoint.timestamp;
 
-      result.add(new SyncedDataPoint(velocity, acceleration, voltage, time));
+      result.add(new SyncedDataPoint(velocity, position, acceleration, voltage, time));
     }
     
     return result;
   }
 
   private static SysIDResults performRegression(List<SyncedDataPoint> data) {
-
+    
   }
 }

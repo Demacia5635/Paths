@@ -16,6 +16,7 @@ import java.util.Set;
 
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.DataLogManager;
+import frc.demacia.utils.Log.LogManager;
 
 public class Sysid {
 
@@ -408,21 +409,6 @@ public class Sysid {
 
 
 
-
-
-  public static void main(String[] args) {
-    
-    
-    String logFile = LogManager.getCurrentLogFilePath();
-    System.out.println(logFile);
-
-    Map<String, SysIDResults> results = getReasult(logFile);
-    
-    System.out.println("\n=== SysID Analysis Results ===");
-    for (Map.Entry<String, SysIDResults> entry : results.entrySet()) {
-        System.out.println(entry.getKey() + ": " + entry.getValue());
-    }
-  }
 
 
 }

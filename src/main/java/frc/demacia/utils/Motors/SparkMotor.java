@@ -1,4 +1,4 @@
-package frc.utils.Motors;
+package frc.demacia.utils.Motors;
 
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkLowLevel;
@@ -13,8 +13,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.utils.Elastics.UpdateArray;
-import frc.utils.Log.LogManager;
+import frc.demacia.utils.Motors.UpdateArray;
+import frc.demacia.utils.Log.LogManager;
 import frc.robot.RobotContainer;
 import frc.robot.Utilities;
 
@@ -81,7 +81,6 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
                 getCurrentVoltage(),
                 getCurrentCurrent()
             }, 2, "motor");
-
   }
 
   /**

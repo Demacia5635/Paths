@@ -4,14 +4,8 @@
 
 package frc.robot;
 
+import frc.demacia.utils.Log.LogManager;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.DriveTestMotor;
-import frc.robot.commands.SysidCommand;
-import frc.robot.commands.TestMotorCommand;
-import frc.robot.subsystems.TestMotor;
-import frc.utils.CommandController;
-import frc.utils.LogManager;
-import frc.utils.CommandController.ControllerType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -29,8 +23,6 @@ public class RobotContainer {
   public static boolean isComp = DriverStation.isFMSAttached();
   private static boolean hasRemovedFromLog = false;
 
-  public static TestMotor testMotor;
-
   public static int N_CYCLE = 0;
   public static double CYCLE_TIME = 0.02;
 
@@ -38,17 +30,13 @@ public class RobotContainer {
 
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  public static CommandController controller;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
     new LogManager();
-    testMotor = new TestMotor();
-    controller = new CommandController(OperatorConstants.kDriverControllerPort, ControllerType.kXbox);
-    
+
     // Configure the trigger bindings
-    testMotor.setDefaultCommand(new DriveTestMotor(testMotor, controller));
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
     configureBindings();
   }
@@ -75,7 +63,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    controller.rightButton().onTrue(new SysidCommand());
+    
   }
 
   /**
