@@ -12,16 +12,16 @@ import com.ctre.phoenix6.StatusSignal;
 
 import edu.wpi.first.networktables.BooleanArrayPublisher;
 import edu.wpi.first.networktables.BooleanPublisher;
-import edu.wpi.first.networktables.DoubleArrayPublisher;
-import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.FloatArrayPublisher;
+import edu.wpi.first.networktables.FloatPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.Publisher;
 import edu.wpi.first.util.datalog.BooleanArrayLogEntry;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DataLogEntry;
-import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.FloatArrayLogEntry;
+import edu.wpi.first.util.datalog.FloatLogEntry;
 import frc.robot.RobotContainer;
 
 public class LogEntry<T> {
@@ -29,23 +29,20 @@ public class LogEntry<T> {
     private final LogManager logManager;
 
     DataLogEntry entry;
-    StatusSignal<T> phoenix6Status; // supplier of phoenix 6 status signal
-    StatusSignal<T>[] phoenix6StatusArray;
+    StatusSignal<T>[] phoenix6Status;
     Supplier<T> getter;
-    BiConsumer<T, Long> consumer = null;
+    BiConsumer<float[], Long> consumer = null;
     String name;
     String metaData;
     Publisher ntPublisher;
-    T lastValue;
+    float[] lastValue;
     private double precision = 0; // Configurable precision for change detection
     private int skipedCycles2 = 0;
     private int SkipCycle = 1; // Default: log every cycle, can be changed for optimization
-    private final Class<T> classType;
 
-    private boolean isDoubleType;
-    private boolean isBooleanType;
-    private boolean isDoubleArrayType;
-    private boolean isBooleanArrayType;
+    private boolean isFloat;
+    private boolean isBoolean;
+    private boolean isArray;
 
     /*
         * the log levels are this:
@@ -59,22 +56,19 @@ public class LogEntry<T> {
     /*
         * Constructor with the suppliers and boolean if add to network table
         */
-    LogEntry(String name, StatusSignal<T> phoenix6Status, StatusSignal<T>[] phoenix6StatusArray, Supplier<T> getter, int logLevel, String metaData, Class<T> classType) {
+    LogEntry(String name, StatusSignal<T>[] phoenix6Status, Supplier<T> getter, int logLevel, String metaData, boolean isFloat, boolean isBoolean, boolean isArray) {
 
         logManager = LogManager.logManager;
 
         this.name = name;
         this.logLevel = logLevel;
-        this.classType = classType;
         this.phoenix6Status = phoenix6Status;
-        this.phoenix6StatusArray = phoenix6StatusArray;
         this.getter = getter;
         this.metaData = metaData;
 
-        isDoubleType = classType == Double.class;
-        isBooleanType = classType == Boolean.class;
-        isDoubleArrayType = classType == double[].class;
-        isBooleanArrayType = classType == boolean[].class;
+        this.isFloat = isFloat;
+        this.isBoolean = isBoolean;
+        this.isArray = isArray;
 
         this.entry = createLogEntry(logManager.log, name, metaData);
 
@@ -96,67 +90,61 @@ public class LogEntry<T> {
         return;
         }
         skipedCycles2 = 0;
-        T value  = null;
+        float[] value  = null;
         long time = 0;
 
         if (phoenix6Status != null) {
-        var st  = phoenix6Status.refresh();
-        if (st.getStatus() == StatusCode.OK) {
-            value = (T) Double.valueOf(st.getValueAsDouble());
-            time = (long) (st.getTimestamp().getTime() * 1000);
-        } else {
-            return;
-        }
-        } else if (phoenix6StatusArray != null) {
-        StatusCode  st = StatusSignal.refreshAll(phoenix6StatusArray);
-        if (st == StatusCode.OK) {
-            double[] arrV = new double[phoenix6StatusArray.length];
-            for (int i = 0; i < phoenix6StatusArray.length; i++) {
-            arrV[i] = phoenix6StatusArray[i].getValueAsDouble();
-            if (i == 0) {
-                time = (long) (phoenix6StatusArray[i].getTimestamp().getTime() * 1000);
+            StatusCode  st = StatusSignal.refreshAll(phoenix6Status);
+            if (st == StatusCode.OK) {
+                float[] V = new float[phoenix6Status.length];
+                for (int i = 0; i < phoenix6Status.length; i++) {
+                    V[i] = (float)phoenix6Status[i].getValueAsDouble();
+                if (i == 0) {
+                    time = (long) (phoenix6Status[i].getTimestamp().getTime() * 1000);
+                }
+                }
+                value = V;
+            } else {
+                return;
             }
-            }
-            value = (T) arrV;
-        } else {
-            return;
-        }
         } else if (getter != null){
-        value = getter.get();
-        time = 0;
+            value = (float[])getter.get();
+            time = 0;
         } if (value != null) {
-        log(value, time);
+            log(value, time);
         }
     }
 
     /*
         * log a value use zero (current) time
         */
-    public void log(T value) {
+    public void log(float[] value) {
         log(value, 0);
     }
 
-    private boolean hasSignificantChange(T value) {
+    private boolean hasSignificantChange(float[] value) {
         if (lastValue == null) {
         return true;
         }
         
-        if (isDoubleType) {
-        return Math.abs((Double) value - (Double) lastValue) >= precision;
-        } else if (isDoubleArrayType) {
-        double[] arrV = (double[]) value;
-        double[] lastArrV = (double[]) lastValue;
-        if (arrV.length != lastArrV.length) {
-            return true;
-        }
-        for (int i = 0; i < arrV.length; i++) {
-            if (Math.abs(arrV[i] - lastArrV[i]) >= precision) {
-            return true;
+        if (isFloat) {
+            if (isArray) {
+                float[] arrV = (float[]) value;
+                float[] lastArrV = (float[]) lastValue;
+                if (arrV.length != lastArrV.length) {
+                    return true;
+                }
+                for (int i = 0; i < arrV.length; i++) {
+                    if (Math.abs(arrV[i] - lastArrV[i]) >= precision) {
+                    return true;
+                    }
+                }
+                return false;
+            } else {
+                return Math.abs((float) value[0] - (float) lastValue[0]) >= precision;
             }
-        }
-        return false;
         } else {
-        return !value.equals(lastValue);
+            return !value.equals(lastValue);
         }
     }
 
@@ -165,7 +153,7 @@ public class LogEntry<T> {
         * also publish to network table (if required)
         * also call consumer if set
         */
-    public void log(T value, long time) {
+    public void log(float[] value, long time) {
         if (!hasSignificantChange(value)) {
         return;
         }
@@ -178,59 +166,75 @@ public class LogEntry<T> {
         
         // Call consumer if set
         if (consumer != null) {
-        consumer.accept(value, time);
+            consumer.accept(value, time);
         }
         
         lastValue = value;
     }
 
     private DataLogEntry createLogEntry(DataLog log, String name, String metaData) {
-        if (isDoubleType) {
-        return new DoubleLogEntry(log, name, metaData);
-        } else if (isBooleanType) {
-        return new BooleanLogEntry(log, name, metaData);
-        } else if (isDoubleArrayType) {
-        return new DoubleArrayLogEntry(log, name, metaData);
-        } else if (isBooleanArrayType) {
-        return new BooleanArrayLogEntry(log, name, metaData);
+        if (isFloat) {
+            if (isArray) {
+                return new FloatArrayLogEntry(log, name, metaData);
+            }
+            return new FloatLogEntry(log, name, metaData);
+        } else if (isBoolean) {
+            if (isArray) {
+                return new BooleanArrayLogEntry(log, name, metaData);
+            }
+            return new BooleanLogEntry(log, name, metaData);
         }
-        throw new IllegalArgumentException("Unsupported type: " + classType);
+        throw new IllegalArgumentException("Unsupported type");
     }
 
     private Publisher createPublisher(NetworkTable table, String name) {
-        if (isDoubleType) {
-        return table.getDoubleTopic(name).publish();
-        } else if (isBooleanType) {
-        return table.getBooleanTopic(name).publish();
-        } else if (isDoubleArrayType) {
-        return table.getDoubleArrayTopic(name).publish();
-        } else if (isBooleanArrayType) {
-        return table.getBooleanArrayTopic(name).publish();
+        if (isFloat) {
+            if (isArray) {
+                return table.getFloatArrayTopic(name).publish();
+            }
+            return table.getFloatTopic(name).publish();
+        } else if (isBoolean) {
+            if (isArray) {
+                return table.getBooleanArrayTopic(name).publish();
+            }
+            return table.getBooleanTopic(name).publish();
         }
-        throw new IllegalArgumentException("Unsupported type: " + classType);
+        throw new IllegalArgumentException("Unsupported type");
     }
 
-    private void appendEntry(T value, long time) {
-        if (isDoubleType) {
-        ((DoubleLogEntry) entry).append((Double) value, time);
-        } else if (isBooleanType) {
-        ((BooleanLogEntry) entry).append((Boolean) value, time);
-        } else if (isDoubleArrayType) {
-        ((DoubleArrayLogEntry) entry).append((double[]) value, time);
-        } else if (isBooleanArrayType) {
-        ((BooleanArrayLogEntry) entry).append((boolean[]) value, time);
+    private void appendEntry(float[] value, long time) {
+        if (isFloat) {
+            if (isArray) {
+                ((FloatArrayLogEntry) entry).append((float[]) value, time);
+            }
+            ((FloatLogEntry) entry).append((Float) value[0], time);
+        } else if (isBoolean) {
+            if (isArray) {
+                boolean[] bools = new boolean[value.length];
+                for (int i = 0; i < value.length; i++) {
+                    bools[i] = (value[i] != 0);
+                }
+                ((BooleanArrayLogEntry) entry).append(bools, time);
+            }
+            ((BooleanLogEntry) entry).append(value[0] != 0, time);
         }
     }
 
-    private void publishToNetworkTable(T value) {
-        if (isDoubleType) {
-        ((DoublePublisher) ntPublisher).set((Double) value);
-        } else if (isBooleanType) {
-        ((BooleanPublisher) ntPublisher).set((Boolean) value);
-        } else if (isDoubleArrayType) {
-        ((DoubleArrayPublisher) ntPublisher).set((double[]) value);
-        } else if (isBooleanArrayType) {
-        ((BooleanArrayPublisher) ntPublisher).set((boolean[]) value);
+    private void publishToNetworkTable(float[] value) {
+        if (isFloat) {
+            if (isArray) {
+                ((FloatArrayPublisher) ntPublisher).set((float[]) value);
+            }
+            ((FloatPublisher) ntPublisher).set((Float) value[0]);
+        } else if (isBoolean) {
+            if (isArray) {
+                boolean[] bools = new boolean[value.length];
+                for (int i = 0; i < value.length; i++) {
+                    bools[i] = (value[i] != 0);
+                }
+                ((BooleanArrayPublisher) ntPublisher).set(bools);
+            }
+            ((BooleanPublisher) ntPublisher).set(value[0] != 0);
         }
     }
 
@@ -257,7 +261,7 @@ public class LogEntry<T> {
     }
 
     // set the consumer
-    public void setConsumer(BiConsumer<T, Long> consumer) {
+    public void setConsumer(BiConsumer<float[], Long> consumer) {
         this.consumer = consumer;
     }
 

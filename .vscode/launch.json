@@ -8,6 +8,13 @@
       "type": "java",
       "name": "Sysid",
       "request": "launch",
+      "mainClass": "frc.demacia.SysID.Sysid",
+      "projectName": "offseason2026"
+    },
+    {
+      "type": "java",
+      "name": "Sysid",
+      "request": "launch",
       "mainClass": "frc.robot.utils.Sysid",
       "projectName": "offseason2026"
     },

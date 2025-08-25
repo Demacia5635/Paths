@@ -51,8 +51,8 @@ public class LogManager extends SubsystemBase {
   /*
    * add a log entry with all data
    */
-  private <T> LogEntry<T> add(String name, StatusSignal<T> phoenix6Status, StatusSignal<T>[] phoenix6StatusArray, Supplier<T> getter, int logLevel, String metaData, Class<T> classType) {
-    LogEntry<T> entry = new LogEntry<T>(name, phoenix6Status, phoenix6StatusArray, getter,  logLevel, metaData, classType);
+  private <T> LogEntry<T> add(String name, StatusSignal<T>[] phoenix6Status, Supplier<T> getter, int logLevel, String metaData, boolean isFloat, boolean isBoolean, boolean isArray) {
+    LogEntry<T> entry = new LogEntry<T>(name, phoenix6Status, getter,  logLevel, metaData, isFloat, isBoolean, isArray);
     logEntries.add(entry);
     return entry;
   }
@@ -64,7 +64,7 @@ public class LogManager extends SubsystemBase {
     LogEntry<?> e = find(name);
     return e != null 
     ?e 
-    :new LogEntry(name, null, null, null, 1, "", (Class<Double>) Double.class);
+    :new LogEntry(name, null, null, 1, "", true, false, false);
   }
 
   public static void removeInComp() {
@@ -90,14 +90,16 @@ public class LogManager extends SubsystemBase {
   }
   
   public static <T> LogEntry<T> addEntry(String name, StatusSignal<T> phoenixStatus, int logLevel, String metaData) {
-    Class<T> classType;
+    boolean isFloat = false;
+    boolean isBoolean = false;
+    boolean isArray = false;
     try{
       phoenixStatus.getValueAsDouble();
-      classType = (Class<T>) Double.class;
+      isFloat = true;
     } catch(Exception e){
-      classType = (Class<T>) phoenixStatus.getValue().getClass();
+      isBoolean = true;
     }
-    return logManager.add(name, phoenixStatus, null, null, logLevel, metaData, classType);
+    return logManager.add(name, new StatusSignal[] {phoenixStatus}, null, logLevel, metaData, isFloat, isBoolean, isArray);
   }
 
   public static <T> LogEntry<T> addEntry(String name, StatusSignal<T> phoenix6Status, int logLevel) {
@@ -112,27 +114,29 @@ public class LogManager extends SubsystemBase {
     return addEntry(name, phoenix6Status, 4, "");
   }
 
-  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatusArray, int logLevel, String metaData) {
-    Class<T> classType;
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatus, int logLevel, String metaData) {
+    boolean isFloat = false;
+    boolean isBoolean = false;
+    boolean isArray = true;
     try {
-      phoenixStatusArray[0].getValueAsDouble();
-      classType = (Class<T>) double[].class;
+      phoenixStatus[0].getValueAsDouble();
+      isFloat = true;
     } catch (Exception e) {
-      classType = (Class<T>) boolean[].class;
+      isBoolean = true;
     }
-    return logManager.add(name, null, phoenixStatusArray, null, logLevel, metaData, classType);
+    return logManager.add(name,  phoenixStatus, null, logLevel, metaData, isFloat, isBoolean, isArray);
   }
 
-  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatusArray, int logLevel) {
-    return addEntry(name, phoenixStatusArray, logLevel, "");
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatus, int logLevel) {
+    return addEntry(name, phoenixStatus, logLevel, "");
   }
 
-  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatusArray, String metaData) {
-    return addEntry(name, phoenixStatusArray, 4, metaData);
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatus, String metaData) {
+    return addEntry(name, phoenixStatus, 4, metaData);
   }
 
-  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatusArray) {
-    return addEntry(name, phoenixStatusArray, 4, "");
+  public static <T> LogEntry<T> addEntry(String name, StatusSignal<T>[] phoenixStatus) {
+    return addEntry(name, phoenixStatus, 4, "");
   }
 
   /*
@@ -140,9 +144,20 @@ public class LogManager extends SubsystemBase {
    * network table
    */
   public static <T> LogEntry<T> addEntry(String name, Supplier<T> getter, int logLevel, String metaData) {
+    boolean isFloat = false;
+    boolean isBoolean = false;
+    boolean isArray = false;
     T value = getter.get();
-    Class<T> classType = (Class<T>) value.getClass();
-    return logManager.add(name, null, null, getter, logLevel, metaData, classType);
+    if (value instanceof Float || value instanceof Double) {
+      isFloat = true;
+    }
+    if (value instanceof Boolean) {
+      isBoolean = true;
+    }
+    if (value != null && value.getClass().isArray()) {
+      isArray = true;
+    }
+    return logManager.add(name, null, getter, logLevel, metaData, isFloat, isBoolean, isArray);
   }
 
   public static <T> LogEntry<T> addEntry(String name, Supplier<T> getter, int logLevel) {
