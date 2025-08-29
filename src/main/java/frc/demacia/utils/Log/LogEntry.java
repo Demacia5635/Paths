@@ -16,12 +16,16 @@ import edu.wpi.first.networktables.FloatArrayPublisher;
 import edu.wpi.first.networktables.FloatPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.Publisher;
+import edu.wpi.first.networktables.StringArrayPublisher;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.util.datalog.BooleanArrayLogEntry;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DataLogEntry;
 import edu.wpi.first.util.datalog.FloatArrayLogEntry;
 import edu.wpi.first.util.datalog.FloatLogEntry;
+import edu.wpi.first.util.datalog.StringArrayLogEntry;
+import edu.wpi.first.util.datalog.StringLogEntry;
 import frc.robot.RobotContainer;
 
 public class LogEntry<T> {
@@ -31,14 +35,14 @@ public class LogEntry<T> {
     DataLogEntry entry;
     StatusSignal<T>[] phoenix6Status;
     Supplier<T> getter;
-    BiConsumer<float[], Long> consumer = null;
+    BiConsumer<T, Long> consumer = null;
     String name;
     String metaData;
     Publisher ntPublisher;
-    float[] lastValue;
-    private double precision = 0; // Configurable precision for change detection
+    T lastValue;
+    private double precision = 0;
     private int skipedCycles2 = 0;
-    private int SkipCycle = 1; // Default: log every cycle, can be changed for optimization
+    private int SkipCycle = 1;
 
     private boolean isFloat;
     private boolean isBoolean;
@@ -55,7 +59,7 @@ public class LogEntry<T> {
 
     /*
         * Constructor with the suppliers and boolean if add to network table
-        */
+    */
     LogEntry(String name, StatusSignal<T>[] phoenix6Status, Supplier<T> getter, int logLevel, String metaData, boolean isFloat, boolean isBoolean, boolean isArray) {
 
         logManager = LogManager.logManager;
@@ -73,201 +77,311 @@ public class LogEntry<T> {
         this.entry = createLogEntry(logManager.log, name, metaData);
 
         if (logLevel == 4 || (logLevel == 3 && !RobotContainer.isComp())) {
-        this.ntPublisher = createPublisher(logManager.table, name);
+            this.ntPublisher = createPublisher(logManager.table, name);
         } else {
-        this.ntPublisher = null;
+            this.ntPublisher = null;
         }
-        
     }
 
     /*
         * perform a periodic log
         * get the data from the getters and call the actual log
-        */
+    */
     void log() {
         skipedCycles2++;
         if (skipedCycles2 < SkipCycle) {
-        return;
+            return;
         }
         skipedCycles2 = 0;
-        float[] value  = null;
+
+        T newValue = null;
         long time = 0;
+        boolean hasChanged = false;
 
         if (phoenix6Status != null) {
-            StatusCode  st = StatusSignal.refreshAll(phoenix6Status);
+            StatusCode st = StatusSignal.refreshAll(phoenix6Status);
             if (st == StatusCode.OK) {
-                float[] V = new float[phoenix6Status.length];
-                for (int i = 0; i < phoenix6Status.length; i++) {
-                    V[i] = (float)phoenix6Status[i].getValueAsDouble();
-                if (i == 0) {
-                    time = (long) (phoenix6Status[i].getTimestamp().getTime() * 1000);
+                newValue = extractPhoenixValue();
+                if (newValue != null) {
+                    hasChanged = hasValueChanged(newValue);
+                    time = (long) (phoenix6Status[0].getTimestamp().getTime() * 1000);
                 }
-                }
-                value = V;
             } else {
-                return;
+                newValue = lastValue;
+                hasChanged = false;
             }
-        } else if (getter != null){
-            value = (float[])getter.get();
-            time = 0;
-        } if (value != null) {
-            log(value, time);
+        } else if (getter != null) {
+            T rawValue = getter.get();
+            if (rawValue != null) {
+                newValue = rawValue;
+                hasChanged = hasValueChanged(newValue);
+                time = 0;
+            }
+        }
+        
+        if (hasChanged && newValue != null) {
+            log(newValue, time);
+            lastValue = copyValue(newValue);
         }
     }
 
     /*
         * log a value use zero (current) time
-        */
-    public void log(float[] value) {
+    */
+    public void log(T value) {
         log(value, 0);
-    }
-
-    private boolean hasSignificantChange(float[] value) {
-        if (lastValue == null) {
-        return true;
-        }
-        
-        if (isFloat) {
-            if (isArray) {
-                float[] arrV = (float[]) value;
-                float[] lastArrV = (float[]) lastValue;
-                if (arrV.length != lastArrV.length) {
-                    return true;
-                }
-                for (int i = 0; i < arrV.length; i++) {
-                    if (Math.abs(arrV[i] - lastArrV[i]) >= precision) {
-                    return true;
-                    }
-                }
-                return false;
-            } else {
-                return Math.abs((float) value[0] - (float) lastValue[0]) >= precision;
-            }
-        } else {
-            return !value.equals(lastValue);
-        }
     }
 
     /*
         * Log data and time if data changed
         * also publish to network table (if required)
         * also call consumer if set
-        */
-    public void log(float[] value, long time) {
-        if (!hasSignificantChange(value)) {
-        return;
-        }
-
+    */
+    public void log(T value, long time) {
+        if (value == null) return;
+        
         appendEntry(value, time);
 
         if (ntPublisher != null) {
-        publishToNetworkTable(value);
+            publishToNetworkTable(value);
         }
         
-        // Call consumer if set
         if (consumer != null) {
             consumer.accept(value, time);
         }
-        
-        lastValue = value;
     }
 
-    private DataLogEntry createLogEntry(DataLog log, String name, String metaData) {
-        if (isFloat) {
-            if (isArray) {
-                return new FloatArrayLogEntry(log, name, metaData);
-            }
-            return new FloatLogEntry(log, name, metaData);
-        } else if (isBoolean) {
-            if (isArray) {
-                return new BooleanArrayLogEntry(log, name, metaData);
-            }
-            return new BooleanLogEntry(log, name, metaData);
-        }
-        throw new IllegalArgumentException("Unsupported type");
-    }
-
-    private Publisher createPublisher(NetworkTable table, String name) {
-        if (isFloat) {
-            if (isArray) {
-                return table.getFloatArrayTopic(name).publish();
-            }
-            return table.getFloatTopic(name).publish();
-        } else if (isBoolean) {
-            if (isArray) {
-                return table.getBooleanArrayTopic(name).publish();
-            }
-            return table.getBooleanTopic(name).publish();
-        }
-        throw new IllegalArgumentException("Unsupported type");
-    }
-
-    private void appendEntry(float[] value, long time) {
-        if (isFloat) {
-            if (isArray) {
-                ((FloatArrayLogEntry) entry).append((float[]) value, time);
-            }
-            ((FloatLogEntry) entry).append((Float) value[0], time);
-        } else if (isBoolean) {
-            if (isArray) {
-                boolean[] bools = new boolean[value.length];
-                for (int i = 0; i < value.length; i++) {
-                    bools[i] = (value[i] != 0);
-                }
-                ((BooleanArrayLogEntry) entry).append(bools, time);
-            }
-            ((BooleanLogEntry) entry).append(value[0] != 0, time);
-        }
-    }
-
-    private void publishToNetworkTable(float[] value) {
-        if (isFloat) {
-            if (isArray) {
-                ((FloatArrayPublisher) ntPublisher).set((float[]) value);
-            }
-            ((FloatPublisher) ntPublisher).set((Float) value[0]);
-        } else if (isBoolean) {
-            if (isArray) {
-                boolean[] bools = new boolean[value.length];
-                for (int i = 0; i < value.length; i++) {
-                    bools[i] = (value[i] != 0);
-                }
-                ((BooleanArrayPublisher) ntPublisher).set(bools);
-            }
-            ((BooleanPublisher) ntPublisher).set(value[0] != 0);
-        }
-    }
+    
 
     public void setPrecision(double precision) {
-        this.precision = precision;
+        this.precision = Math.max(0, precision);
     }
 
     public double getPrecision() {
         return precision;
     }
 
-    /*
-        * Set skip interval for periodic logging (1 = every cycle, 2 = every other cycle, etc.)
-        */
     public void setSkipCycles(int interval) {
         SkipCycle = Math.max(1, interval);
     }
 
-    /*
-        * Get current skip interval
-        */
     public int getSkipCycles() {
         return SkipCycle;
     }
 
-    // set the consumer
-    public void setConsumer(BiConsumer<float[], Long> consumer) {
+    public void setConsumer(BiConsumer<T, Long> consumer) {
         this.consumer = consumer;
     }
 
     public void removeInComp() {
         if (logLevel == 3 && ntPublisher != null) {
-        ntPublisher.close();
+            ntPublisher.close();
+        }
+    }
+
+    private T extractPhoenixValue() {
+        if (isArray) {
+            if (isFloat) {
+                float[] floatArray = new float[phoenix6Status.length];
+                for (int i = 0; i < phoenix6Status.length; i++) {
+                    floatArray[i] = (float)phoenix6Status[i].getValueAsDouble();
+                }
+                return (T) floatArray;
+            } else if (isBoolean) {
+                boolean[] booleanArray = new boolean[phoenix6Status.length];
+                for (int i = 0; i < phoenix6Status.length; i++) {
+                    booleanArray[i] = (Boolean)phoenix6Status[i].getValue();
+                }
+                return (T) booleanArray;
+            } else {
+                String[] stringArray = new String[phoenix6Status.length];
+                for (int i = 0; i < phoenix6Status.length; i++) {
+                    stringArray[i] = phoenix6Status[i].getValue().toString();
+                }
+                return (T) stringArray;
+            }
+        } else {
+            if (isFloat) {
+                return (T) Float.valueOf((float)phoenix6Status[0].getValueAsDouble());
+            } else if (isBoolean) {
+                return (T) phoenix6Status[0].getValue();
+            } else{
+                return (T) phoenix6Status[0].getValue().toString();
+            }
+        }
+    }
+
+    private boolean hasValueChanged(T newValue) {
+        if (lastValue == null) {
+            return true;
+        }
+
+        if (isArray){
+            if (isFloat){
+                float[] newArr = toFloatArray(newValue);
+                float[] lastArr = toFloatArray(lastValue);
+                if (newArr.length != lastArr.length) {
+                    return true;
+                }
+                for (int i = 0; i < newArr.length; i++) {
+                    if (Math.abs(newArr[i] - lastArr[i]) >= precision) {
+                        return true;
+                    }
+                }
+                return false;
+            } else if (isBoolean){
+                boolean[] newArr = (boolean[]) newValue;
+                boolean[] lastArr = (boolean[]) lastValue;
+                if (newArr.length != lastArr.length) {
+                    return true;
+                }
+                for (int i = 0; i < newArr.length; i++) {
+                    if (newArr[i] != lastArr[i]) {
+                        return true;
+                    }
+                }
+                return false;
+            } else{
+                String[] newArr = toStringArray(newValue);
+                String[] lastArr = toStringArray(lastValue);
+                if (newArr.length != lastArr.length) {
+                    return true;
+                }
+                for (int i = 0; i < newArr.length; i++) {
+                    if (!(newArr[i].toString()).equals((lastArr[i].toString()))) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        } else{
+            if (isFloat){
+                return Math.abs((Float)newValue - (Float)lastValue) >= precision;
+            } else if (isBoolean){
+                return !newValue.equals(lastValue);
+            } else{
+                return !(newValue.toString()).equals((lastValue.toString()));
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private T copyValue(T value) {
+        if (isArray){
+            if (isFloat) {
+                return (T) toFloatArray(value);
+            } else if (isBoolean) {
+                return (T) ((boolean[]) value).clone();
+            } else {
+                return (T) toStringArray(value);
+            }
+        }
+        else{
+            if (!(value instanceof Float) && !(value instanceof Boolean)) {
+                return (T) value.toString();
+            } else{
+            return value;
+            }
+        }
+    }
+
+    private float[] toFloatArray(T value){
+        int length = java.lang.reflect.Array.getLength(value);
+        float[] floatArr = new float[length];
+            for (int i = 0; i < length; i++) {
+                Object elem = java.lang.reflect.Array.get(value, i);
+                floatArr[i] = (elem != null) ? ((Number) elem).floatValue() : 0f;
+            }
+            return floatArr;
+    }
+
+    private String[] toStringArray(T value){
+        int length = java.lang.reflect.Array.getLength(value);
+            String[] stringArr = new String[length];
+            for (int i = 0; i < length; i++) {
+                Object elem = java.lang.reflect.Array.get(value, i);
+                stringArr[i] = (elem != null) ? elem.toString() : null;
+            }
+            return stringArr;
+    }
+
+    private DataLogEntry createLogEntry(DataLog log, String name, String metaData) {
+        if (isArray) {
+            if (isFloat){
+                return new FloatArrayLogEntry(log, name, metaData);
+            } else if (isBoolean){
+                return new BooleanArrayLogEntry(log, name, metaData);
+            } else{
+                return new StringArrayLogEntry(log, name, metaData);
+            }
+        } else {
+            if (isFloat){
+                return new FloatLogEntry(log, name, metaData);
+            } else if (isBoolean){
+                return new BooleanLogEntry(log, name, metaData);
+            } else{
+                return new StringLogEntry(log, name, metaData);
+            }
+        }
+    }
+
+    private Publisher createPublisher(NetworkTable table, String name) {
+        if (isArray) {
+            if (isFloat){
+                return table.getFloatArrayTopic(name).publish();
+            } else if (isBoolean){
+                return table.getBooleanArrayTopic(name).publish();
+            } else{
+                return table.getStringArrayTopic(name).publish();
+            }
+        } else {
+            if (isFloat){
+                return table.getFloatTopic(name).publish();
+            } else if (isBoolean){
+                return table.getBooleanTopic(name).publish();
+            } else{
+                return table.getStringTopic(name).publish();
+            }
+        }
+    }
+
+    private void appendEntry(T value, long time) {
+        if (isArray) {
+            if (isFloat){
+                ((FloatArrayLogEntry) entry).append(toFloatArray(value), time);
+            } else if (isBoolean){
+                ((BooleanArrayLogEntry) entry).append((boolean[]) value, time);
+            } else{
+                ((StringArrayLogEntry) entry).append(toStringArray(value), time);
+            }
+        } else {
+            if (isFloat){
+                ((FloatLogEntry) entry).append((Float) value, time);
+            } else if (isBoolean){
+                ((BooleanLogEntry) entry).append((Boolean) value, time);
+            } else{
+                ((StringLogEntry) entry).append(value.toString(), time);
+            }
+        }
+    }
+
+    private void publishToNetworkTable(T value) {
+        if (isArray) {
+            if (isFloat){
+                ((FloatArrayPublisher) ntPublisher).set(toFloatArray(value));
+            } else if (isBoolean){
+                ((BooleanArrayPublisher) ntPublisher).set((boolean[]) value);
+            } else{
+                ((StringArrayPublisher) ntPublisher).set(toStringArray(value));
+            }
+        } else {
+            if (isFloat){
+                ((FloatPublisher) ntPublisher).set((Float) value);
+            } else if (isBoolean){
+                ((BooleanPublisher) ntPublisher).set((Boolean) value);
+            } else{
+                ((StringPublisher) ntPublisher).set(value.toString());
+            }
         }
     }
 }

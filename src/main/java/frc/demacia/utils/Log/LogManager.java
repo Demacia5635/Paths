@@ -20,22 +20,19 @@ import frc.demacia.utils.constants.UtilsContants.ConsoleConstants;
 
 public class LogManager extends SubsystemBase {
 
-  public static LogManager logManager; // singleton reference
+  public static LogManager logManager;
 
   DataLog log;
   NetworkTable table = NetworkTableInstance.getDefault().getTable("Log");
 
   private static ArrayList<ConsoleAlert> activeConsole;
   
-  // Optimization: Configurable skip cycles for better performance
   private static int SkipedCycles1 = 0;
-  private static int SKIP_CYCLES = 1; // Default: log every cycle, can be changed for optimization
-  private static boolean issenabled = true;
+  private static int SKIP_CYCLES = 1;
+  private static boolean isLoggingEnabled = true;
 
-  // array of log entries
   ArrayList<LogEntry<?>> logEntries = new ArrayList<>();
 
-  // Log managerconstructor
   public LogManager() {
     logManager = this;
 
@@ -48,47 +45,6 @@ public class LogManager extends SubsystemBase {
     log("log manager is ready");
   }
 
-  /*
-   * add a log entry with all data
-   */
-  private <T> LogEntry<T> add(String name, StatusSignal<T>[] phoenix6Status, Supplier<T> getter, int logLevel, String metaData, boolean isFloat, boolean isBoolean, boolean isArray) {
-    LogEntry<T> entry = new LogEntry<T>(name, phoenix6Status, getter,  logLevel, metaData, isFloat, isBoolean, isArray);
-    logEntries.add(entry);
-    return entry;
-  }
-
-  /*
-   * get a log entry - if not found, create one
-   */
-  private LogEntry<?> get(String name) {
-    LogEntry<?> e = find(name);
-    return e != null 
-    ?e 
-    :new LogEntry(name, null, null, 1, "", true, false, false);
-  }
-
-  public static void removeInComp() {
-    for (int i = 0; i < LogManager.logManager.logEntries.size(); i++) {
-      LogManager.logManager.logEntries.get(i).removeInComp();
-      if (LogManager.logManager.logEntries.get(i).logLevel == 1) {
-        LogManager.logManager.logEntries.remove(LogManager.logManager.logEntries.get(i));
-        i--;
-      }
-    }
-  }
-
-  /*
-   * find a log entry by name
-   */
-  private LogEntry<?> find(String name) {
-    for (LogEntry<?> entry : logEntries) {
-      if (entry.name.equals(name)) {
-        return entry;
-      }
-    }
-    return null;
-  }
-  
   public static <T> LogEntry<T> addEntry(String name, StatusSignal<T> phoenixStatus, int logLevel, String metaData) {
     boolean isFloat = false;
     boolean isBoolean = false;
@@ -97,7 +53,9 @@ public class LogManager extends SubsystemBase {
       phoenixStatus.getValueAsDouble();
       isFloat = true;
     } catch(Exception e){
-      isBoolean = true;
+      if (phoenixStatus.getValue() instanceof Boolean){
+        isBoolean = true;
+      }
     }
     return logManager.add(name, new StatusSignal[] {phoenixStatus}, null, logLevel, metaData, isFloat, isBoolean, isArray);
   }
@@ -122,7 +80,9 @@ public class LogManager extends SubsystemBase {
       phoenixStatus[0].getValueAsDouble();
       isFloat = true;
     } catch (Exception e) {
-      isBoolean = true;
+      if (phoenixStatus[0].getValue() instanceof Boolean){
+        isBoolean = true;
+      }
     }
     return logManager.add(name,  phoenixStatus, null, logLevel, metaData, isFloat, isBoolean, isArray);
   }
@@ -139,24 +99,34 @@ public class LogManager extends SubsystemBase {
     return addEntry(name, phoenixStatus, 4, "");
   }
 
-  /*
-   * Static function - add log entry for double supplier with option to add to
-   * network table
-   */
   public static <T> LogEntry<T> addEntry(String name, Supplier<T> getter, int logLevel, String metaData) {
     boolean isFloat = false;
     boolean isBoolean = false;
     boolean isArray = false;
     T value = getter.get();
-    if (value instanceof Float || value instanceof Double) {
-      isFloat = true;
-    }
-    if (value instanceof Boolean) {
-      isBoolean = true;
-    }
-    if (value != null && value.getClass().isArray()) {
+    
+    if (value.getClass().isArray()) {
       isArray = true;
+      try {
+        Object first = java.lang.reflect.Array.get(value, 0);
+        double d = ((Number) first).floatValue();
+        isFloat = true;
+      } catch (Exception e) {
+        if (value instanceof boolean[] || value instanceof Boolean[]){
+          isBoolean = true;
+        }
+      }
+    } else {
+        try {
+            double d = ((Number) value).floatValue();
+            isFloat = true;
+        } catch (Exception e) {
+          if (value instanceof  Boolean){
+            isBoolean = true;
+          }
+        }
     }
+    
     return logManager.add(name, null, getter, logLevel, metaData, isFloat, isBoolean, isArray);
   }
 
@@ -172,17 +142,30 @@ public class LogManager extends SubsystemBase {
     return addEntry(name, getter, 4, "");
   }
 
-  /*
-   * Static function - get an entry, create if not foune - will see network table
-   * is crating new
-   */
   public static LogEntry<?> getEntry(String name) {
     return logManager.get(name);
   }
 
-  /*
-   * Log text message - also will be sent System.out
-   */
+  public static void removeInComp() {
+    for (int i = 0; i < logManager.logEntries.size(); i++) {
+      logManager.logEntries.get(i).removeInComp();
+      if (logManager.logEntries.get(i).logLevel == 1) {
+        logManager.logEntries.remove(logManager.logEntries.get(i));
+        i--;
+      }
+    }
+  }
+  
+  public static void clearEntries() {
+    if (logManager != null) {
+      logManager.logEntries.clear();
+    }
+  }
+  
+  public static int getEntryCount() {
+    return logManager != null ? logManager.logEntries.size() : 0;
+  }
+
   public static ConsoleAlert log(Object message, AlertType alertType) {
     DataLogManager.log(String.valueOf(message));
     
@@ -200,11 +183,26 @@ public class LogManager extends SubsystemBase {
     return log(meesage, AlertType.kInfo);
   }
 
+  public static void setStaticSkipCycles(int cycles) {
+    SKIP_CYCLES = Math.max(1, cycles);
+  }
+
+  public static int getSStaticSkipCycles() {
+    return SKIP_CYCLES;
+  }
+  
+  public static void setLoggingEnabled(boolean isenabled) {
+    isLoggingEnabled = isenabled;
+  }
+
+  public static boolean getLoggingEnabled() {
+    return isLoggingEnabled;
+  }
+
   @Override
   public void periodic() {
-    // Configurable cycle skipping for performance optimization
     SkipedCycles1++;
-    if (SkipedCycles1 < SKIP_CYCLES || !issenabled) {
+    if (SkipedCycles1 < SKIP_CYCLES || !isLoggingEnabled) {
       return;
     }
     SkipedCycles1 = 0;
@@ -214,45 +212,25 @@ public class LogManager extends SubsystemBase {
     }
   }
 
-  /*
-   * Set skip interval for periodic logging (1 = every cycle, 2 = every other cycle, etc.)
-   */
-  public static void setStaticSkipCycles(int cycles) {
-    SKIP_CYCLES = Math.max(1, cycles);
+  private <T> LogEntry<T> add(String name, StatusSignal<T>[] phoenix6Status, Supplier<T> getter, int logLevel, String metaData, boolean isFloat, boolean isBoolean, boolean isArray) {
+    LogEntry<T> entry = new LogEntry<T>(name, phoenix6Status, getter,  logLevel, metaData, isFloat, isBoolean, isArray);
+    logEntries.add(entry);
+    return entry;
   }
 
-  /*
-   * Get current skip interval
-   */
-  public static int getSStaticSkipCycles() {
-    return SKIP_CYCLES;
-  }
-  
-  /*
-   * Enable/disable all logging for performance in competition
-   */
-  public static void setLoggingEnabled(boolean isenabled) {
-    issenabled = isenabled;
+  private LogEntry<?> get(String name) {
+    LogEntry<?> e = find(name);
+    return e != null 
+    ?e 
+    :new LogEntry(name, null, null, 1, "", true, false, false);
   }
 
-  public static boolean getLoggingEnabled() {
-    return issenabled;
-  }
-  
-  /*
-   * Get number of active log entries
-   */
-  public static int getEntryCount() {
-    return logManager != null ? logManager.logEntries.size() : 0;
-  }
-  
-  
-  /*
-   * Clear all log entries (useful for testing)
-   */
-  public static void clearEntries() {
-    if (logManager != null) {
-      logManager.logEntries.clear();
+  private LogEntry<?> find(String name) {
+    for (LogEntry<?> entry : logEntries) {
+      if (entry.name.equals(name)) {
+        return entry;
+      }
     }
+    return null;
   }
 }
