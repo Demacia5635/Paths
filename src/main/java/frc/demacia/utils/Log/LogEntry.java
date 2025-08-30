@@ -54,7 +54,7 @@ public class LogEntry<T> {
         * 2 -> only log
         * 3 -> log and add to network tables if not in a compition
         * 4 -> log and add to network tables
-        */
+    */
     public int logLevel;
 
     /*
@@ -83,10 +83,6 @@ public class LogEntry<T> {
         }
     }
 
-    /*
-        * perform a periodic log
-        * get the data from the getters and call the actual log
-    */
     void log() {
         skipedCycles2++;
         if (skipedCycles2 < SkipCycle) {
@@ -125,18 +121,10 @@ public class LogEntry<T> {
         }
     }
 
-    /*
-        * log a value use zero (current) time
-    */
     public void log(T value) {
         log(value, 0);
     }
 
-    /*
-        * Log data and time if data changed
-        * also publish to network table (if required)
-        * also call consumer if set
-    */
     public void log(T value, long time) {
         if (value == null) return;
         
@@ -256,7 +244,7 @@ public class LogEntry<T> {
             }
         } else{
             if (isFloat){
-                return Math.abs((Float)newValue - (Float)lastValue) >= precision;
+                return Math.abs(((Number) newValue).floatValue() - ((Number) lastValue).floatValue()) >= precision;
             } else if (isBoolean){
                 return !newValue.equals(lastValue);
             } else{
@@ -277,10 +265,10 @@ public class LogEntry<T> {
             }
         }
         else{
-            if (!(value instanceof Float) && !(value instanceof Boolean)) {
+            if (!(isFloat || isBoolean)) {
                 return (T) value.toString();
             } else{
-            return value;
+                return value;
             }
         }
     }
@@ -356,7 +344,8 @@ public class LogEntry<T> {
             }
         } else {
             if (isFloat){
-                ((FloatLogEntry) entry).append((Float) value, time);
+                ((FloatLogEntry) entry).append(((Number) value).floatValue()
+                , time);
             } else if (isBoolean){
                 ((BooleanLogEntry) entry).append((Boolean) value, time);
             } else{
@@ -376,7 +365,7 @@ public class LogEntry<T> {
             }
         } else {
             if (isFloat){
-                ((FloatPublisher) ntPublisher).set((Float) value);
+                ((FloatPublisher) ntPublisher).set(((Number) value).floatValue());
             } else if (isBoolean){
                 ((BooleanPublisher) ntPublisher).set((Boolean) value);
             } else{

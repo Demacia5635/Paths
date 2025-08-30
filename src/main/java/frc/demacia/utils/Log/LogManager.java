@@ -118,7 +118,7 @@ public class LogManager extends SubsystemBase {
       }
     } else {
         try {
-            double d = ((Number) value).floatValue();
+            float d = ((Number) value).floatValue();
             isFloat = true;
         } catch (Exception e) {
           if (value instanceof  Boolean){

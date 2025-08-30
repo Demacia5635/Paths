@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.demacia.utils.Motors.UpdateArray;
 import frc.demacia.utils.Log.LogManager;
 import frc.robot.RobotContainer;
-import frc.robot.Utilities;
 
 public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
 
