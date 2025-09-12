@@ -35,6 +35,5 @@ public interface MotorInterface {
 
     void showConfigPIDFSlotCommand(int slot);
     void showConfigMotionVelocitiesCommand();
-    void showSysidCommands(Subsystem subsystem);
 
 }

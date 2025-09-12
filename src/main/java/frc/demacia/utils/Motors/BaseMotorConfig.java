@@ -261,3 +261,22 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         this.isRadiansMotor = other.isRadiansMotor;
    }
 }
+
+/* Alphabetic order:
+ * BaseMotorConfig(int id, String name)
+ * BaseMotorConfig(int id, String name, Canbus canbus)
+ * withVolts(double maxVolt)
+ * withBrake(boolean brake)
+ * withInvert(boolean invert)
+ * withRampTime(double rampTime)
+ * withMeterMotor(double gearRatio, double diameter)
+ * withRadiansMotor(double gearRatio)
+ * withDegreesMotor(double gearRatio)
+ * withMaxPositionError(double maxPositionError)
+ * withCurrent(double maxCurrent)
+ * withMotionParam(double maxVelocity, double maxAcceleration, double maxJerk)
+ * withFeedForward(double kv2, double ksin, double posToRad)
+ * withPID(double kp, double ki, double kd, double ks, double kv, double ka, double kg)
+ * withCanbus(Canbus canbus)
+ * copyBaseFields(BaseMotorConfig<?> other)
+ */

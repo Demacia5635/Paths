@@ -12,8 +12,8 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.demacia.utils.Motors.UpdateArray;
+import frc.demacia.utils.UpdateArray;
+import frc.demacia.utils.Utilities;
 import frc.demacia.utils.Log.LogManager;
 import frc.robot.RobotContainer;
 
@@ -100,7 +100,7 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
    * set motor to brake or coast
    */
   public void setNeutralMode(boolean isBrake) {
-    cfg.idleMode(config.brake ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
+    cfg.idleMode(isBrake ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
     configure(cfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
@@ -112,12 +112,13 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
   public void setDuty(double power) {
     super.set(power);
     controlType = ControlType.kDutyCycle;
-
+    lastControlMode = "Duty Cycle";
   }
 
   public void setVoltage(double voltage) {
     super.setVoltage(voltage);
     controlType = ControlType.kVoltage;
+    lastControlMode = "Voltage";
   }
 
   /**
@@ -131,6 +132,7 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
   public void setVelocity(double velocity, double feedForward) {
     super.closedLoopController.setReference(velocity, ControlType.kMAXMotionVelocityControl, slot, feedForward);
     controlType = ControlType.kMAXMotionVelocityControl;
+    lastControlMode = "Velocity Control";
     setPoint = velocity;
   }
 
@@ -141,6 +143,7 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
   public void setPositionVoltage(double position, double feedForward) {
     super.closedLoopController.setReference(position, ControlType.kPosition, slot, feedForward);
     controlType = ControlType.kPosition;
+    lastControlMode = "Position Control";
     setPoint = position;
   }
 
@@ -154,6 +157,27 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
 
   public void setMotionWithFeedForward(double velocity) {
     setVelocity(velocity, positionFeedForward(velocity));
+  }
+
+  @Override
+  public void setMotion(double position, double feedForward) {
+    super.closedLoopController.setReference(position, ControlType.kMAXMotionPositionControl, slot, feedForward);
+    controlType = ControlType.kMAXMotionPositionControl;
+    setPoint = position;
+  }
+
+  @Override
+  public void setMotion(double position) {
+    setMotion(position, config.pid[slot.value].ks()*Utilities.signumWithDeadband(position - getCurrentPosition(), 0.5));
+  }
+
+  @Override
+  public void setAngle(double angle, double feedForward) {
+    setMotion(MotorUtils.getPositionForAngle(getCurrentPosition(), angle, config.isRadiansMotor), feedForward);
+  }
+  @Override
+  public void setAngle(double angle) {
+    setMotion(MotorUtils.getPositionForAngle(getCurrentPosition(), angle, config.isRadiansMotor));
   }
 
   private double velocityFeedForward(double velocity) {
@@ -268,27 +292,6 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
   }
 
   @Override
-  public void setMotion(double position, double feedForward) {
-    super.closedLoopController.setReference(position, ControlType.kMAXMotionPositionControl, slot, feedForward);
-    controlType = ControlType.kMAXMotionPositionControl;
-    setPoint = position;
-  }
-
-  @Override
-  public void setMotion(double position) {
-    setMotion(position, config.pid[slot.value].ks()*Utilities.signumWithDeadband(position - getCurrentPosition(), 0.5));
-  }
-
-  @Override
-  public void setAngle(double angle, double feedForward) {
-    setMotion(MotorUtils.getPositionForAngle(getCurrentPosition(), angle, config.isRadiansMotor), feedForward);
-  }
-  @Override
-  public void setAngle(double angle) {
-    setMotion(MotorUtils.getPositionForAngle(getCurrentPosition(), angle, config.isRadiansMotor));
-  }
-
-  @Override
   public void setEncoderPosition(double position) {
     encoder.setPosition(position);
   }
@@ -305,10 +308,4 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
           configure(cfg, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         });
   }
-
-  @Override
-  public void showSysidCommands(Subsystem subsystem) {
-    MotorUtils.showSysidCommands(this, config, subsystem);
-  }
-
 }

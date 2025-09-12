@@ -23,9 +23,8 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.demacia.utils.Motors.StatusSignalData;
-import frc.demacia.utils.Motors.UpdateArray;
+import frc.demacia.utils.Data;
+import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Log.LogManager;
 
 public class TalonMotor extends TalonFX implements MotorInterface {
@@ -44,14 +43,14 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     MotionMagicExpoVoltage motionMagicExpoVoltage = new MotionMagicExpoVoltage(0).withSlot(slot);
     PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(slot);
 
-    StatusSignalData<ControlModeValue> controlModeSignal;
-    StatusSignalData<Double> closedLoopSPSignal;
-    StatusSignalData<Double> closedLoopErrorSignal;
-    StatusSignalData<Angle> positionSignal;
-    StatusSignalData<AngularVelocity> velocitySignal;
-    StatusSignalData<AngularAcceleration> accelerationSignal;
-    StatusSignalData<Voltage> voltageSignal;
-    StatusSignalData<Current> currentSignal;
+    Data<ControlModeValue> controlModeSignal;
+    Data<Double> closedLoopSPSignal;
+    Data<Double> closedLoopErrorSignal;
+    Data<Angle> positionSignal;
+    Data<AngularVelocity> velocitySignal;
+    Data<AngularAcceleration> accelerationSignal;
+    Data<Voltage> voltageSignal;
+    Data<Current> currentSignal;
 
     String lastControlMode;
 
@@ -106,7 +105,7 @@ public class TalonMotor extends TalonFX implements MotorInterface {
         if(config.maxVelocity > 0) {
             cfg.MotionMagic.MotionMagicExpo_kV = 12.0 / config.maxVelocity  * unitMultiplier;
         } else {
-            cfg.MotionMagic.MotionMagicExpo_kA = config.pid[slot].kv() * unitMultiplier;
+            cfg.MotionMagic.MotionMagicExpo_kV = config.pid[slot].kv() * unitMultiplier;
         }
         if(apply) {
             getConfigurator().apply(cfg.MotionMagic);
@@ -128,7 +127,7 @@ public class TalonMotor extends TalonFX implements MotorInterface {
         cfg.Slot1.kP = config.pid[1].kp() * unitMultiplier;
         cfg.Slot1.kI = config.pid[1].ki() * unitMultiplier;
         cfg.Slot1.kD = config.pid[1].kd() * unitMultiplier;
-        cfg.Slot1.kS = -config.pid[1].ks();
+        cfg.Slot1.kS = config.pid[1].ks();
         cfg.Slot1.kV = config.pid[1].kv() * unitMultiplier;
         cfg.Slot1.kA = config.pid[1].ka() * unitMultiplier;
         cfg.Slot1.kG = config.pid[1].kg();
@@ -150,14 +149,14 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     }
 
     private void setSignals() {
-        controlModeSignal = new StatusSignalData<>(getControlMode());
-        closedLoopSPSignal = new StatusSignalData<>(getClosedLoopReference(), unitMultiplier);
-        closedLoopErrorSignal = new StatusSignalData<>(getClosedLoopError(), unitMultiplier);
-        positionSignal = new StatusSignalData<>(getPosition(), unitMultiplier);
-        velocitySignal = new StatusSignalData<>(getVelocity(), unitMultiplier);
-        accelerationSignal = new StatusSignalData<>(getAcceleration(), unitMultiplier);
-        voltageSignal = new StatusSignalData<>(getMotorVoltage());
-        currentSignal = new StatusSignalData<>(getStatorCurrent());
+        controlModeSignal = new Data<>(getControlMode());
+        closedLoopSPSignal = new Data<>(getClosedLoopReference());
+        closedLoopErrorSignal = new Data<>(getClosedLoopError());
+        positionSignal = new Data<>(getPosition());
+        velocitySignal = new Data<>(getVelocity());
+        accelerationSignal = new Data<>(getAcceleration());
+        voltageSignal = new Data<>(getMotorVoltage());
+        currentSignal = new Data<>(getStatorCurrent());
     }
 
     private void addLog() {
@@ -302,16 +301,35 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     }
 
     public double getCurrentClosedLoopSP() {
-        return closedLoopSPSignal.get();
+        closedLoopSPSignal.refresh();
+        Double value = closedLoopSPSignal.getDouble();
+        return value != null ? value * unitMultiplier : 0.0;
     }
-
+    
     public double getCurrentClosedLoopError() {
-        return closedLoopErrorSignal.get();
+        closedLoopErrorSignal.refresh();
+        Double value = closedLoopErrorSignal.getDouble();
+        return value != null ? value * unitMultiplier : 0.0;
     }
-
+    
     public double getCurrentPosition() {
-        return positionSignal.get();
+        positionSignal.refresh();
+        Double value = positionSignal.getDouble();
+        return value != null ? value * unitMultiplier : 0.0;
     }
+    
+    public double getCurrentVelocity() {
+        velocitySignal.refresh();
+        Double value = velocitySignal.getDouble();
+        return value != null ? value * unitMultiplier : 0.0;
+    }
+    
+    public double getCurrentAcceleration() {
+        accelerationSignal.refresh();
+        Double value = accelerationSignal.getDouble();
+        return value != null ? value * unitMultiplier : 0.0;
+    }
+    
     public double getCurrentAngle() {
         if(config.isRadiansMotor) {
             return MathUtil.angleModulus(getCurrentPosition());
@@ -320,20 +338,17 @@ public class TalonMotor extends TalonFX implements MotorInterface {
         }
         return 0;
     }
-
-    public double getCurrentVelocity() {
-        return velocitySignal.get();
-    }
-
-    public double getCurrentAcceleration() {
-        return accelerationSignal.get();
-    }
-
+    
     public double getCurrentVoltage() {
-        return voltageSignal.get();
+        voltageSignal.refresh();
+        Double value = voltageSignal.getDouble();
+        return value != null ? value : 0.0;
     }
+    
     public double getCurrentCurrent() {
-        return currentSignal.get();
+        currentSignal.refresh();
+        Double value = currentSignal.getDouble();
+        return value != null ? value : 0.0;
     }
 
     /**
@@ -385,6 +400,7 @@ public class TalonMotor extends TalonFX implements MotorInterface {
         if(config.isDegreesMotor || config.isRadiansMotor) {
             builder.addDoubleProperty("Angle", this::getCurrentAngle, null);
         }
+        builder.addStringProperty("ControlMode", this::getCurrentControlMode, null);
     }
 
     public double gearRatio() {
@@ -399,30 +415,25 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     public void setEncoderPosition(double position) {
       setPosition(position / unitMultiplier);   
     }
-    public StatusSignalData<Double> getClosedLoopErrorSignal() {
+    public Data<Double> getClosedLoopErrorSignal() {
         return closedLoopErrorSignal;
     }
-    public StatusSignalData<Double> getClosedLoopSPSignal() {
+    public Data<Double> getClosedLoopSPSignal() {
         return closedLoopSPSignal;
     }
-    public StatusSignalData<Angle> getPositionSignal() {
+    public Data<Angle> getPositionSignal() {
         return positionSignal;
     }
-    public StatusSignalData<AngularVelocity> getVelocitySignal() {
+    public Data<AngularVelocity> getVelocitySignal() {
         return velocitySignal;
     }
-    public StatusSignalData<AngularAcceleration> getAccelerationSignal() {
+    public Data<AngularAcceleration> getAccelerationSignal() {
         return accelerationSignal;
     }
-    public StatusSignalData<Voltage> getVoltageSignal() {
+    public Data<Voltage> getVoltageSignal() {
         return voltageSignal;
     }
-    public StatusSignalData<Current> getCurrentSignal() {
+    public Data<Current> getCurrentSignal() {
         return currentSignal;
     }
-  @Override
-  public void showSysidCommands(Subsystem subsystem) {
-        MotorUtils.showSysidCommands(this, config, subsystem);
-    }
-
 }

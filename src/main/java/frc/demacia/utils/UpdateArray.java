@@ -1,4 +1,4 @@
-package frc.demacia.utils.Motors;
+package frc.demacia.utils;
 
 import java.util.function.Consumer;
 
