@@ -97,7 +97,7 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
             xAccelerationSignal,
             yAccelerationSignal,
             zAccelerationSignal
-        }, 2);
+        }, 3);
     }
 
     public String getName(){

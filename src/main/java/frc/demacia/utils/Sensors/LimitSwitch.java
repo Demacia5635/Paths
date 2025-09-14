@@ -23,7 +23,7 @@ public class LimitSwitch extends DigitalInput implements DigitalSensorInterface{
     }
 
     private void addLog() {
-        LogManager.addEntry(name + "/isTriggered", this::get, 2);
+        LogManager.addEntry(name + "/isTriggered", this::get, 3);
     }
 
     public String getName(){
@@ -31,6 +31,6 @@ public class LimitSwitch extends DigitalInput implements DigitalSensorInterface{
     }
 
     public boolean get(){
-        return !(inverted == get());
+        return !(inverted == super.get());
     }
 }
