@@ -11,9 +11,12 @@ import frc.robot.testMotors.talonFX.subsystems.Motor;
 public class Set extends Command {
   Motor motor;
 
+  double value;
+
   /** Creates a new Set. */
-  public Set(Motor motor, double Value) {
+  public Set(Motor motor, double value) {
     this.motor = motor;
+    this.value = value;
     addRequirements(motor);
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -25,7 +28,7 @@ public class Set extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    motor.getMotor().setDuty(Value);
+    motor.getMotor().setDuty(value);
   }
 
   // Called once the command ends or is interrupted.
