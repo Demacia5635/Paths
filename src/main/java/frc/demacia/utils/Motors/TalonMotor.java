@@ -161,14 +161,21 @@ public class TalonMotor extends TalonFX implements MotorInterface {
 
     private void addLog() {
         LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP",  new StatusSignal[] {
-      getPosition(),
-      getVelocity(),
-      getAcceleration(),
-      getMotorVoltage(),
-      getStatorCurrent(),
-      getClosedLoopError(),
-      getClosedLoopReference(),
-  }, 2,"motor");
+            positionSignal.getSignal(),
+            velocitySignal.getSignal(),
+            accelerationSignal.getSignal(),
+            voltageSignal.getSignal(),
+            currentSignal.getSignal(),
+            closedLoopErrorSignal.getSignal(),
+            closedLoopSPSignal.getSignal()
+            }, 3,"motor");
+        LogManager.addEntry(name + "/Position and Velocity and Voltage and Current", 
+            () -> new double[] {
+                getCurrentPosition(),
+                getCurrentVelocity(), 
+                getCurrentVoltage(),
+                getCurrentCurrent()
+            }, 3, "motor");
     }
 
     public void checkElectronics() {
