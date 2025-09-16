@@ -2,21 +2,21 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.testMotors.talonSRX.subsystems;
+package frc.robot.testMotors.sparkFlex.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.demacia.utils.Motors.TalonSRXMotor;
-import frc.robot.testMotors.talonSRX.Constants;
+import frc.demacia.utils.Motors.SparkFlexMotor;
+import frc.robot.testMotors.sparkFlex.Constants;
 
 public class Motor extends SubsystemBase {
-  private TalonSRXMotor talonMotor;
+  private SparkFlexMotor sparkMotor;
 
   /** Creates a new motor. */
   public Motor() {
-    talonMotor = new TalonSRXMotor(Constants.CONFIG);
+    sparkMotor = new SparkFlexMotor(Constants.CONFIG);
   }
 
-  public TalonSRXMotor getMotor(){
-    return talonMotor;
+  public SparkFlexMotor getMotor(){
+    return sparkMotor;
   }
 }

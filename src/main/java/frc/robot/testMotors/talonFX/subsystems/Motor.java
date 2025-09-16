@@ -9,7 +9,7 @@ import frc.demacia.utils.Motors.TalonMotor;
 import frc.robot.testMotors.talonFX.Constants;
 
 public class Motor extends SubsystemBase {
-  TalonMotor talonMotor;
+  private TalonMotor talonMotor;
 
   /** Creates a new motor. */
   public Motor() {

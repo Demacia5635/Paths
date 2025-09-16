@@ -51,8 +51,6 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     StatusSignalData<Voltage> voltageSignal;
     StatusSignalData<Current> currentSignal;
 
-    String lastControlMode = "";
-
     public TalonMotor(TalonConfig config) {
         super(config.id, config.canbus.canbus);
         this.config = config;
@@ -168,15 +166,15 @@ public class TalonMotor extends TalonFX implements MotorInterface {
         //     closedLoopSPSignal.getSignal(),
         //     }, 3,"motor");
         LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP2", 
-            () -> new double[] {
-                getCurrentPosition(),
-                getCurrentVelocity(),
-                getCurrentAcceleration(),
-                getCurrentVoltage(),
-                getCurrentCurrent(),
-                getCurrentClosedLoopError(),
-                getCurrentClosedLoopSP(),
-            }, 3, "motor");
+          () -> new double[] {
+            getCurrentPosition(),
+            getCurrentVelocity(),
+            getCurrentAcceleration(),
+            getCurrentVoltage(),
+            getCurrentCurrent(),
+            getCurrentClosedLoopError(),
+            getCurrentClosedLoopSP(),
+          }, 3, "motor");
             // LogManager.addEntry(name + "/ControlMode", 
             // () -> getCurrentControlMode(), 3, "motor");
             // LogManager.addEntry(name + "/Position and Velocity and Voltage and Current", 
@@ -222,12 +220,10 @@ public class TalonMotor extends TalonFX implements MotorInterface {
      */
     public void setDuty(double power) {
         setControl(dutyCycle.withOutput(power));
-        lastControlMode = "Duty Cycle";
     }
 
     public void setVoltage(double voltage) {
         setControl(voltageOut.withOutput(voltage));
-        lastControlMode = "Voltage";
     }
 
     /**
@@ -240,7 +236,6 @@ public class TalonMotor extends TalonFX implements MotorInterface {
      */
     public void setVelocity(double velocity, double feedForward) {
         setControl(velocityVoltage.withVelocity(velocity/unitMultiplier).withFeedForward(feedForward));
-        lastControlMode = "Velocity";
     }
 
     public void setVelocity(double velocity) {
@@ -260,7 +255,6 @@ public class TalonMotor extends TalonFX implements MotorInterface {
      */
     public void setMotion(double position, double feedForward) {
         setControl(motionMagicExpoVoltage.withPosition(position/unitMultiplier).withFeedForward(feedForward));  
-        lastControlMode = "Position";
     }
 
     public void setMotion(double position) {
@@ -391,7 +385,8 @@ public class TalonMotor extends TalonFX implements MotorInterface {
                 "Max Volt",
                 "Brake (0/1)",
                 "Invert (0/1)",
-                "Motor Ratio"
+                "Motor Ratio",
+                "Slot"
             },
             new double[] {
                 config.maxCurrent,
@@ -399,7 +394,8 @@ public class TalonMotor extends TalonFX implements MotorInterface {
                 config.maxVolt,
                 config.brake ? 1.0 : 0.0,
                 config.inverted ? 1.0 : 0.0,
-                config.motorRatio
+                config.motorRatio,
+                slot
             },
             (double[] array) -> {
                 config.withCurrent(array[0])
@@ -409,6 +405,7 @@ public class TalonMotor extends TalonFX implements MotorInterface {
                       .withInvert(array[4] > 0.5);
     
                 config.motorRatio = array[5];
+                changeSlot(slot);
     
                 configMotor();
     

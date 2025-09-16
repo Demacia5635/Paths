@@ -73,18 +73,16 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
     }
 
     private void addLog() {
-        LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP2", 
-            () -> new double[] {
-                getCurrentPosition(),
-                getCurrentVelocity(),
-                getCurrentAcceleration(),
-                getCurrentVoltage(),
-                getCurrentCurrent(),
-                getCurrentClosedLoopError(),
-                getCurrentClosedLoopSP(),
-            }, 3, "motor");
-            // LogManager.addEntry(name + "/ControlMode", 
-            // () -> getCurrentControlMode(), 3, "motor");
+      LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP2", 
+        () -> new double[] {
+          getCurrentPosition(),
+          getCurrentVelocity(),
+          getCurrentAcceleration(),
+          getCurrentVoltage(),
+          getCurrentCurrent(),
+          getCurrentClosedLoopError(),
+          getCurrentClosedLoopSP(),
+        }, 3, "motor");
     }
 
     public void changeSlot(int slot){
@@ -132,6 +130,7 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
     
     public void setAngle(double angle, double feedForward) {
       setMotion(MotorUtils.getPositionForAngle(getCurrentPosition(), angle, config.isRadiansMotor), feedForward);
+      lastControlMode = "Angle";
     }
     
     public void setAngle(double angle) {
@@ -142,6 +141,7 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
     public void setPositionVoltage(double position, double feedForward) {
         selectProfileSlot(slot, 0);
         set(ControlMode.Position, position / config.motorRatio, DemandType.ArbitraryFeedForward, feedForward / 12.0);
+        lastControlMode = "Position Voltage";
     }
 
     @Override
@@ -166,7 +166,7 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
     }
 
     public String getCurrentControlMode(){
-        return lastControlMode.toString();
+        return lastControlMode;
     }@Override
     public double getCurrentClosedLoopSP() {
         return getClosedLoopTarget(0) * config.motorRatio;
