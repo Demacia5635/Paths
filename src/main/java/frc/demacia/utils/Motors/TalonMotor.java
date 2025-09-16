@@ -51,7 +51,7 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     StatusSignalData<Voltage> voltageSignal;
     StatusSignalData<Current> currentSignal;
 
-    String lastControlMode;
+    String lastControlMode = "";
 
     public TalonMotor(TalonConfig config) {
         super(config.id, config.canbus.canbus);
@@ -167,7 +167,6 @@ public class TalonMotor extends TalonFX implements MotorInterface {
         //     closedLoopErrorSignal.getSignal(),
         //     closedLoopSPSignal.getSignal(),
         //     }, 3,"motor");
-        LogManager.log("good");
         LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP2", 
             () -> new double[] {
                 getCurrentPosition(),
@@ -421,7 +420,7 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     public void showControlCommand() {
         UpdateArray.show(name + " CONTROL",
             new String[] {
-                "ControlMode (0=Duty, 1=Voltage, 2=Velocity, 3=MotionMagic)",
+                "ControlMode (0=Duty, 1=Voltage, 2=Velocity, 3=MotionMagic, 4=angle, 5=positionVoltage, 6=velocityWithFeedForward, 7=motionWithFeedForward)",
                 "Value"
             },
             new double[] {
@@ -435,19 +434,27 @@ public class TalonMotor extends TalonFX implements MotorInterface {
                 switch (mode) {
                     case 0: // Duty cycle [-1, 1]
                         setDuty(value);
-                        System.out.println("[CONTROL] Duty=" + value);
                         break;
                     case 1: // Voltage
                         setVoltage(value);
-                        System.out.println("[CONTROL] Voltage=" + value);
                         break;
                     case 2: // Velocity
                         setVelocity(value);
-                        System.out.println("[CONTROL] Velocity=" + value);
                         break;
-                    case 3: // MotionMagic / Position
+                    case 3: // MotionMagic
                         setMotion(value);
-                        System.out.println("[CONTROL] MotionMagic=" + value);
+                        break;
+                    case 4: // angle
+                        setAngle(value);
+                        break;
+                    case 5: // positionVoltage
+                        setPositionVoltage(value);
+                        break;
+                    case 6: // velocityWithFeedForward
+                        setVelocityWithFeedForward(value);
+                        break;
+                    case 7: // MotionMagic
+                        setMotionWithFeedForward(value);
                         break;
                     default:
                         System.out.println("[CONTROL] Invalid mode: " + mode);

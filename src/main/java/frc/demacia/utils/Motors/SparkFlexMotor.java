@@ -25,7 +25,7 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
   private ClosedLoopSlot slot = ClosedLoopSlot.kSlot0;
   private ControlType controlType = ControlType.kDutyCycle;
 
-  private String lastControlMode;
+  private String lastControlMode = "";
   private double lastVelocity;
   private double lastAcceleration;
   private double setPoint = 0;

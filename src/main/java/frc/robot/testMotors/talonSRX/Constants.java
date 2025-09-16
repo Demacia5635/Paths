@@ -2,14 +2,14 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.testMotors.talonFX;
+package frc.robot.testMotors.talonSRX;
 
 import frc.demacia.utils.Motors.TalonConfig;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 public final class Constants {
-  public static final int ID = 5;
-  public static final Canbus CAN_BUS = Canbus.CANIvore;
-  public static final String NAME = "Test Motor";
+  public static final int ID = 30;
+  public static final Canbus CAN_BUS = Canbus.Rio;
+  public static final String NAME = "Test Motoor";
 
   public static final double MAX_VOLT = 12;
   public static final double MAX_CURRENT = 40;
