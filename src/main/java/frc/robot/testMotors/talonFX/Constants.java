@@ -7,8 +7,8 @@ package frc.robot.testMotors.talonFX;
 import frc.demacia.utils.Motors.TalonConfig;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 public final class Constants {
-  public static final int ID = 10;
-  public static final Canbus CAN_BUS = Canbus.CANIvore;
+  public static final int ID = 11;
+  public static final Canbus CAN_BUS = Canbus.Rio;
   public static final String NAME = "Test Motor";
 
   public static final double MAX_VOLT = 12;

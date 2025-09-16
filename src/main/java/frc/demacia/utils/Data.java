@@ -47,7 +47,7 @@ public class Data<T> {
     public Double getDouble() {
         if (!isDouble || length == 0) {return null;}
         refresh();
-        return toDouble(lastValues[0]);
+        return (Double)lastValues[0];
     }
 
     public double[] getDoubleArray() {

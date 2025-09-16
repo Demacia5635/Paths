@@ -6,6 +6,8 @@ package frc.robot;
 
 import frc.demacia.utils.Log.LogManager;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.testMotors.talonFX.commands.Set;
+import frc.robot.testMotors.talonFX.subsystems.Motor;
 import frc.robot.testSensors.LimitSwitch.subsystems.LimitSwitch;
 import frc.robot.testSensors.piegon.subsystems.Pigeon;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -22,7 +24,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
 
-  Pigeon pigeon;
+  Motor motor;
+  Set set;
 
   public static boolean isComp = DriverStation.isFMSAttached();
   private static boolean hasRemovedFromLog = false;
@@ -40,8 +43,9 @@ public class RobotContainer {
     
     new LogManager();
 
-    pigeon = new Pigeon();
+    motor = new Motor();
 
+    set = new Set(motor);
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
     configureBindings();
@@ -69,7 +73,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    
+    motor.setDefaultCommand(set);
   }
 
   /**
