@@ -1,10 +1,10 @@
 package frc.demacia.utils.Motors;
 
 import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.util.sendable.Sendable;
@@ -17,11 +17,11 @@ import frc.demacia.utils.Utilities;
 import frc.demacia.utils.Log.LogManager;
 import frc.robot.RobotContainer;
 
-public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
+public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterface {
 
   private SparkConfig config;
   private String name;
-  private SparkMaxConfig cfg;
+  private SparkFlexConfig cfg;
   private ClosedLoopSlot slot = ClosedLoopSlot.kSlot0;
   private ControlType controlType = ControlType.kDutyCycle;
 
@@ -32,7 +32,7 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
   private int lastCycleNum = 0;
   private double lastTime = 0;
 
-  public SparkMotor(SparkConfig config) {
+  public SparkFlexMotor(SparkConfig config) {
     super(config.id, SparkLowLevel.MotorType.kBrushless);
     this.config = config;
     name = config.name;
@@ -43,7 +43,7 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
   }
 
   private void configMotor() {
-    cfg = new SparkMaxConfig();
+    cfg = new SparkFlexConfig();
     cfg.smartCurrentLimit((int) config.maxCurrent);
     cfg.openLoopRampRate(config.rampUpTime);
     cfg.closedLoopRampRate(config.rampUpTime);
@@ -189,8 +189,8 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
     return velocity * velocity * Math.signum(velocity) * config.kv2;
   }
 
-  private double positionFeedForward(double position) {
-    return Math.cos(position * config.posToRad) * config.kSin;
+  private double positionFeedForward(double positin) {
+    return Math.cos(positin * config.posToRad) * config.kSin;
   }
 
   @Override

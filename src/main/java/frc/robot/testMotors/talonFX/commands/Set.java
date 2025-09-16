@@ -4,12 +4,16 @@
 
 package frc.robot.testMotors.talonFX.commands;
 
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.demacia.utils.Motors.TalonMotor;
 import frc.robot.testMotors.talonFX.subsystems.Motor;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class Set extends Command {
   Motor motor;
+
+  TalonMotor testMotor;
 
   double value;
 
@@ -17,18 +21,23 @@ public class Set extends Command {
   public Set(Motor motor, double value) {
     this.motor = motor;
     this.value = value;
+    testMotor = motor.getMotor();
     addRequirements(motor);
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    testMotor.showConfigMotorCommand();
+    testMotor.showConfigPIDFSlotCommand(0);
+    testMotor.showConfigMotorCommand();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    motor.getMotor().setDuty(value);
+    testMotor.setDuty(value);
   }
 
   // Called once the command ends or is interrupted.

@@ -71,7 +71,6 @@ public class TalonMotor extends TalonFX implements MotorInterface {
         cfg.CurrentLimits.SupplyCurrentLowerLimit = config.maxCurrent;
         cfg.CurrentLimits.SupplyCurrentLowerTime = 0.1;
         cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
-
         cfg.ClosedLoopRamps.VoltageClosedLoopRampPeriod = config.rampUpTime;
         cfg.OpenLoopRamps.VoltageOpenLoopRampPeriod = config.rampUpTime;
 
@@ -167,15 +166,22 @@ public class TalonMotor extends TalonFX implements MotorInterface {
             voltageSignal.getSignal(),
             currentSignal.getSignal(),
             closedLoopErrorSignal.getSignal(),
-            closedLoopSPSignal.getSignal()
+            closedLoopSPSignal.getSignal(),
             }, 3,"motor");
         LogManager.addEntry(name + "/Position and Velocity and Voltage and Current", 
             () -> new double[] {
                 getCurrentPosition(),
-                getCurrentVelocity(), 
+                getCurrentVelocity(),
+                getCurrentAcceleration(),
                 getCurrentVoltage(),
-                getCurrentCurrent()
+                getCurrentCurrent(),
+                getCurrentClosedLoopError(),
+                getCurrentClosedLoopSP(),
             }, 3, "motor");
+            LogManager.addEntry(name + "/Position and Velocity and Voltage and Current", 
+            () -> getCurrentControlMode(), 3, "motor");
+            LogManager.addEntry(name + "/Position and Velocity and Voltage and Current", 
+            () -> controlModeSignal.getSignal(), 3, "motor");
     }
 
     public void checkElectronics() {
@@ -217,12 +223,12 @@ public class TalonMotor extends TalonFX implements MotorInterface {
      */
     public void setDuty(double power) {
         setControl(dutyCycle.withOutput(power));
-        // dutyCycleEntry.log(power);
+        lastControlMode = "Duty Cycle";
     }
 
     public void setVoltage(double voltage) {
         setControl(voltageOut.withOutput(voltage));
-        // dutyCycleEntry.log(voltage / 12.0);
+        lastControlMode = "Voltage";
     }
 
     /**
@@ -235,7 +241,7 @@ public class TalonMotor extends TalonFX implements MotorInterface {
      */
     public void setVelocity(double velocity, double feedForward) {
         setControl(velocityVoltage.withVelocity(velocity/unitMultiplier).withFeedForward(feedForward));
-        // velocityEntry.log(velocity);
+        lastControlMode = "Velocity";
     }
 
     public void setVelocity(double velocity) {
@@ -255,32 +261,25 @@ public class TalonMotor extends TalonFX implements MotorInterface {
      */
     public void setMotion(double position, double feedForward) {
         setControl(motionMagicExpoVoltage.withPosition(position/unitMultiplier).withFeedForward(feedForward));  
-        /* 
-        double error = position-getCurrentPosition(); 
-        if(error > 0) {
-            setControl(motionMagicExpoVoltage.withPosition(position/unitMultiplier).withFeedForward(feedForward).withSlot(0));  
-        } else {
-            setControl(motionMagicExpoVoltage.withPosition(position/unitMultiplier).withFeedForward(feedForward).withSlot(1));  
-        }
-            */
+        lastControlMode = "Position";
     }
 
     public void setMotion(double position) {
         setMotion(position, 0);
     }
+
     @Override
     public void setAngle(double angle, double feedForward) {
       setMotion(MotorUtils.getPositionForAngle(getCurrentPosition(), angle, config.isRadiansMotor), feedForward);
     }
+
     @Override
     public void setAngle(double angle) {
       setMotion(MotorUtils.getPositionForAngle(getCurrentPosition(), angle, config.isRadiansMotor));
     }
   
-
     public void setPositionVoltage(double position, double feedForward) {
         setControl(positionVoltage.withPosition(position/unitMultiplier).withFeedForward(feedForward));
-        // positionEntry.log(position);
     }
 
     public void setPositionVoltage(double position) {
@@ -292,15 +291,15 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     }
 
     public void setMotionWithFeedForward(double velocity) {
-        setVelocity(velocity, positionFeedForward(velocity));
+        setMotion(velocity, positionFeedForward(velocity));
     }
 
     private double velocityFeedForward(double velocity) {
         return velocity * velocity * Math.signum(velocity) * config.kv2;
     }
 
-    private double positionFeedForward(double positin) {
-        return Math.cos(positin * config.posToRad) * config.kSin;
+    private double positionFeedForward(double position) {
+        return Math.cos(position * config.posToRad) * config.kSin;
     }
 
     public String getCurrentControlMode() {
@@ -383,6 +382,43 @@ public class TalonMotor extends TalonFX implements MotorInterface {
                 config.maxJerk = array[2];
                 configureMotionMagic(true);
             });
+    }
+
+    public void showConfigMotorCommand() {
+        UpdateArray.show(name + " MOTOR CONFIG",
+            new String[] {
+                "Max Current",
+                "Ramp Time (s)",
+                "Max Volt",
+                "Brake (0/1)",
+                "Invert (0/1)",
+                "Motor Ratio",
+                "Max Position Error"
+            },
+            new double[] {
+                config.maxCurrent,
+                config.rampUpTime,
+                config.maxVolt,
+                config.brake ? 1.0 : 0.0,
+                config.inverted ? 1.0 : 0.0,
+                config.motorRatio,
+                config.maxPositionError
+            },
+            (double[] array) -> {
+                config.withCurrent(array[0])
+                      .withRampTime(array[1])
+                      .withVolts(array[2])
+                      .withBrake(array[3] > 0.5)
+                      .withInvert(array[4] > 0.5);
+    
+                config.motorRatio = array[5];
+                config.maxPositionError = array[6];
+    
+                configMotor();
+    
+                System.out.println("[HOT RELOAD] Motor config updated for " + name);
+            }
+        );
     }
 
     /**
