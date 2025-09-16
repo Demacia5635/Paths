@@ -4,7 +4,6 @@
 
 package frc.robot.testMotors.talonFX.commands;
 
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.demacia.utils.Motors.TalonMotor;
 import frc.robot.testMotors.talonFX.subsystems.Motor;
@@ -15,12 +14,9 @@ public class Set extends Command {
 
   TalonMotor testMotor;
 
-  double value;
-
   /** Creates a new Set. */
-  public Set(Motor motor, double value) {
+  public Set(Motor motor) {
     this.motor = motor;
-    this.value = value;
     testMotor = motor.getMotor();
     addRequirements(motor);
     // Use addRequirements() here to declare subsystem dependencies.
@@ -31,13 +27,14 @@ public class Set extends Command {
   public void initialize() {
     testMotor.showConfigMotorCommand();
     testMotor.showConfigPIDFSlotCommand(0);
-    testMotor.showConfigMotorCommand();
+    testMotor.showConfigMotionVelocitiesCommand();
+    testMotor.showControlCommand();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    testMotor.setDuty(value);
+    
   }
 
   // Called once the command ends or is interrupted.

@@ -421,6 +421,44 @@ public class TalonMotor extends TalonFX implements MotorInterface {
         );
     }
 
+    public void showControlCommand() {
+        UpdateArray.show(name + " CONTROL",
+            new String[] {
+                "ControlMode (0=Duty, 1=Voltage, 2=Velocity, 3=MotionMagic)",
+                "Value"
+            },
+            new double[] {
+                0, // default control mode: Duty
+                0  // default value
+            },
+            (double[] array) -> {
+                int mode = (int) array[0];
+                double value = array[1];
+    
+                switch (mode) {
+                    case 0: // Duty cycle [-1, 1]
+                        setDuty(value);
+                        System.out.println("[CONTROL] Duty=" + value);
+                        break;
+                    case 1: // Voltage
+                        setVoltage(value);
+                        System.out.println("[CONTROL] Voltage=" + value);
+                        break;
+                    case 2: // Velocity
+                        setVelocity(value);
+                        System.out.println("[CONTROL] Velocity=" + value);
+                        break;
+                    case 3: // MotionMagic / Position
+                        setMotion(value);
+                        System.out.println("[CONTROL] MotionMagic=" + value);
+                        break;
+                    default:
+                        System.out.println("[CONTROL] Invalid mode: " + mode);
+                }
+            }
+        );
+    }
+
     /**
      * override the sendable of the talonFX to our costum widget in elastic
      * <br>
