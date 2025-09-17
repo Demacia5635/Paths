@@ -405,9 +405,9 @@ public class TalonMotor extends TalonFX implements MotorInterface {
                       .withInvert(array[4] > 0.5);
     
                 config.motorRatio = array[5];
-                changeSlot(slot);
     
                 configMotor();
+                changeSlot(slot);
     
                 System.out.println("[HOT RELOAD] Motor config updated for " + name);
             }
