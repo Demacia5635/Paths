@@ -1,5 +1,6 @@
 package frc.demacia.utils.Motors;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
@@ -22,7 +23,8 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.demacia.utils.StatusSignalData;
+import frc.demacia.utils.Data;
+import frc.demacia.utils.Data;
 import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Log.LogManager;
 
@@ -42,14 +44,14 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     MotionMagicExpoVoltage motionMagicExpoVoltage = new MotionMagicExpoVoltage(0).withSlot(slot);
     PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(slot);
 
-    StatusSignalData<ControlModeValue> controlModeSignal;
-    StatusSignalData<Double> closedLoopSPSignal;
-    StatusSignalData<Double> closedLoopErrorSignal;
-    StatusSignalData<Angle> positionSignal;
-    StatusSignalData<AngularVelocity> velocitySignal;
-    StatusSignalData<AngularAcceleration> accelerationSignal;
-    StatusSignalData<Voltage> voltageSignal;
-    StatusSignalData<Current> currentSignal;
+    Data<ControlModeValue> controlModeSignal;
+    Data<Double> closedLoopSPSignal;
+    Data<Double> closedLoopErrorSignal;
+    Data<Angle> positionSignal;
+    Data<AngularVelocity> velocitySignal;
+    Data<AngularAcceleration> accelerationSignal;
+    Data<Voltage> voltageSignal;
+    Data<Current> currentSignal;
 
     public TalonMotor(TalonConfig config) {
         super(config.id, config.canbus.canbus);
@@ -145,26 +147,26 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     }
 
     private void setSignals() {
-        controlModeSignal = new StatusSignalData<>(getControlMode());
-        closedLoopSPSignal = new StatusSignalData<>(getClosedLoopReference());
-        closedLoopErrorSignal = new StatusSignalData<>(getClosedLoopError());
-        positionSignal = new StatusSignalData<>(getPosition());
-        velocitySignal = new StatusSignalData<>(getVelocity());
-        accelerationSignal = new StatusSignalData<>(getAcceleration());
-        voltageSignal = new StatusSignalData<>(getMotorVoltage());
-        currentSignal = new StatusSignalData<>(getStatorCurrent());
+        controlModeSignal = new Data<>(getControlMode());
+        closedLoopSPSignal = new Data<>(getClosedLoopReference());
+        closedLoopErrorSignal = new Data<>(getClosedLoopError());
+        positionSignal = new Data<>(getPosition());
+        velocitySignal = new Data<>(getVelocity());
+        accelerationSignal = new Data<>(getAcceleration());
+        voltageSignal = new Data<>(getMotorVoltage());
+        currentSignal = new Data<>(getStatorCurrent());
     }
 
     private void addLog() {
-        // LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP",  new StatusSignal[] {
-        //     positionSignal.getSignal(),
-        //     velocitySignal.getSignal(),
-        //     accelerationSignal.getSignal(),
-        //     voltageSignal.getSignal(),
-        //     currentSignal.getSignal(),
-        //     closedLoopErrorSignal.getSignal(),
-        //     closedLoopSPSignal.getSignal(),
-        //     }, 3,"motor");
+        LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP",  new StatusSignal[] {
+            positionSignal.getSignal(),
+            velocitySignal.getSignal(),
+            accelerationSignal.getSignal(),
+            voltageSignal.getSignal(),
+            currentSignal.getSignal(),
+            closedLoopErrorSignal.getSignal(),
+            closedLoopSPSignal.getSignal(),
+            }, 3,"motor");
         LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP2", 
           () -> new double[] {
             getCurrentPosition(),
@@ -175,10 +177,10 @@ public class TalonMotor extends TalonFX implements MotorInterface {
             getCurrentClosedLoopError(),
             getCurrentClosedLoopSP(),
           }, 3, "motor");
-            // LogManager.addEntry(name + "/ControlMode", 
-            // () -> getCurrentControlMode(), 3, "motor");
-            // LogManager.addEntry(name + "/Position and Velocity and Voltage and Current", 
-            // () -> controlModeSignal.getSignal(), 3, "motor");
+            LogManager.addEntry(name + "/ControlMode2", 
+            () -> getCurrentControlMode(), 3, "motor");
+            LogManager.addEntry(name + "/ControlMode", 
+            () -> controlModeSignal.getSignal(), 3, "motor");
     }
 
     public void checkElectronics() {
@@ -300,32 +302,27 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     }
 
     public double getCurrentClosedLoopSP() {
-        // closedLoopSPSignal.refresh();
-        Double value = closedLoopSPSignal.get();
+        Double value = closedLoopSPSignal.getDouble();
         return value != null ? value * unitMultiplier : 0.0;
     }
     
     public double getCurrentClosedLoopError() {
-        // closedLoopErrorSignal.refresh();
-        Double value = closedLoopErrorSignal.get();
+        Double value = closedLoopErrorSignal.getDouble();
         return value != null ? value * unitMultiplier : 0.0;
     }
     
     public double getCurrentPosition() {
-        // positionSignal.refresh();
-        Double value = positionSignal.get();
+        Double value = positionSignal.getDouble();
         return value != null ? value * unitMultiplier : 0.0;
     }
     
     public double getCurrentVelocity() {
-        // velocitySignal.refresh();
-        Double value = velocitySignal.get();
+        Double value = velocitySignal.getDouble();
         return value != null ? value * unitMultiplier : 0.0;
     }
     
     public double getCurrentAcceleration() {
-        // accelerationSignal.refresh();
-        Double value = accelerationSignal.get();
+        Double value = accelerationSignal.getDouble();
         return value != null ? value * unitMultiplier : 0.0;
     }
     
@@ -339,14 +336,12 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     }
     
     public double getCurrentVoltage() {
-        // voltageSignal.refresh();
-        Double value = voltageSignal.get();
+        Double value = voltageSignal.getDouble();
         return value != null ? value : 0.0;
     }
     
     public double getCurrentCurrent() {
-        // currentSignal.refresh();
-        Double value = currentSignal.get();
+        Double value = currentSignal.getDouble();
         return value != null ? value : 0.0;
     }
 
@@ -467,7 +462,7 @@ public class TalonMotor extends TalonFX implements MotorInterface {
      * to activate put in the code:
      * 
      * <pre>
-     * SmartDashboard.putStatusSignalData("talonMotor name", talonMotor);
+     * SmartDashboard.putData("talonMotor name", talonMotor);
      * </pre>
      */
     @Override
@@ -497,25 +492,25 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     public void setEncoderPosition(double position) {
       setPosition(position / unitMultiplier);   
     }
-    public StatusSignalData<Double> getClosedLoopErrorSignal() {
+    public Data<Double> getClosedLoopErrorgetSignal() {
         return closedLoopErrorSignal;
     }
-    public StatusSignalData<Double> getClosedLoopSPSignal() {
+    public Data<Double> getClosedLoopSPgetSignal() {
         return closedLoopSPSignal;
     }
-    public StatusSignalData<Angle> getPositionSignal() {
+    public Data<Angle> getPositiongetSignal() {
         return positionSignal;
     }
-    public StatusSignalData<AngularVelocity> getVelocitySignal() {
+    public Data<AngularVelocity> getVelocitygetSignal() {
         return velocitySignal;
     }
-    public StatusSignalData<AngularAcceleration> getAccelerationSignal() {
+    public Data<AngularAcceleration> getAccelerationgetSignal() {
         return accelerationSignal;
     }
-    public StatusSignalData<Voltage> getVoltageSignal() {
+    public Data<Voltage> getVoltagegetSignal() {
         return voltageSignal;
     }
-    public StatusSignalData<Current> getCurrentSignal() {
+    public Data<Current> getCurrentgetSignal() {
         return currentSignal;
     }
 }

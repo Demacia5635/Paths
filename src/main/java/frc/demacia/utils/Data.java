@@ -47,48 +47,78 @@ public class Data<T> {
     public Double getDouble() {
         if (!isDouble || length == 0) {return null;}
         refresh();
-        return (Double)lastValues[0];
+        if (signal != null){
+            return Double.valueOf((double)signal[0].getValueAsDouble());
+        }
+        else {
+            return toDouble(lastValues[0]);
+        }
     }
 
     public double[] getDoubleArray() {
         if (!isDouble || length == 0) {return null;}
         refresh();
-        if (isArray){
+        if (signal != null){
+            double[] doubleArray = new double[signal.length];
+                for (int i = 0; i < signal.length; i++) {
+                    doubleArray[i] = (double)signal[i].getValueAsDouble();
+                }
+                return doubleArray;
+        }
+        else {
             return toDoubleArray(lastValues);
-        } else{
-            return new double[]{toDouble(lastValues[0])};
         }
     }
 
     public Boolean getBoolean() {
         if (!isBoolean || length == 0) {return null;}
         refresh();
-        return (Boolean) lastValues[0];
+        if (signal != null){
+            return (Boolean) signal[0].getValue();
+        }
+        else {
+            return (Boolean) lastValues[0];
+        }
     }
 
     public boolean[] getBooleanArray() {
         if (!isBoolean || length == 0) {return null;}
         refresh();
-        if (isArray){
+        if (signal != null){
+            boolean[] booleanArray = new boolean[signal.length];
+                for (int i = 0; i < signal.length; i++) {
+                    booleanArray[i] = (Boolean)signal[i].getValue();
+                }
+                return booleanArray;
+        }
+        else {
             return toBooleanArray(lastValues);
-        } else{
-            return new boolean[] {(Boolean)lastValues[0]};
         }
     }
 
     public String getString() {
-        if (isDouble || isBoolean || length == 0) {return null;}
+        if (isDouble || isBoolean || length == 0) {return "";}
         refresh();
-        return lastValues[0] != null ? lastValues[0].toString() : null;
+        if (signal != null){
+            return signal[0].getValue().toString();
+        }
+        else {
+            return lastValues[0] != null ? lastValues[0].toString() : "";
+        }
     }
 
     public String[] getStringArray() {
         if (isDouble || isBoolean || length == 0) {return null;}
         refresh();
-        if (isArray){
+        if (signal != null){
+            String[] stringArray = new String[signal.length];
+                for (int i = 0; i < signal.length; i++) {
+                    stringArray[i] = signal[i].getValue().toString();
+                }
+                return stringArray;
+        }
+        else {
             return toStringArray(lastValues);
-        } else{
-            return new String[] {lastValues[0].toString()};
         }
     }
 
