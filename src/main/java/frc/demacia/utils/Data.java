@@ -48,7 +48,7 @@ public class Data<T> {
         if (!isDouble || length == 0) {return null;}
         refresh();
         if (signal != null){
-            return Double.valueOf((double)signal[0].getValueAsDouble());
+            return (double)signal[0].getValueAsDouble();
         }
         else {
             return toDouble(lastValues[0]);
@@ -67,6 +67,32 @@ public class Data<T> {
         }
         else {
             return toDoubleArray(lastValues);
+        }
+    }
+
+    public Float getFloat() {
+        if (!isDouble || length == 0) {return null;}
+        refresh();
+        if (signal != null){
+            return (float) signal[0].getValueAsDouble();
+        }
+        else {
+            return toDouble(lastValues[0]).floatValue();
+        }
+    }
+
+    public float[] getFloatArray() {
+        if (!isDouble || length == 0) {return null;}
+        refresh();
+        if (signal != null){
+            float[] floatArray = new float[signal.length];
+                for (int i = 0; i < signal.length; i++) {
+                    floatArray[i] = (float)signal[i].getValueAsDouble();
+                }
+                return floatArray;
+        }
+        else {
+            return toFloatArray(lastValues);
         }
     }
 
@@ -163,6 +189,86 @@ public class Data<T> {
         }
     }
 
+    public boolean hasChanged() {
+        return lastValues == getValueArray();
+    }
+
+    // public boolean hasChanged() {
+    //     if (lastValues == null || lastValues[0] == null) {
+    //         return true;
+    //     }
+    
+    //     refresh();
+    //     T[] currentValues = lastValues;
+    
+    //     if (isArray){
+    //         if (isDouble){
+    //             double[] newArr = toDoubleArray(currentValues);
+    //             double[] lastArr = toDoubleArray(lastValues);
+    //             if (newArr.length != lastArr.length) {
+    //                 return true;
+    //             }
+    //             for (int i = 0; i < newArr.length; i++) {
+    //                 if (Math.abs(newArr[i] - lastArr[i]) >= 0.001) {
+    //                     return true;
+    //                 }
+    //             }
+    //             return false;
+    //         } else if (isBoolean){
+    //             boolean[] newArr = toBooleanArray(currentValues);
+    //             boolean[] lastArr = toBooleanArray(lastValues);
+    //             if (newArr.length != lastArr.length) {
+    //                 return true;
+    //             }
+    //             for (int i = 0; i < newArr.length; i++) {
+    //                 if (newArr[i] != lastArr[i]) {
+    //                     return true;
+    //                 }
+    //             }
+    //             return false;
+    //         } else{
+    //             String[] newArr = toStringArray(currentValues);
+    //             String[] lastArr = toStringArray(lastValues);
+    //             if (newArr.length != lastArr.length) {
+    //                 return true;
+    //             }
+    //             for (int i = 0; i < newArr.length; i++) {
+    //                 if (!(newArr[i].toString()).equals((lastArr[i].toString()))) {
+    //                     return true;
+    //                 }
+    //             }
+    //             return false;
+    //         }
+    //     } else{
+    //         if (isDouble){
+    //             return Math.abs(toDouble(currentValues[0]) - toDouble(lastValues[0])) >= 0.001;
+    //         } else if (isBoolean){
+    //             return !currentValues[0].equals(lastValues[0]);
+    //         } else{
+    //             return !(currentValues[0].toString()).equals((lastValues[0].toString()));
+    //         }
+    //     }
+    // }
+
+    public long getTime() {
+        if (signal != null) {
+            return (long) (signal[0].getTimestamp().getTime() * 1000);
+        }
+        return 0;
+    }
+
+    public boolean isDouble(){
+        return isDouble;
+    }
+
+    public boolean isBoolean(){
+        return isBoolean;
+    }
+
+    public boolean isArray(){
+        return isArray;
+    }
+
     private double[] toDoubleArray(T[] values){
         if (values == null) return null;
 
@@ -172,6 +278,16 @@ public class Data<T> {
             doubleArr[i] = (value != null) ? toDouble(value) : 0.0;
         }
         return doubleArr;
+    }
+
+    private float[] toFloatArray(T[] values){
+        int length = java.lang.reflect.Array.getLength(values);
+        float[] floatArr = new float[length];
+            for (int i = 0; i < length; i++) {
+                Object elem = java.lang.reflect.Array.get(values, i);
+                floatArr[i] = (elem != null) ? ((Number) elem).floatValue() : 0f;
+            }
+            return floatArr;
     }
 
     private boolean[] toBooleanArray(T[] values){
