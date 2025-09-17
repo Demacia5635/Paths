@@ -7,7 +7,7 @@ package frc.robot.testSensors.piegon.subsystems;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.demacia.utils.Motors.TalonMotor;
 import frc.robot.testSensors.piegon.Constants;
 
 
@@ -18,47 +18,15 @@ public class Pigeon extends SubsystemBase {
   public Pigeon() {
     pigeon= new frc.demacia.utils.Sensors.Pigeon(Constants.PIGEON_CONFIG);
     
+
+  }
+  public frc.demacia.utils.Sensors.Pigeon getPigeon(){
+    return pigeon;
+  }
+
   }
 
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
-  public double getCurrentYaw(){
-    return pigeon.getCurrentYaw();
-  }
-  public double getYawInZeroTo2Pi(){
-    return pigeon.getCurrentYaw();
-  }
-  public double getCurrentPitch(){
-    return pigeon.getCurrentPitch();
-  }
-  public double getPitchInZeroTo2Pi(){
-    return pigeon.getPitchInZeroTo2Pi();
-  }
-  public double getCurrentRoll(){
-    return pigeon.getCurrentRoll();
-  }
-  public double getRollInZeroTo2Pi(){
-    return pigeon.getRollInZeroTo2Pi();
-  }
-  public double getXVelocity(){
-    return pigeon.getXVelocity();
-  }
-  public double getYVelocity(){
-    return pigeon.getYVelocity();
-  }
-  public double getZVelocity(){
-    return pigeon.getZVelocity();
-    
-  }
-  @Override
-  public void initSendable(SendableBuilder builder) {
-      super.initSendable(builder);
-      builder.addDoubleProperty("getZVelocity:",this::getCurrentPitch,null);
-  }
-}   
 
 
 
