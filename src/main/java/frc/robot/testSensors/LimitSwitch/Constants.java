@@ -1,12 +1,11 @@
-package frc.robot.testSensors.LimitSwitch;
+package frc.robot.testSensors.limitSwitch;
 
 import frc.demacia.utils.Sensors.LimitSwitchConfig;
 
 public class Constants {
-    public static final int limitSwitchChannel = 0;
-    public static final String limitSwitchName = "Test Limit Switch";
-    public static final boolean limitSwitchInverted = false;
-
-    public static final LimitSwitchConfig limitSwitchConfig = new LimitSwitchConfig(limitSwitchChannel, limitSwitchName)
-            .withInvert(limitSwitchInverted);
+    public static final double CHANNEL = 0;
+    public static final String LIMIT_SWITCH_NAME = "test limit switch";
+    public static final boolean INVERTED = false;
+    public static final LimitSwitchConfig LIMIT_SWITCH_CONFIG = new LimitSwitchConfig(0, "Limit Switch")
+    .withInvert(false);
 }

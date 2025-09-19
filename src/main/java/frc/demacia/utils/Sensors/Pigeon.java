@@ -88,16 +88,18 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
     }
 
     private void addLog() {
-        LogManager.addEntry(name + "/yaw and pitch and x velocity and y velocity and z velocity", () -> new StatusSignal[] {
-            yawSignal,
-            pitchSignal,
-            rollSignal,
-            xVelocitySignal,
-            yVelocitySignal,
-            zVelocitySignal,
-            xAccelerationSignal,
-            yAccelerationSignal,
-            zAccelerationSignal
+        LogManager.addEntry(name + "/yaw and pitch and x velocity and y velocity and z velocity", () -> new double[] {
+            getCurrentYaw(),
+            getCurrentPitch(),
+            getXVelocity(),
+            getYVelocity(),
+            getZVelocity(),
+            getXAcceleration(),
+            getYAcceleration(),
+            getZAcceleration(),
+            getXAngularAcceleration(),
+            getYAngularAcceleration(),
+            getZAngularAcceleration()
         }, 3);
     }
 
@@ -194,7 +196,7 @@ public void showConfigMotorCommand() {
                 "y Scalar",
                 "z Scalar",
                 "is Inverted (1, 0)"
-            },
+            }, 
             new double[] {
                 config.pitchOffset,
                 config.rollOffset,
@@ -211,7 +213,7 @@ public void showConfigMotorCommand() {
                 .withXScalar(array[3])
                 .withYScalar(array[4])
                 .withZScalar(array[5])
-                .withInvert(array[6] < 0.5);
+                .withInvert(array[6] > 0.5);
                 
                 configPigeon();
             }

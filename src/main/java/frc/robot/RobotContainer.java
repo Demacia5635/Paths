@@ -4,11 +4,12 @@
 
 package frc.robot;
 
-import frc.demacia.utils.Log.LogManager2;
+import frc.demacia.utils.Log.LogManager;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.testMotors.talonFX.commands.Set;
 import frc.robot.testMotors.talonFX.subsystems.Motor;
-import frc.robot.testSensors.LimitSwitch.subsystems.LimitSwitch;
+import frc.robot.testSensors.cancoder.subsystems.Cancoder;
+import frc.robot.testSensors.piegon.commands.Show;
 import frc.robot.testSensors.piegon.subsystems.Pigeon;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,8 +25,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
 
-  Motor motor;
-  Set set;
+  Pigeon pigeon;
+  Show pigeonShow;
+  Cancoder cancoder;
+  frc.robot.testSensors.cancoder.commands.Show cancoderShow;
 
   public static boolean isComp = DriverStation.isFMSAttached();
   private static boolean hasRemovedFromLog = false;
@@ -41,11 +44,12 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     
-    new LogManager2();
+    new LogManager();
 
-    motor = new Motor();
-
-    set = new Set(motor);
+    pigeon = new Pigeon();
+    pigeonShow = new Show(pigeon);
+    cancoder = new Cancoder();
+    cancoderShow = new frc.robot.testSensors.cancoder.commands.Show(cancoder);
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
     configureBindings();
@@ -59,7 +63,7 @@ public class RobotContainer {
     RobotContainer.isComp = isComp;
     if(!hasRemovedFromLog && isComp) {
       hasRemovedFromLog = true;
-      LogManager2.removeInComp();
+      LogManager.removeInComp();
     }
   }
 
@@ -73,7 +77,8 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    motor.setDefaultCommand(set);
+    pigeon.setDefaultCommand(pigeonShow);
+    cancoder.setDefaultCommand(cancoderShow);
   }
 
   /**
