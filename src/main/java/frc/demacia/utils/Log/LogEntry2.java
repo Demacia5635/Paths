@@ -35,7 +35,6 @@ public class LogEntry2<T> {
     String name;
     String metaData;
     Publisher ntPublisher;
-    private double precision = 0;
     private int skipedCycles2 = 0;
     private int SkipCycle = 1;
 
@@ -86,7 +85,7 @@ public class LogEntry2<T> {
 
         long time = data.getTime();
 
-         appendEntry(time);
+        appendEntry(time);
 
         if (ntPublisher != null) {
             publishToNetworkTable();
@@ -98,11 +97,11 @@ public class LogEntry2<T> {
     }
 
     public void setPrecision(double precision) {
-        this.precision = Math.max(0, precision);
+        data.setPrecision(Math.max(0, precision));
     }
 
     public double getPrecision() {
-        return precision;
+        return data.getPrecision();
     }
 
     public void setSkipCycles(int interval) {

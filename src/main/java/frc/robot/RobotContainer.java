@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogManager2;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.testMotors.talonFX.commands.Set;
 import frc.robot.testMotors.talonFX.subsystems.Motor;
@@ -41,7 +41,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     
-    new LogManager();
+    new LogManager2();
 
     motor = new Motor();
 
@@ -59,7 +59,7 @@ public class RobotContainer {
     RobotContainer.isComp = isComp;
     if(!hasRemovedFromLog && isComp) {
       hasRemovedFromLog = true;
-      LogManager.removeInComp();
+      LogManager2.removeInComp();
     }
   }
 

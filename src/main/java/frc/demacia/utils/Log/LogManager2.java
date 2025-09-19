@@ -80,48 +80,23 @@ public class LogManager2 extends SubsystemBase {
     return addEntry(name, phoenixStatus, 4, "");
   }
 
-  // public static <T> LogEntry2<T> addEntry(String name, Supplier<T> getter, int logLevel, String metaData) {
-  //   boolean isFloat = false;//TODO
-  //   boolean isBoolean = false;
-  //   boolean isArray = false;
-  //   T value = getter.get();
+  public static <T> LogEntry2<T> addEntry(String name, Supplier<T> supplier, int logLevel, String metaData) {
+    Data<T> supplierData = new Data<>(supplier);
     
-  //   if (value.getClass().isArray()) {
-  //     isArray = true;
-  //     try {
-  //       Object first = java.lang.reflect.Array.get(value, 0);
-  //       double d = ((Number) first).floatValue();
-  //       isFloat = true;
-  //     } catch (Exception e) {
-  //       if (value instanceof boolean[] || value instanceof Boolean[]){
-  //         isBoolean = true;
-  //       }
-  //     }
-  //   } else {
-  //       try {
-  //           float d = ((Number) value).floatValue();
-  //           isFloat = true;
-  //       } catch (Exception e) {
-  //         if (value instanceof  Boolean){
-  //           isBoolean = true;
-  //         }
-  //       }
-  //   }
-    
-  //   return logManager.add(name, null, getter, logLevel, metaData, isFloat, isBoolean, isArray);
-  // }
+    return logManager.add(name, supplierData, logLevel, metaData);
+  }
 
-  // public static <T> LogEntry2<T> addEntry(String name, Supplier<T> getter, int logLevel) {
-  //   return addEntry(name, getter, logLevel, "");
-  // }
+  public static <T> LogEntry2<T> addEntry(String name, Supplier<T> getter, int logLevel) {
+    return addEntry(name, getter, logLevel, "");
+  }
 
-  // public static <T> LogEntry2<T> addEntry(String name, Supplier<T> getter, String metaData) {
-  //   return addEntry(name, getter, 4, metaData);
-  // }
+  public static <T> LogEntry2<T> addEntry(String name, Supplier<T> getter, String metaData) {
+    return addEntry(name, getter, 4, metaData);
+  }
 
-  // public static <T> LogEntry2<T> addEntry(String name, Supplier<T> getter) {
-  //   return addEntry(name, getter, 4, "");
-  // }
+  public static <T> LogEntry2<T> addEntry(String name, Supplier<T> getter) {
+    return addEntry(name, getter, 4, "");
+  }
 
   public static LogEntry2<?> getEntry(String name) {
     return logManager.get(name);

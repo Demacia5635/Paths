@@ -1,6 +1,9 @@
 package frc.demacia.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
@@ -11,7 +14,10 @@ public class Data<T> {
     private static ArrayList<Data> signals = new ArrayList<>();
 
     private StatusSignal<T>[] signal;
-    private T[] lastValues;
+    private Supplier<T>[] supplier;
+    private T[] currentValues;
+    private T[] previousValues;
+    private double precision = 0;
     private int length;
 
     private boolean isDouble = false;
@@ -26,7 +32,8 @@ public class Data<T> {
         
         length = signal.length;
 
-        this.lastValues = (T[]) new Object[length];
+        currentValues = (T[]) new Object[length];
+        previousValues = (T[]) new Object[length];
         
         refresh();
 
@@ -43,6 +50,49 @@ public class Data<T> {
             }
         }
     }
+    
+    @SuppressWarnings("unchecked")
+    public Data(Supplier<T> ... supplier){
+        this.supplier = supplier;
+
+        signals.add(this);
+
+        T value = supplier[0].get();
+
+        if (value == null){
+            length = 0;
+            currentValues = (T[]) new Object[0];
+            previousValues = (T[]) new Object[length];
+            return;
+        }
+
+        length = supplier.length;
+        currentValues = (T[]) new Object[length];
+        
+        refresh();
+
+        if (value.getClass().isArray()) {
+            isArray = true;
+            try {
+                Object first = java.lang.reflect.Array.get(value, 0);
+                ((Number) first).doubleValue();
+                isDouble = true;
+            } catch (Exception e) {
+                if (value instanceof boolean[] || value instanceof Boolean[]){
+                    isBoolean = true;
+                }
+            }
+        } else {
+            try {
+                ((Number) value).doubleValue();
+                isDouble = true;
+            } catch (Exception e) {
+                if (value instanceof  Boolean){
+                    isBoolean = true;
+                }
+            }
+        }
+    }
 
     public Double getDouble() {
         if (!isDouble || length == 0) {return null;}
@@ -51,7 +101,7 @@ public class Data<T> {
             return (double)signal[0].getValueAsDouble();
         }
         else {
-            return toDouble(lastValues[0]);
+            return toDouble(currentValues[0]);
         }
     }
 
@@ -66,7 +116,7 @@ public class Data<T> {
                 return doubleArray;
         }
         else {
-            return toDoubleArray(lastValues);
+            return toDoubleArray(currentValues);
         }
     }
 
@@ -77,7 +127,8 @@ public class Data<T> {
             return (float) signal[0].getValueAsDouble();
         }
         else {
-            return toDouble(lastValues[0]).floatValue();
+            Double d = toDouble(currentValues[0]);
+            return d != null ? d.floatValue() : null;
         }
     }
 
@@ -92,7 +143,7 @@ public class Data<T> {
                 return floatArray;
         }
         else {
-            return toFloatArray(lastValues);
+            return toFloatArray(currentValues);
         }
     }
 
@@ -103,7 +154,7 @@ public class Data<T> {
             return (Boolean) signal[0].getValue();
         }
         else {
-            return (Boolean) lastValues[0];
+            return (Boolean) currentValues[0];
         }
     }
 
@@ -118,7 +169,7 @@ public class Data<T> {
                 return booleanArray;
         }
         else {
-            return toBooleanArray(lastValues);
+            return toBooleanArray(currentValues);
         }
     }
 
@@ -129,7 +180,7 @@ public class Data<T> {
             return signal[0].getValue().toString();
         }
         else {
-            return lastValues[0] != null ? lastValues[0].toString() : "";
+            return currentValues[0] != null ? currentValues[0].toString() : "";
         }
     }
 
@@ -144,20 +195,20 @@ public class Data<T> {
                 return stringArray;
         }
         else {
-            return toStringArray(lastValues);
+            return toStringArray(currentValues);
         }
     }
 
     public T getValue() {
         if (length == 0) {return null;}
         refresh();
-        return lastValues[0];
+        return currentValues[0];
     }
 
     public T[] getValueArray() {
         if (length == 0) {return null;}
         refresh();
-        return lastValues;
+        return currentValues;
     }
 
     public StatusSignal<T> getSignal() {
@@ -168,11 +219,25 @@ public class Data<T> {
         return signal;
     }
 
-    public void refresh(){
-        StatusCode st = StatusSignal.refreshAll(signal);
-        if(st == StatusCode.OK) {
+    public void refresh() {
+        if (currentValues != null) {
+            previousValues = Arrays.copyOf(currentValues, currentValues.length);
+            for (int i = 0; i < previousValues.length; i++) {
+                if (previousValues[i] != null && previousValues[i].getClass().isArray()) {
+                    previousValues[i] = copyArray(previousValues[i]);
+                }
+            }
+        }
+        if (signal != null) {
+            StatusCode st = StatusSignal.refreshAll(signal);
+            if(st == StatusCode.OK) {
+                for (int i = 0; i < length; i++){
+                    currentValues[i] = signal[i].getValue();
+                }
+            }
+        } else {
             for (int i = 0; i < length; i++){
-                lastValues[i] = signal[i].getValue();
+                currentValues[i] = supplier[i].get();
             }
         }
     }
@@ -180,75 +245,62 @@ public class Data<T> {
     @SuppressWarnings("rawtypes")
     public static void refreshAll() {
         for(Data s : signals) {
-            StatusCode st = StatusSignal.refreshAll(s.signal);
-            if (st == StatusCode.OK) {
-                for (int i = 0; i < s.signal.length; i++){
-                    s.lastValues[i] = s.signal[i].getValue();
-                }
-            }
+            s.refresh();
         }
     }
 
     public boolean hasChanged() {
-        return lastValues == getValueArray();
+        if (previousValues == null) {
+            return true;
+        }
+
+        if (length == 0) {
+            return false;
+        }
+
+        if (length > 1) {
+            for (int i = 0; i < length; i++) {
+                if (hasValueChanged(currentValues[i], previousValues[i])) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return hasValueChanged(currentValues[0], previousValues[0]);
+        }
     }
 
-    // public boolean hasChanged() {
-    //     if (lastValues == null || lastValues[0] == null) {
-    //         return true;
-    //     }
-    
-    //     refresh();
-    //     T[] currentValues = lastValues;
-    
-    //     if (isArray){
-    //         if (isDouble){
-    //             double[] newArr = toDoubleArray(currentValues);
-    //             double[] lastArr = toDoubleArray(lastValues);
-    //             if (newArr.length != lastArr.length) {
-    //                 return true;
-    //             }
-    //             for (int i = 0; i < newArr.length; i++) {
-    //                 if (Math.abs(newArr[i] - lastArr[i]) >= 0.001) {
-    //                     return true;
-    //                 }
-    //             }
-    //             return false;
-    //         } else if (isBoolean){
-    //             boolean[] newArr = toBooleanArray(currentValues);
-    //             boolean[] lastArr = toBooleanArray(lastValues);
-    //             if (newArr.length != lastArr.length) {
-    //                 return true;
-    //             }
-    //             for (int i = 0; i < newArr.length; i++) {
-    //                 if (newArr[i] != lastArr[i]) {
-    //                     return true;
-    //                 }
-    //             }
-    //             return false;
-    //         } else{
-    //             String[] newArr = toStringArray(currentValues);
-    //             String[] lastArr = toStringArray(lastValues);
-    //             if (newArr.length != lastArr.length) {
-    //                 return true;
-    //             }
-    //             for (int i = 0; i < newArr.length; i++) {
-    //                 if (!(newArr[i].toString()).equals((lastArr[i].toString()))) {
-    //                     return true;
-    //                 }
-    //             }
-    //             return false;
-    //         }
-    //     } else{
-    //         if (isDouble){
-    //             return Math.abs(toDouble(currentValues[0]) - toDouble(lastValues[0])) >= 0.001;
-    //         } else if (isBoolean){
-    //             return !currentValues[0].equals(lastValues[0]);
-    //         } else{
-    //             return !(currentValues[0].toString()).equals((lastValues[0].toString()));
-    //         }
-    //     }
-    // }
+    private boolean hasValueChanged(T newValue, T oldValue) {
+        if (oldValue == null) {
+            return newValue != null;
+        }
+        
+        if (newValue == null) {
+            return true;
+        }
+
+        if (newValue.getClass().isArray()) {
+            return hasArrayChanged(newValue, oldValue);
+        } else {
+            if (isDouble) {
+                double newVal = ((Number) newValue).doubleValue();
+                double oldVal = ((Number) oldValue).doubleValue();
+                return Math.abs(newVal - oldVal) >= precision;
+            } else if (isBoolean) {
+                return !newValue.equals(oldValue);
+            } else {
+                return !newValue.toString().equals(oldValue.toString());
+            }
+        }
+    }
+
+    public void setPrecision(double precision) {
+        this.precision = precision;
+    }
+
+    public double getPrecision() {
+        return precision;
+    }
 
     public long getTime() {
         if (signal != null) {
@@ -269,53 +321,168 @@ public class Data<T> {
         return isArray;
     }
 
-    private double[] toDoubleArray(T[] values){
-        if (values == null) return null;
-
-        double[] doubleArr = new double[length];
-        for (int i = 0; i < length; i++) {
-            T value = values[i];
-            doubleArr[i] = (value != null) ? toDouble(value) : 0.0;
+    private boolean hasArrayChanged(T newArray, T oldArray) {
+        if (oldArray == null) {
+            return newArray != null;
         }
-        return doubleArr;
-    }
+        
+        if (newArray == null) {
+            return true;
+        }
 
-    private float[] toFloatArray(T[] values){
-        int length = java.lang.reflect.Array.getLength(values);
-        float[] floatArr = new float[length];
-            for (int i = 0; i < length; i++) {
-                Object elem = java.lang.reflect.Array.get(values, i);
-                floatArr[i] = (elem != null) ? ((Number) elem).floatValue() : 0f;
+        int newLength = java.lang.reflect.Array.getLength(newArray);
+        int oldLength = java.lang.reflect.Array.getLength(oldArray);
+        
+        if (newLength != oldLength) {
+            return true;
+        }
+
+        if (isDouble) {
+            for (int i = 0; i < newLength; i++) {
+                Object newElem = java.lang.reflect.Array.get(newArray, i);
+                Object oldElem = java.lang.reflect.Array.get(oldArray, i);
+                
+                if (newElem == null && oldElem == null) continue;
+                if (newElem == null || oldElem == null) return true;
+                
+                double newVal = ((Number) newElem).doubleValue();
+                double oldVal = ((Number) oldElem).doubleValue();
+                
+                if (Math.abs(newVal - oldVal) >= precision) {
+                    return true;
+                }
             }
-            return floatArr;
+            return false;
+        } else if (isBoolean) {
+            for (int i = 0; i < newLength; i++) {
+                Object newElem = java.lang.reflect.Array.get(newArray, i);
+                Object oldElem = java.lang.reflect.Array.get(oldArray, i);
+                
+                if (!Objects.equals(newElem, oldElem)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            for (int i = 0; i < newLength; i++) {
+                Object newElem = java.lang.reflect.Array.get(newArray, i);
+                Object oldElem = java.lang.reflect.Array.get(oldArray, i);
+                
+                String newStr = (newElem != null) ? newElem.toString() : null;
+                String oldStr = (oldElem != null) ? oldElem.toString() : null;
+                
+                if (!Objects.equals(newStr, oldStr)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
-    private boolean[] toBooleanArray(T[] values){
-        if (values == null) return null;
-
-        boolean[] booleanArr = new boolean[length];
-        for (int i = 0; i < length; i++) {
-            T value = values[i];
-            booleanArr[i] = (value != null) ? (Boolean)value : false;
-        }
-        return booleanArr;
+    @SuppressWarnings("unchecked")
+    private T copyArray(T array) {
+        if (array == null) return null;
+        
+        Class<?> componentType = array.getClass().getComponentType();
+        int length = java.lang.reflect.Array.getLength(array);
+        Object newArray = java.lang.reflect.Array.newInstance(componentType, length);
+        
+        System.arraycopy(array, 0, newArray, 0, length);
+        return (T) newArray;
     }
 
-    private String[] toStringArray(T[] values){
-        if (values == null) return null;
+    private double[] toDoubleArray(T[] value){
+        if (value == null) return null;
 
-        String[] stringArr = new String[length];
-        for (int i = 0; i < length; i++) {
-            T value = values[i];
-            stringArr[i] = (value != null) ? value.toString() : null;
+        if (isArray){
+            int arrayLength  = java.lang.reflect.Array.getLength(value[0]);
+            double[] doubleArr = new double[arrayLength];
+            for (int i = 0; i < arrayLength; i++) {
+                Object elem = java.lang.reflect.Array.get(value[0], i);
+                doubleArr[i] = (elem != null) ? ((Number) elem).doubleValue() : 0.0;
+            }
+            return doubleArr;
+        } else{
+            double[] doubleArr = new double[length];
+            for (int i = 0; i < length; i++) {
+                Object elem = java.lang.reflect.Array.get(value, i);
+                doubleArr[i] = (elem != null) ? ((Number) elem).doubleValue() : 0.0;
+            }
+            return doubleArr;
         }
-        return stringArr;
     }
 
     private Double toDouble(T value){
         if (value == null) return null;
 
+        if (isArray) {
+            Object first = java.lang.reflect.Array.get(value, 0);
+            return (first != null) ? ((Number) first).doubleValue() : null;
+        }
         return ((Number) value).doubleValue();
+    }
+
+    private float[] toFloatArray(T[] value){
+        if (value == null) return null;
+
+        if (isArray){
+            int arrayLength  = java.lang.reflect.Array.getLength(value[0]);
+            float[] floatArr = new float[arrayLength];
+            for (int i = 0; i < arrayLength; i++) {
+                Object elem = java.lang.reflect.Array.get(value[0], i);
+                floatArr[i] = (elem != null) ? ((Number) elem).floatValue() : 0f;
+            }
+            return floatArr;
+        } else {
+            float[] floatArr = new float[length];
+            for (int i = 0; i < length; i++) {
+                Object elem = java.lang.reflect.Array.get(value, i);
+                floatArr[i] = (elem != null) ? ((Number) elem).floatValue() : 0f;
+            }
+            return floatArr;
+        }
+    }
+
+    private boolean[] toBooleanArray(T[] value){
+        if (value == null) return null;
+
+        if (isArray){
+            int arrayLength  = java.lang.reflect.Array.getLength(value[0]);
+            boolean[] booleanArr = new boolean[arrayLength];
+            for (int i = 0; i < arrayLength; i++) {
+                Object elem = java.lang.reflect.Array.get(value[0], i);
+                booleanArr[i] = (elem != null) ? (Boolean) elem : false;
+            }
+            return booleanArr;
+        } else {
+            boolean[] booleanArr = new boolean[length];
+            for (int i = 0; i < length; i++) {
+                Object elem = java.lang.reflect.Array.get(value, i);
+                booleanArr[i] = (elem != null) ? (Boolean) elem : false;
+            }
+            return booleanArr;
+        }
+    }
+    
+    private String[] toStringArray(T[] value){
+        if (value == null) return null;
+
+        if (isArray){
+            int arrayLength  = java.lang.reflect.Array.getLength(value[0]);
+            String[] stringArr = new String[arrayLength];
+            for (int i = 0; i < arrayLength; i++) {
+                Object elem = java.lang.reflect.Array.get(value[0], i);
+                stringArr[i] = (elem != null) ? elem.toString() : null;
+            }
+            return stringArr;
+        } else {
+            String[] stringArr = new String[length];
+            for (int i = 0; i < length; i++) {
+                Object elem = java.lang.reflect.Array.get(value, i);
+                stringArr[i] = (elem != null) ? elem.toString() : null;
+            }
+            return stringArr;
+        }
     }
 
     public void cleanup() {
