@@ -1,4 +1,4 @@
-package frc.robot.testSensors.limitSwitch;
+package frc.robot.testSensors.LimitSwitch;
 
 import frc.demacia.utils.Sensors.LimitSwitchConfig;
 
