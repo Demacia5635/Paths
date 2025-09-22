@@ -4,8 +4,9 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Ultrasonic;
 
-public class UltraSonicSensor {
+public class UltraSonicSensor extends Ultrasonic {
     // === שדות (משתנים פנימיים) ===
     private DigitalInput echoChannel;   // קולט את ההחזרה (Echo)
     private DigitalOutput pingChannel;  // שולח את הפולס (Ping)
