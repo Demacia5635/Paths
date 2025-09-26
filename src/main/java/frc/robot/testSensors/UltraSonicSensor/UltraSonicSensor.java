@@ -1,13 +1,31 @@
 package frc.robot.testSensors.UltraSonicSensor;
 
 import edu.wpi.first.wpilibj.Ultrasonic;
+import frc.demacia.utils.Sensors.AnalogSensorInterface;
+import frc.demacia.utils.Sensors.CancoderConfig;
 import edu.wpi.first.wpilibj.Timer;
 
-public class UltraSonicSensor extends Ultrasonic {
+public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterface {
+    String name;
+    UltraSonicSensorConfig config;
+
+    public double get() {
+        return getRangeMeters();
+    }
 
 
-    public UltraSonicSensor(int pingChannelPort, int echoChannelPort) {
+    public String getName() {
+        return "config.name";
+    }
+
+
+    public UltraSonicSensor(int pingChannelPort, int echoChannelPort, UltraSonicSensorConfig config) {
         super(pingChannelPort, echoChannelPort);
+        this.config = config;
+        name = config.name;
+
+        
+
     }
 
     @Override
