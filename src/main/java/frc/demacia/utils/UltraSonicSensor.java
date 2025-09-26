@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.Timer;
 public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterface {
     String name;
     UltraSonicSensorConfig config;
-
     public double get() {
         return getRangeMeters();
     }
@@ -19,8 +18,8 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
     }
 
 
-    public UltraSonicSensor(int pingChannelPort, int echoChannelPort, UltraSonicSensorConfig config) {
-        super(pingChannelPort, echoChannelPort);
+    public UltraSonicSensor( UltraSonicSensorConfig config) {
+        super(config.pingChannel, config.channel);
         this.config = config;
         name = config.name;
 
