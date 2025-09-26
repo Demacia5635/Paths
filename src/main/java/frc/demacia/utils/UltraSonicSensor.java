@@ -1,9 +1,9 @@
 package frc.demacia.utils;
 
 import edu.wpi.first.wpilibj.Ultrasonic;
+import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Sensors.AnalogSensorInterface;
-import frc.demacia.utils.Sensors.CancoderConfig;
-import edu.wpi.first.wpilibj.Timer;
+
 
 public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterface {
     String name;
@@ -22,7 +22,8 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
         super(config.pingChannel, config.channel);
         this.config = config;
         name = config.name;
-
+        addLog();
+		LogManager.log(name + " cancoder initialized");
         
 
     }
@@ -34,5 +35,9 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
 
     public double getRangeMeters() {
         return getRangeMM() / 100.0;
+    }
+    private void addLog() {
+        LogManager.addEntry(name + "range", this::get, 3);
+            getRangeMeters();
     }
 }
