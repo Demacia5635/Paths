@@ -5,8 +5,6 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class UltraSonicSensor extends Ultrasonic {
 
-    private Thread backgroundThread;
-    private boolean automaticEnabled = false;
 
     public UltraSonicSensor(int pingChannelPort, int echoChannelPort) {
         super(pingChannelPort, echoChannelPort);
