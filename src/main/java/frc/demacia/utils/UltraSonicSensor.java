@@ -1,5 +1,4 @@
-package frc.demacia.utils;
-
+package frc.demacia.utils;  
 import edu.wpi.first.wpilibj.Ultrasonic;
 import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Sensors.AnalogSensorInterface;
