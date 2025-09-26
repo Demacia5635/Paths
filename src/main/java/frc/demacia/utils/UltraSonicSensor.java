@@ -3,8 +3,7 @@ package frc.demacia.utils;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Sensors.AnalogSensorInterface;
-import frc.demacia.utils.Sensors.CancoderConfig;
-import edu.wpi.first.wpilibj.Timer;
+
 
 public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterface {
     String name;
