@@ -1,4 +1,4 @@
-package frc.robot.testSensors.UltraSonicSensor;
+package frc.demacia.utils;
 
 import edu.wpi.first.wpilibj.Ultrasonic;
 import frc.demacia.utils.Sensors.AnalogSensorInterface;
@@ -15,7 +15,7 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
 
 
     public String getName() {
-        return "config.name";
+        return config.name;
     }
 
 
