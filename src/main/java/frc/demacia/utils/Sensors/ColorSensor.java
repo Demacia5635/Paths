@@ -1,5 +1,4 @@
 package frc.demacia.utils.Sensors;
-import frc.demacia.utils.Sensors.SensorInterface;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
 import com.revrobotics.ColorSensorV3;
@@ -7,32 +6,31 @@ import com.revrobotics.ColorMatch;
 import com.revrobotics.ColorMatchResult;
 import frc.demacia.utils.Log.LogManager;
 
+public class ColorSensor extends ColorSensorV3 implements SensorInterface {
 
-public class ColorSensor implements SensorInterface {
-
-    ColorSensorConfig config;
-    String name;
-
-    private final ColorSensorV3 sensor;
+    private final ColorSensorConfig config;
+    private final String name;
     private final ColorMatch matcher;
-
+    private String colors;
     private Color lastColor;
     private ColorMatchResult lastMatch;
     private int lastProximity;
 
     public ColorSensor(ColorSensorConfig config) {
+        super(I2C.Port.kOnboard); 
         this.config = config;
-        name = config.name;
-        sensor = new ColorSensorV3(I2C.Port.kOnboard);
-        matcher = new ColorMatch();
+        this.name = config.name;
+        this.matcher = new ColorMatch();
+
         addDefaultColors();
         updateReadings();
         addLog();
 
         LogManager.log(name + " color sensor initialized");
+     
     }
 
-    private void addDefaultColors() { //ערכי RGB
+    private void addDefaultColors() {
         matcher.addColorMatch(Color.kBlue);
         matcher.addColorMatch(Color.kRed);
         matcher.addColorMatch(Color.kGreen);
@@ -40,60 +38,46 @@ public class ColorSensor implements SensorInterface {
     }
 
     private void updateReadings() {
-        lastColor = sensor.getColor();
+        lastColor = getColor(); 
         lastMatch = matcher.matchClosestColor(lastColor);
-        lastProximity = sensor.getProximity();
+        lastProximity = getProximity(); 
     }
-
 
     private void addLog() {
         LogManager.addEntry(name + " Color and Proximity", () -> new double[] {
-            getRed(), getGreen(), getBlue(), getProximity()
+            lastColor.red, lastColor.green, lastColor.blue, lastProximity
         }, 3);
-    }
-
+        LogManager.addEntry(colors + "Colors values:", this::getRGBString, 3);
+    }   
     public String getName() {
         return config.name;
-    }
+        }
 
-    public double getRed() {
+        public String getRedValue() {
         updateReadings();
-        return lastColor.red;
-    }
+        return Integer.toString((int)(lastColor.red * 255));
+        }
 
-    public double getGreen() {
+        public String getGreenValue() {
         updateReadings();
-        return lastColor.green;
-    }
+        return Integer.toString((int)(lastColor.green * 255));
+        }
 
-    public double getBlue() {
-        updateReadings();
-        return lastColor.blue;
-    }
+        public String getBlueValue() {
+            updateReadings();
+            return Integer.toString((int)(lastColor.blue * 255));
+            }
 
-    public int getProximity() {
+        public int getProximityValue() {
         updateReadings();
         return lastProximity;
     }
 
-    // public String getMatchedColorName() {
-    //     updateReadings();
-    //     if (lastMatch.color == Color.kBlue) {
-    //         return "Blue";
-    //     } else if (lastMatch.color == Color.kRed) {
-    //         return "Red";
-    //     } else if (lastMatch.color == Color.kGreen) {
-    //         return "Green";
-    //     } else if (lastMatch.color == Color.kYellow) {
-    //         return "Yellow";
-    //     }
-    //     return "Unknown";
-    // }
-
-    public Color getLastColor() {
+    public String getRGBString() {
         updateReadings();
-        return lastColor;
+        int r = (Integer.parseInt (getRedValue()));
+        int g = (Integer.parseInt(getGreenValue()));
+        int b = (Integer .parseInt(getBlueValue()));
+        return r +  ", " + g + ", " + b;
     }
 }
-
-
