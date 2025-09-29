@@ -64,8 +64,8 @@ public class ColorSensor extends ColorSensorV3 implements SensorInterface {
         }
 
         public String getBlueValue() {
-            updateReadings();
-            return Integer.toString((int)(lastColor.blue * 255));
+         updateReadings();
+        return Integer.toString((int)(lastColor.blue * 255));
             }
 
         public int getProximityValue() {
@@ -80,4 +80,13 @@ public class ColorSensor extends ColorSensorV3 implements SensorInterface {
         int b = (Integer .parseInt(getBlueValue()));
         return r +  ", " + g + ", " + b;
     }
+    public String getMatchedColor() {
+        updateReadings();
+        if (lastMatch.color == Color.kBlue) return "Blue";
+        if (lastMatch.color == Color.kRed) return "Red";
+        if (lastMatch.color == Color.kGreen) return "Green";
+        if (lastMatch.color == Color.kYellow) return "Yellow";
+        return "Unknown";
+    }
+    
 }
