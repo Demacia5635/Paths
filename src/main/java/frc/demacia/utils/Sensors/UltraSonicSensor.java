@@ -31,10 +31,11 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
     }
 
     public double getRangeMeters() {
+        ping();
         return getRangeMM() / 100.0;
     }
     private void addLog() {
-        LogManager.addEntry(name + "range", this::get, 3);
+        LogManager.addEntry(name + "range", () -> getRangeMeters(), 3);
             getRangeMeters();
     }
 }

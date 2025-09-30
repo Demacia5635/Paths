@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Sensors.UltraSonicSensor;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.testMotors.talonFX.commands.Set;
 import frc.robot.testMotors.talonFX.subsystems.Motor;
@@ -29,6 +30,7 @@ public class RobotContainer {
   Show pigeonShow;
   Cancoder cancoder;
   frc.robot.testSensors.cancoder.commands.Show cancoderShow;
+  UltraSonicSensor ultraSonicSensor;
 
   public static boolean isComp = DriverStation.isFMSAttached();
   private static boolean hasRemovedFromLog = false;
@@ -50,6 +52,7 @@ public class RobotContainer {
     pigeonShow = new Show(pigeon);
     cancoder = new Cancoder();
     cancoderShow = new frc.robot.testSensors.cancoder.commands.Show(cancoder);
+    ultraSonicSensor = new UltraSonicSensor(frc.robot.testSensors.UltraSonicSensor.Constants.ULTRA_SONIC_SENSOR_CONFIG);
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
     configureBindings();
@@ -79,6 +82,7 @@ public class RobotContainer {
   private void configureBindings() {
     pigeon.setDefaultCommand(pigeonShow);
     cancoder.setDefaultCommand(cancoderShow);
+
   }
 
   /**

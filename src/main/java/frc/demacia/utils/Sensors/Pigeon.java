@@ -101,6 +101,7 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
             getYAngularAcceleration(),
             getZAngularAcceleration()
         }, 3);
+        LogManager.addEntry(name + "/yaw", () -> getYaw() , 3);
     }
 
     public String getName(){
