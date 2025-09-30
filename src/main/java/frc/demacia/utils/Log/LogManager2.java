@@ -46,60 +46,12 @@ public class LogManager2 extends SubsystemBase {
     log("log manager is ready");
   }
 
-  public static <T> LogEntry2<T> addEntry(String name, StatusSignal<T> statusSignal, int logLevel, String metaData) {
-    Data<T> statusSignalData = new Data<>(statusSignal);
-    return logManager.add(name, statusSignalData, logLevel, metaData);
+  public static <T> LogEntryBuilder<T> addEntry(String name, StatusSignal<T> ... statusSignals) {
+      return new LogEntryBuilder<T>(name, statusSignals);
   }
 
-  public static <T> LogEntry2<T> addEntry(String name, StatusSignal<T> phoenix6Status, int logLevel) {
-    return addEntry(name, phoenix6Status, logLevel, "");
-  }
-
-  public static <T> LogEntry2<T> addEntry(String name, StatusSignal<T> phoenix6Status, String metaData) {
-    return addEntry(name, phoenix6Status, 4, metaData);
-  }
-
-  public static <T> LogEntry2<T> addEntry(String name, StatusSignal<T> phoenix6Status) {
-    return addEntry(name, phoenix6Status, 4, "");
-  }
-
-  public static <T> LogEntry2<T> addEntry(String name, StatusSignal<T>[] statusSignals, int logLevel, String metaData) {
-    Data<T> statusSignalData = new Data<>(statusSignals);
-    return logManager.add(name, statusSignalData, logLevel, metaData);
-  }
-
-  public static <T> LogEntry2<T> addEntry(String name, StatusSignal<T>[] phoenixStatus, int logLevel) {
-    return addEntry(name, phoenixStatus, logLevel, "");
-  }
-
-  public static <T> LogEntry2<T> addEntry(String name, StatusSignal<T>[] phoenixStatus, String metaData) {
-    return addEntry(name, phoenixStatus, 4, metaData);
-  }
-
-  public static <T> LogEntry2<T> addEntry(String name, StatusSignal<T>[] phoenixStatus) {
-    return addEntry(name, phoenixStatus, 4, "");
-  }
-
-  public static <T> LogEntry2<T> addEntry(String name, Supplier<T> supplier, int logLevel, String metaData) {
-    Data<T> supplierData = new Data<>(supplier);
-    
-    return logManager.add(name, supplierData, logLevel, metaData);
-  }
-
-  public static <T> LogEntry2<T> addEntry(String name, Supplier<T> getter, int logLevel) {
-    return addEntry(name, getter, logLevel, "");
-  }
-
-  public static <T> LogEntry2<T> addEntry(String name, Supplier<T> getter, String metaData) {
-    return addEntry(name, getter, 4, metaData);
-  }
-
-  public static <T> LogEntry2<T> addEntry(String name, Supplier<T> getter) {
-    return addEntry(name, getter, 4, "");
-  }
-
-  public static LogEntry2<?> getEntry(String name) {
-    return logManager.get(name);
+  public static <T> LogEntryBuilder<T> addEntry(String name, Supplier<T> ... suppliers) {
+    return new LogEntryBuilder<T>(name, suppliers);
   }
 
   public static void removeInComp() {
