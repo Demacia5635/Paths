@@ -2,6 +2,15 @@ package frc.demacia.utils.Sensors;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import frc.demacia.utils.Log.LogManager;
 public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterface {
+    public UltraSonicSensor( UltraSonicSensorConfig config) {
+        super(config.pingChannel, config.channel);
+        this.config = config;
+        name = config.name;
+        addLog();
+		LogManager.log(name + " cancoder initialized");
+        
+
+    }
     String name;
     UltraSonicSensorConfig config;
     public double get() {
@@ -14,15 +23,7 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
     }
 
 
-    public UltraSonicSensor( UltraSonicSensorConfig config) {
-        super(config.pingChannel, config.channel);
-        this.config = config;
-        name = config.name;
-        addLog();
-		LogManager.log(name + " cancoder initialized");
-        
-
-    }
+ 
 
     @Override
     public void ping() {
