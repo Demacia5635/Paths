@@ -35,7 +35,7 @@ public class LogEntry2<T> {
     String name;
     String metaData;
     Publisher ntPublisher;
-    private int skipedCycles2 = 0;
+    private int skipedCycles = 0;
     private int SkipCycle = 1;
 
     private boolean isFloat;
@@ -77,11 +77,15 @@ public class LogEntry2<T> {
     }
 
     void log() {
-        skipedCycles2++;
-        if (skipedCycles2 < SkipCycle) {
+        skipedCycles++;
+        if (skipedCycles < SkipCycle) {
             return;
         }
-        skipedCycles2 = 0;
+        skipedCycles = 0;
+
+        if (!data.hasChanged()) {
+            return;
+        }
 
         long time = data.getTime();
 

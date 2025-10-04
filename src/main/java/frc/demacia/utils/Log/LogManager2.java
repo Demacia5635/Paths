@@ -28,7 +28,7 @@ public class LogManager2 extends SubsystemBase {
 
   private static ArrayList<ConsoleAlert> activeConsole;
   
-  private static int SkipedCycles1 = 0;
+  private static int SkipedCycles = 0;
   private static int SKIP_CYCLES = 1;
   private static boolean isLoggingEnabled = true;
 
@@ -77,7 +77,7 @@ public class LogManager2 extends SubsystemBase {
   public static ConsoleAlert log(Object message, AlertType alertType) {
     DataLogManager.log(String.valueOf(message));
     
-    ConsoleAlert alert = new ConsoleAlert(String.valueOf(message.toString()), alertType);
+    ConsoleAlert alert = new ConsoleAlert(String.valueOf(message), alertType);
     alert.set(true);
     if (activeConsole.size() > ConsoleConstants.CONSOLE_LIMIT) {
       activeConsole.get(0).close();
@@ -95,7 +95,7 @@ public class LogManager2 extends SubsystemBase {
     SKIP_CYCLES = Math.max(1, cycles);
   }
 
-  public static int getSStaticSkipCycles() {
+  public static int getStaticSkipCycles() {
     return SKIP_CYCLES;
   }
   
@@ -109,11 +109,11 @@ public class LogManager2 extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SkipedCycles1++;
-    if (SkipedCycles1 < SKIP_CYCLES || !isLoggingEnabled) {
+    SkipedCycles++;
+    if (SkipedCycles < SKIP_CYCLES || !isLoggingEnabled) {
       return;
     }
-    SkipedCycles1 = 0;
+    SkipedCycles = 0;
 
     for (LogEntry2<?> e : logEntries) {
       e.log();
@@ -130,7 +130,7 @@ public class LogManager2 extends SubsystemBase {
     LogEntry2<?> e = find(name);
     return e != null 
     ?e 
-    :new LogEntry2(name, null, 1, "");
+    :new LogEntry2<>(name, null, 1, "");
   }
 
   private LogEntry2<?> find(String name) {
