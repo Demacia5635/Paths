@@ -120,7 +120,7 @@ public class LogManager2 extends SubsystemBase {
     }
   }
 
-  private <T> LogEntry2<T> add(String name, Data<T> data, int logLevel, String metaData) {
+  public <T> LogEntry2<T> add(String name, Data<T> data, int logLevel, String metaData) {
     LogEntry2<T> entry = new LogEntry2<T>(name, data, logLevel, metaData);
     logEntries.add(entry);
     return entry;

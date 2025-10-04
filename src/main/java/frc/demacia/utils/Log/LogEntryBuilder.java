@@ -9,7 +9,7 @@ import frc.demacia.utils.Data;
 
 public class LogEntryBuilder<T> implements AutoCloseable{
     private String name;
-    private int logLevel = 4;
+    private int logLevel = 2;
     private String metaData = "";
     private double precision = 0.0;
     private int skipCycles = 1;
@@ -63,7 +63,7 @@ public class LogEntryBuilder<T> implements AutoCloseable{
     
     public LogEntry2<T> build() {
         built = true;
-        LogEntry2<T> entry = new LogEntry2<T>(name, data, logLevel, metaData);
+        LogEntry2<T> entry = LogManager2.logManager.add(name, data, logLevel, metaData);
         if (precision != 0.0) {
             entry.setPrecision(precision);
         }
