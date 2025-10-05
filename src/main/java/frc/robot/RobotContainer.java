@@ -5,13 +5,10 @@
 package frc.robot;
 
 import frc.demacia.utils.Log.LogManager;
+import frc.robot.testMotors.sparkFlex.subsystems.Motor;
+import frc.robot.testMotors.sparkFlex.commands.Set;
 import frc.demacia.utils.Sensors.UltraSonicSensor;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.testMotors.talonFX.commands.Set;
-import frc.robot.testMotors.talonFX.subsystems.Motor;
-import frc.robot.testSensors.cancoder.subsystems.Cancoder;
-import frc.robot.testSensors.piegon.commands.Show;
-import frc.robot.testSensors.piegon.subsystems.Pigeon;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -26,11 +23,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
 
-  Pigeon pigeon;
-  Show pigeonShow;
-  Cancoder cancoder;
-  frc.robot.testSensors.cancoder.commands.Show cancoderShow;
-  UltraSonicSensor ultraSonicSensor;
+  Motor motor;
+  Set set;
 
   public static boolean isComp = DriverStation.isFMSAttached();
   private static boolean hasRemovedFromLog = false;
@@ -48,11 +42,8 @@ public class RobotContainer {
     
     new LogManager();
 
-    pigeon = new Pigeon();
-    pigeonShow = new Show(pigeon);
-    cancoder = new Cancoder();
-    cancoderShow = new frc.robot.testSensors.cancoder.commands.Show(cancoder);
-    ultraSonicSensor = new UltraSonicSensor(frc.robot.testSensors.UltraSonicSensor.Constants.ULTRA_SONIC_SENSOR_CONFIG);
+    motor = new Motor();
+    set = new Set(motor);
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
     configureBindings();
@@ -80,8 +71,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    pigeon.setDefaultCommand(pigeonShow);
-    cancoder.setDefaultCommand(cancoderShow);
+    motor.setDefaultCommand(set);
 
   }
 
