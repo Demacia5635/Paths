@@ -1,6 +1,9 @@
-package frc.demacia.Controller;  
+package frc.demacia.utils.Controller;  
 
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
+
+import static frc.demacia.utils.Controller.ControllerConstants.*;
+
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.XboxController;
@@ -10,8 +13,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.demacia.utils.Utilities;
 import frc.demacia.utils.Log.LogManager;
-
-import static frc.demacia.Controller.ControllerConstants.*;
 
 public class CommandController extends CommandGenericHID{
 
