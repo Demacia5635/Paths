@@ -6,7 +6,7 @@ package frc.robot.testMotors.sparkFlex;
 
 import frc.demacia.utils.Motors.SparkConfig;
 public final class Constants {
-  public static final int ID = 30;
+  public static final int ID = 1;
   public static final String NAME = "Test Motor";
 
   public static final double MAX_VOLT = 12;
@@ -14,7 +14,7 @@ public final class Constants {
   public static final double RAMP_TIME = 0.3;
 
   /* the pid and ff constants of the motor */
-  public static final double KP = 0;
+  public static final double KP = 0.02;
   public static final double KI = 0;
   public static final double KD = 0;
   public static final double KS = 0;
@@ -27,9 +27,6 @@ public final class Constants {
   public static final double MOTION_MAGIC_ACCELERATION = 0;
   public static final double MOTION_MAGIC_JERK = 0;
   public static final double MAX_POSITION_ERROR = 0.5;
-
-  /* the channel of the limit switch of the arm angle motor */
-  public static final int LIMIT_SWITCH_CHANNEL = 0;
 
   /* the basic configues of the motor */
   public static final boolean IS_BRAKE = true;
