@@ -2,6 +2,7 @@ package frc.demacia.utils.Motors;
 
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkAnalogSensor;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.config.SparkBaseConfig;
@@ -169,11 +170,11 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
 
   @Override
   public void setMotion(double position, double feedForward) {
-    super.closedLoopController.setReference(position, ControlType.kMAXMotionPositionControl, closedLoopSlot, feedForward);
+    LogManager.log(getClosedLoopController().setReference(position, ControlType.kMAXMotionPositionControl, closedLoopSlot, feedForward).name());
     controlType = ControlType.kMAXMotionPositionControl;
     lastControlMode = "Motion";
     setPoint = position;
-  }
+  } 
 
   @Override
   public void setMotion(double position) {

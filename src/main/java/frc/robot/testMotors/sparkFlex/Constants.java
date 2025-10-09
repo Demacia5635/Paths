@@ -6,7 +6,7 @@ package frc.robot.testMotors.sparkFlex;
 
 import frc.demacia.utils.Motors.SparkConfig;
 public final class Constants {
-  public static final int ID = 1;
+  public static final int ID = 2;
   public static final String NAME = "Test Motor";
 
   public static final double MAX_VOLT = 12;
@@ -23,8 +23,8 @@ public final class Constants {
   public static final double KG = 0;
 
   /* the motion magic constants of the motor */
-  public static final double MOTION_MAGIC_VELOCITY = 0;
-  public static final double MOTION_MAGIC_ACCELERATION = 0;
+  public static final double MOTION_MAGIC_VELOCITY = 1;
+  public static final double MOTION_MAGIC_ACCELERATION = 1;
   public static final double MOTION_MAGIC_JERK = 0;
   public static final double MAX_POSITION_ERROR = 0.5;
 
