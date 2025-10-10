@@ -1,8 +1,6 @@
 package frc.demacia.utils.Motors;
 
 import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkAnalogSensor;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.config.SparkBaseConfig;
@@ -27,7 +25,6 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
   private int slot = 0;
   private ClosedLoopSlot closedLoopSlot = ClosedLoopSlot.kSlot0;
   private ControlType controlType = ControlType.kDutyCycle;
-  private SparkAnalogSensor anaolg;
 
   private String lastControlMode = "";
   private double lastVelocity;
@@ -60,8 +57,6 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
     if (config.maxVelocity != 0) {
       cfg.closedLoop.maxMotion.maxVelocity(config.maxVelocity).maxAcceleration(config.maxAcceleration);
     }
-    getEncoder();
-    anaolg = getAnalog();
     this.configure(cfg, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 
@@ -325,7 +320,7 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
   }
 
   public double getCurrentPosition() {
-    return anaolg.getPosition();
+    return getEncoder().getPosition();
   }
 
   public double getCurrentAngle() {
@@ -338,7 +333,7 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
   }
 
   public double getCurrentVelocity() {
-    double velocity = encoder.getVelocity();
+    double velocity = getEncoder().getVelocity();
     if (lastCycleNum != RobotContainer.N_CYCLE) {
       lastCycleNum = RobotContainer.N_CYCLE;
       double time = Timer.getFPGATimestamp();

@@ -57,7 +57,6 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
     if (config.maxVelocity != 0) {
       cfg.closedLoop.maxMotion.maxVelocity(config.maxVelocity).maxAcceleration(config.maxAcceleration);
     }
-    getEncoder();
     this.configure(cfg, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 
@@ -321,7 +320,7 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
   }
 
   public double getCurrentPosition() {
-    return encoder.getPosition();
+    return getEncoder().getPosition();
   }
 
   public double getCurrentAngle() {
@@ -334,7 +333,7 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
   }
 
   public double getCurrentVelocity() {
-    double velocity = encoder.getVelocity();
+    double velocity = getEncoder().getVelocity();
     if (lastCycleNum != RobotContainer.N_CYCLE) {
       lastCycleNum = RobotContainer.N_CYCLE;
       double time = Timer.getFPGATimestamp();
