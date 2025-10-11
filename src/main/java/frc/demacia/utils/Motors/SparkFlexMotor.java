@@ -173,7 +173,7 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
       LogManager.log(name + ": maxVelocity not configured", AlertType.kError);
       return;
     }
-    getClosedLoopController().setReference(position, ControlType.kMAXMotionPositionControl, closedLoopSlot, feedForward).name();
+    getClosedLoopController().setReference(position, ControlType.kMAXMotionPositionControl, closedLoopSlot, feedForward);
     controlType = ControlType.kMAXMotionPositionControl;
     lastControlMode = "Motion";
     setPoint = position;
@@ -390,7 +390,7 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
 
   @Override
   public void setEncoderPosition(double position) {
-    encoder.setPosition(position);
+    getEncoder().setPosition(position);
   }
 
   @Override

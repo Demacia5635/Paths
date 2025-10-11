@@ -94,7 +94,7 @@ public class Chassis extends SubsystemBase {
 
     public void setVelocities(ChassisSpeeds speeds) {
         speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getGyroAngle());
-        speeds = ChassisSpeeds.discretize(speeds, chassisConfig.CYCLE_DT);
+        speeds = ChassisSpeeds.discretize(speeds, chassisConfig.cycleDt);
         
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
         setModuleStates(states);
@@ -102,7 +102,7 @@ public class Chassis extends SubsystemBase {
 
     private double calculateLinearVelocity(double wantedSpeeds, double currentSpeeds) {
         double deltaV = wantedSpeeds - currentSpeeds;
-        double maxDelta = chassisConfig.MAX_LINEAR_ACCEL * chassisConfig.CYCLE_DT;
+        double maxDelta = chassisConfig.maxLinearAccel * chassisConfig.cycleDt;
         if(Math.abs(deltaV) > maxDelta){
             return currentSpeeds + (maxDelta * Math.signum(deltaV));
         }
@@ -130,23 +130,23 @@ public class Chassis extends SubsystemBase {
 
         if(currentSpeedsNorm <0.1){
             // LogManager.log("SMALL VEL");
-            double v = MathUtil.clamp(wantedSpeedsNorm, 0, currentSpeedsNorm + chassisConfig.MAX_DELTA_VELOCITY);
+            double v = MathUtil.clamp(wantedSpeedsNorm, 0, currentSpeedsNorm + chassisConfig.maxDeltaVelocity);
             return new Translation2d(v, Rotation2d.fromRadians(wantedSpeedsAngle));
         }
 
         if(wantedSpeedsNorm == 0 && currentSpeedsNorm > 0.1) return new Translation2d(calculateLinearVelocity(wantedSpeedsNorm, currentSpeedsNorm), Rotation2d.fromRadians(lastAngle));
         lastAngle = currentSpeedsAngle;
         double angleDiff = MathUtil.angleModulus(wantedSpeedsAngle - currentSpeedsAngle);
-        double radius = currentSpeedsNorm / chassisConfig.MAX_OMEGA_VELOCITY;
+        double radius = currentSpeedsNorm / chassisConfig.maxOmegaVelocity;
         // LogManager.log("RADIUS: " + radius);
-        if(Math.abs(angleDiff) < 0.6 || radius < chassisConfig.MAX_RADIUS){
+        if(Math.abs(angleDiff) < 0.6 || radius < chassisConfig.maxRadius){
             
             return new Translation2d(calculateLinearVelocity(wantedSpeedsNorm, currentSpeedsNorm), Rotation2d.fromRadians(wantedSpeedsAngle));
         }
 
-        double velocity = Math.min(chassisConfig.MAX_VELOCITY_TO_IGNORE_RADIUS, Math.max(currentSpeedsNorm - (chassisConfig.MAX_DELTA_VELOCITY), chassisConfig.MIN_VELOCITY));
+        double velocity = Math.min(chassisConfig.maxVelocityToIgnoreRadius, Math.max(currentSpeedsNorm - (chassisConfig.maxDeltaVelocity), chassisConfig.minVelocity));
     //    LogManager.log("NEW VELOCITY: " + velocity);
-        double radChange = Math.min(chassisConfig.MAX_OMEGA_VELOCITY, (velocity / chassisConfig.MAX_RADIUS) * chassisConfig.CYCLE_DT);
+        double radChange = Math.min(chassisConfig.maxOmegaVelocity, (velocity / chassisConfig.maxRadius) * chassisConfig.cycleDt);
         return new Translation2d(velocity, Rotation2d.fromRadians((radChange * Math.signum(angleDiff)) + currentSpeedsAngle));
         
     }
