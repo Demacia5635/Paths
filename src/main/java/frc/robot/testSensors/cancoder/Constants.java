@@ -4,7 +4,8 @@ import frc.demacia.utils.Sensors.CancoderConfig;
 import com.ctre.phoenix6.CANBus;
 
 public class Constants {
-    public static final double OFFSET = 0;
+    public static final double OFFSET = 0
+    ;
     public static final boolean INVERTED = false;
     public static final int ID=6;
     public static final CANBus CANBUS= new CANBus("canivore");
