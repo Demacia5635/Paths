@@ -17,10 +17,8 @@ public class Line extends Segment{
 
     @Override
     public Translation2d calc(Pose2d robotPose, double velocity) {
-        Translation2d relativePos = robotPose.getTranslation().minus(helperPoint.getTranslation());
-
-        Rotation2d diffAngle = pointOnTrajectory.getTranslation().minus(helperPoint.getTranslation()).getAngle().minus(relativePos.getAngle());
-
-        return new Translation2d(velocity, relativePos.times(-1).getAngle().minus(diffAngle));    
+        Translation2d line = helperPoint.getTranslation().minus(pointOnTrajectory.getTranslation());
+        Rotation2d angle = line.getAngle();
+        return new Translation2d(velocity, angle);
     }
 }

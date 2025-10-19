@@ -10,7 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 /** Add your docs here. */
-public class Segment {
+public abstract class Segment {
     PathPoint pointOnTrajectory;
     PathPoint helperPoint;
     
