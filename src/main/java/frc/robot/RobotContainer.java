@@ -6,6 +6,8 @@ package frc.robot;
 
 import frc.demacia.utils.Log.LogManager;
 import frc.robot.testMotors.sparkFlex.subsystems.Motor;
+import frc.robot.testSensors.piegon.commands.Show;
+import frc.robot.testSensors.piegon.subsystems.Pigeon;
 import frc.robot.testMotors.sparkFlex.commands.Set;
 import frc.demacia.utils.Sensors.UltraSonicSensor;
 import frc.robot.Constants.OperatorConstants;
@@ -15,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -23,8 +26,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
 
-  Motor motor;
-  Set set;
+  Pigeon pigeon;
+  Show show;
 
   public static boolean isComp = DriverStation.isFMSAttached();
   private static boolean hasRemovedFromLog = false;
@@ -42,8 +45,8 @@ public class RobotContainer {
     
     new LogManager();
 
-    motor = new Motor();
-    set = new Set(motor);
+    pigeon = new Pigeon();
+    show =new Show(pigeon);
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
     configureBindings();
@@ -71,7 +74,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    motor.setDefaultCommand(set);
+    pigeon.setDefaultCommand(show);
 
   }
 
