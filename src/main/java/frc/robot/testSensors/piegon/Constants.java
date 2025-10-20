@@ -23,5 +23,4 @@ public class Constants {
     .withYawOffset(YAW_OFFSET)
     .withInvert(INVERTED);
     
-}
-    }               
+}            
