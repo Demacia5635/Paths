@@ -53,7 +53,8 @@ public final class Constants {
     .withBrake(true)
     .withInvert(true)
     .withMeterMotor(DRIVE_GEAR_RATIO, wheelDiameter),
-    new CancoderConfig(3, new CANBus("canivore"), "frontLeft cancoder"));
+    new CancoderConfig(3, new CANBus("canivore"), "frontLeft cancoder"))
+    .withSteerOffset(-0.68569029575781545181333347012135);
   public static final SwerveModuleConfig frontRightModuleConfig = new SwerveModuleConfig(
     NAME + " frontRight",
     new TalonConfig(5, Canbus.CANIvore, "frontRight steer")
@@ -67,7 +68,8 @@ public final class Constants {
     .withBrake(true)
     .withInvert(true)
     .withMeterMotor(DRIVE_GEAR_RATIO, wheelDiameter),
-    new CancoderConfig(6, new CANBus("canivore"), "frontRight cancoder"));
+    new CancoderConfig(6, new CANBus("canivore"), "frontRight cancoder"))
+    .withSteerOffset(-3.1139780541647389558965567479405 + Math.PI);
   public static final SwerveModuleConfig backLeftModuleConfig = new SwerveModuleConfig(
     NAME + " backLeft",
     new TalonConfig(8, Canbus.CANIvore, "backLeft steer")
@@ -81,7 +83,8 @@ public final class Constants {
     .withBrake(true)
     .withInvert(true)
     .withMeterMotor(DRIVE_GEAR_RATIO, wheelDiameter),
-    new CancoderConfig(9, new CANBus("canivore"), "backLeft cancoder"));
+    new CancoderConfig(9, new CANBus("canivore"), "backLeft cancoder"))
+    .withSteerOffset(2.7795743657460270044216391356507);
   public static final SwerveModuleConfig backRightModuleConfig = new SwerveModuleConfig(
     NAME + " backRight",
     new TalonConfig(11, Canbus.CANIvore, "backRight steer")
@@ -95,13 +98,14 @@ public final class Constants {
     .withBrake(true)
     .withInvert(true)
     .withMeterMotor(DRIVE_GEAR_RATIO, wheelDiameter),
-    new CancoderConfig(12, new CANBus("canivore"), "backRight cancoder"));
-  public static final CANBus PIGEO_CANBUS = new CANBus("canivore");
+    new CancoderConfig(12, new CANBus("canivore"), "backRight cancoder"))
+    .withSteerOffset(-0.68875649018771909001407301006343);
+  public static final CANBus PIGEO_CANBUS = new CANBus("rio");
   public static final PigeonConfig pigeonConfig = new PigeonConfig(14, PIGEO_CANBUS, NAME + " pigeon");
-  public static final Translation2d frontLeftPosition = new Translation2d(null, null);
-  public static final Translation2d frontRightPosition = new Translation2d(null, null);
-  public static final Translation2d backLeftPosition = new Translation2d(null, null);
-  public static final Translation2d backRightPosition = new Translation2d(null, null);
+  public static final Translation2d frontLeftPosition = new Translation2d(0.34, 0.29);
+  public static final Translation2d frontRightPosition = new Translation2d(0.34, -0.29);
+  public static final Translation2d backLeftPosition = new Translation2d(-0.34, 0.29);
+  public static final Translation2d backRightPosition = new Translation2d(-0.34, -0.29);
 
   public static final ChassisConfig CHASSIS_CONFIG = new ChassisConfig(
     NAME,

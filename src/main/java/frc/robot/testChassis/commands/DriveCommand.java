@@ -37,7 +37,7 @@ public class DriveCommand extends Command {
     double rot = controller.getLeftTrigger() - controller.getRightTrigger();
     
     double velX = Math.pow(joyX, 2) * 3.6 * Math.signum(joyX);
-    double velY = Math.pow(joyY, 2) * 0.2 * Math.signum(joyY);
+    double velY = Math.pow(joyY, 2) * 3.6 * Math.signum(joyY);
     double velRot = Math.pow(rot, 2) * Math.toRadians(360) * Math.signum(rot);
     
     speeds = new ChassisSpeeds(velX, velY,velRot);
