@@ -6,30 +6,27 @@ package frc.robot.testMotors.sparkMax;
 
 import frc.demacia.utils.Motors.SparkConfig;
 public final class Constants {
-  public static final int ID = 30;
+  public static final int ID = 2;
   public static final String NAME = "Test Motor";
 
   public static final double MAX_VOLT = 12;
   public static final double MAX_CURRENT = 40;
   public static final double RAMP_TIME = 0.3;
-
+ 
   /* the pid and ff constants of the motor */
   public static final double KP = 0;
   public static final double KI = 0;
   public static final double KD = 0;
   public static final double KS = 0;
-  public static final double KV = 0;
-  public static final double KA = 0;
+  public static final double KV = 0.152;
+  public static final double KA = 0.037;
   public static final double KG = 0;
 
   /* the motion magic constants of the motor */
-  public static final double MOTION_MAGIC_VELOCITY = 0;
-  public static final double MOTION_MAGIC_ACCELERATION = 0;
+  public static final double MOTION_MAGIC_VELOCITY = 1;
+  public static final double MOTION_MAGIC_ACCELERATION = 1;
   public static final double MOTION_MAGIC_JERK = 0;
   public static final double MAX_POSITION_ERROR = 0.5;
-
-  /* the channel of the limit switch of the arm angle motor */
-  public static final int LIMIT_SWITCH_CHANNEL = 0;
 
   /* the basic configues of the motor */
   public static final boolean IS_BRAKE = true;

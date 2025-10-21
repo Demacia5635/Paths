@@ -26,7 +26,7 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
   private ClosedLoopSlot closedLoopSlot = ClosedLoopSlot.kSlot0;
   private ControlType controlType = ControlType.kDutyCycle;
 
-  private String lastControlMode;
+  private String lastControlMode = "";
   private double lastVelocity;
   private double lastAcceleration;
   private double setPoint = 0;
@@ -39,8 +39,8 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
     name = config.name;
     configMotor();
     addLog();
-    SmartDashboard.putData(name, this);
     LogManager.log(name + " motor initialized");
+    SmartDashboard.putData(name, this);
   }
 
   private void configMotor() {
