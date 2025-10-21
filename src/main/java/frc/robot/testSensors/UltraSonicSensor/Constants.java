@@ -1,9 +1,6 @@
 
-package frc.robot.testSensors.UltraSonicSensor;
-import edu.wpi.first.wpilibj.Ultrasonic;
-import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
+package frc.robot.testSensors.ultraSonicSensor;
 import frc.demacia.utils.Sensors.UltraSonicSensorConfig;
-import frc.demacia.utils.Sensors.UltraSonicSensor;
 
 public class Constants {
       private static final int channel=3;
