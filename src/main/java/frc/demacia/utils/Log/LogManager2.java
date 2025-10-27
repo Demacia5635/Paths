@@ -35,7 +35,7 @@ public class LogManager2 extends SubsystemBase {
   
   String name = "";
   Data<?> data = null;
-  LogEntry2<?> logEntry = new LogEntry2<>(name, data, 3, "");
+  LogEntry2<?> logEntry = null;
 
   public LogManager2() {
     logManager = this;
@@ -121,6 +121,11 @@ public class LogManager2 extends SubsystemBase {
     for (LogEntry2<?> e : logEntries) {
       e.log();
     }
+    if (logEntry != null){
+      logEntry.log();
+    } else {
+      log("3");
+    }
   }
 
   public <T> LogEntry2<T> add(String name, Data<T> data, int logLevel, String metaData) {
@@ -136,9 +141,10 @@ public class LogManager2 extends SubsystemBase {
                 StatusSignal<?>[] existingSignals = this.data.getSignals();
                 StatusSignal<?>[] newSignal = data.getSignals();
                 
-                StatusSignal<?>[] combined = new StatusSignal<?>[existingSignals.length + 1];
+                @SuppressWarnings("unchecked")
+                StatusSignal<Double>[] combined = new StatusSignal[existingSignals.length + 1];
                 System.arraycopy(existingSignals, 0, combined, 0, existingSignals.length);
-                combined[existingSignals.length] = newSignal[0];
+                combined[existingSignals.length] = (StatusSignal<Double>) newSignal[0];
                 
                 this.name = this.name + " | " + name;
                 this.data = new Data<>(combined);
@@ -147,13 +153,16 @@ public class LogManager2 extends SubsystemBase {
                 logEntry = new LogEntry2<>(this.name, this.data, 3, "");
                 logManager.logEntries.add(logEntry);
             } catch (Exception e) {
-                
+              
             }
         }
+        logEntry = new LogEntry2<>(this.name, this.data, 3, "");
+        logManager.logEntries.add(logEntry);
     }
     
     return entry;
   }
+
 
   private LogEntry2<?> get(String name) {
     LogEntry2<?> e = find(name);

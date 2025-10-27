@@ -7,6 +7,7 @@ package frc.robot;
 import frc.demacia.utils.Controller.CommandController;
 import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogManager2;
 import frc.robot.testMotors.sparkMax.subsystems.Motor;
 import frc.robot.testSensors.piegon.commands.Show;
 import frc.robot.testSensors.piegon.subsystems.Pigeon;
@@ -51,6 +52,7 @@ public class RobotContainer {
   public RobotContainer() {
     
     new LogManager();
+    new LogManager2();
 
     driverController = new CommandController(0, ControllerType.kXbox);
 
