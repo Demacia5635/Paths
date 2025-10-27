@@ -7,10 +7,10 @@ package frc.robot;
 import frc.demacia.utils.Controller.CommandController;
 import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.demacia.utils.Log.LogManager;
-import frc.robot.testMotors.sparkFlex.subsystems.Motor;
+import frc.robot.testMotors.sparkMax.subsystems.Motor;
 import frc.robot.testSensors.piegon.commands.Show;
 import frc.robot.testSensors.piegon.subsystems.Pigeon;
-import frc.robot.testMotors.sparkFlex.commands.Set;
+import frc.robot.testMotors.sparkMax.commands.Set;
 import frc.demacia.utils.Sensors.UltraSonicSensor;
 import frc.demacia.utils.chassis.Chassis;
 import frc.robot.Constants.OperatorConstants;
@@ -31,8 +31,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
 
-  Chassis chassis;
-  DriveCommand driveCommand;
+  Motor motor;
+  Set set;
   
   public static CommandController driverController;
 
@@ -54,8 +54,8 @@ public class RobotContainer {
 
     driverController = new CommandController(0, ControllerType.kXbox);
 
-    chassis = new Chassis(Constants.CHASSIS_CONFIG);
-    driveCommand =new DriveCommand(chassis, driverController);
+    motor = new Motor();
+    set =new Set(motor);
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
     configureBindings();
@@ -83,7 +83,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    chassis.setDefaultCommand(driveCommand);
+    motor.setDefaultCommand(set);
 
   }
 

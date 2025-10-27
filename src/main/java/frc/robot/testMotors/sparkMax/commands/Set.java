@@ -29,6 +29,9 @@ public class Set extends Command {
     testMotor.showConfigPIDFSlotCommand(0);
     testMotor.showConfigMotionVelocitiesCommand();
     testMotor.showControlCommand();
+    if (Math.abs(testMotor.getCurrentVoltage()) > 3){
+      testMotor.setVoltage(3);
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.

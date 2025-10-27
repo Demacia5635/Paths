@@ -14,12 +14,12 @@ public final class Constants {
   public static final double RAMP_TIME = 0.3;
  
   /* the pid and ff constants of the motor */
-  public static final double KP = 0;
+  public static final double KP = 0.02;
   public static final double KI = 0;
   public static final double KD = 0;
   public static final double KS = 0;
-  public static final double KV = 0.152;
-  public static final double KA = 0.037;
+  public static final double KV = 0;
+  public static final double KA = 0;
   public static final double KG = 0;
 
   /* the motion magic constants of the motor */
