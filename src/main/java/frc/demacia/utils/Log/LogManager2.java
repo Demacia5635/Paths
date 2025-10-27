@@ -32,6 +32,10 @@ public class LogManager2 extends SubsystemBase {
   private static boolean isLoggingEnabled = true;
 
   ArrayList<LogEntry2<?>> logEntries = new ArrayList<>();
+  
+  String name = "";
+  Data<?> data = null;
+  LogEntry2<?> logEntry = new LogEntry2<>(name, data, 3, "");
 
   public LogManager2() {
     logManager = this;
@@ -122,6 +126,32 @@ public class LogManager2 extends SubsystemBase {
   public <T> LogEntry2<T> add(String name, Data<T> data, int logLevel, String metaData) {
     LogEntry2<T> entry = new LogEntry2<T>(name, data, logLevel, metaData);
     logEntries.add(entry);
+    
+    if(data.isDouble() && !data.isArray() && data.getSignals() != null && data.getSignals().length == 1) {
+        if(this.data == null) {
+            this.name = name;
+            this.data = data;
+        } else {
+            try {
+                StatusSignal<?>[] existingSignals = this.data.getSignals();
+                StatusSignal<?>[] newSignal = data.getSignals();
+                
+                StatusSignal<?>[] combined = new StatusSignal<?>[existingSignals.length + 1];
+                System.arraycopy(existingSignals, 0, combined, 0, existingSignals.length);
+                combined[existingSignals.length] = newSignal[0];
+                
+                this.name = this.name + " | " + name;
+                this.data = new Data<>(combined);
+                
+                logManager.logEntries.remove(logEntry);
+                logEntry = new LogEntry2<>(this.name, this.data, 3, "");
+                logManager.logEntries.add(logEntry);
+            } catch (Exception e) {
+                
+            }
+        }
+    }
+    
     return entry;
   }
 
