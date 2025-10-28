@@ -84,11 +84,6 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
         getCurrentClosedLoopError(),
         getCurrentClosedLoopSP(),
       }, 3, "motor");
-      
-      LogManager2.addEntry(name + "/cur", 
-      () -> getCurrentClosedLoopSP()).build();
-      LogManager2.addEntry(name + "/pos", 
-      () -> getCurrentPosition()).build();
   }
 
   /**

@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.demacia.utils.Data;
 import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogManager2;
 
 public class TalonMotor extends TalonFX implements MotorInterface {
 
@@ -166,18 +167,6 @@ public class TalonMotor extends TalonFX implements MotorInterface {
             closedLoopErrorSignal.getSignal(),
             closedLoopSPSignal.getSignal(),
             }, 3,"motor");
-        // LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP2", 
-        //   () -> new double[] {
-        //     getCurrentPosition(),
-        //     getCurrentVelocity(),
-        //     getCurrentAcceleration(),
-        //     getCurrentVoltage(),
-        //     getCurrentCurrent(),
-        //     getCurrentClosedLoopError(),
-        //     getCurrentClosedLoopSP(),
-        //   }, 3, "motor");
-            // LogManager.addEntry(name + "/ControlMode2", 
-            // () -> getCurrentControlMode(), 3, "motor");
             LogManager.addEntry(name + "/ControlMode", 
             controlModeSignal.getSignal(), 3, "motor");
     }

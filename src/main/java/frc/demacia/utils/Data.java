@@ -283,9 +283,13 @@ public class Data<T> {
             return hasArrayChanged(newValue, oldValue);
         } else {
             if (isDouble) {
-                double newVal = ((Number) newValue).doubleValue();
-                double oldVal = ((Number) oldValue).doubleValue();
-                return Math.abs(newVal - oldVal) >= precision;
+                try {
+                    double newVal = ((Number) newValue).doubleValue();
+                    double oldVal = ((Number) oldValue).doubleValue();
+                    return Math.abs(newVal - oldVal) >= precision;
+                } catch (ClassCastException e) {
+                    return !newValue.toString().equals(oldValue.toString());
+                }
             } else if (isBoolean) {
                 return !newValue.equals(oldValue);
             } else {
@@ -345,11 +349,17 @@ public class Data<T> {
                 if (newElem == null && oldElem == null) continue;
                 if (newElem == null || oldElem == null) return true;
                 
-                double newVal = ((Number) newElem).doubleValue();
-                double oldVal = ((Number) oldElem).doubleValue();
-                
-                if (Math.abs(newVal - oldVal) >= precision) {
-                    return true;
+                try {
+                    double newVal = ((Number) newElem).doubleValue();
+                    double oldVal = ((Number) oldElem).doubleValue();
+                    
+                    if (Math.abs(newVal - oldVal) >= precision) {
+                        return true;
+                    }
+                } catch (ClassCastException e) {
+                    if (!newElem.toString().equals(oldElem.toString())) {
+                        return true;
+                    }
                 }
             }
             return false;

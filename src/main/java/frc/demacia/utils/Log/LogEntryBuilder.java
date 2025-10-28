@@ -9,7 +9,7 @@ import frc.demacia.utils.Data;
 
 public class LogEntryBuilder<T> implements AutoCloseable{
     private String name;
-    private int logLevel = 2;
+    private int logLevel = 3;
     private String metaData = "";
     private double precision = 0.0;
     private int skipCycles = 1;

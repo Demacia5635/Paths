@@ -124,7 +124,7 @@ public class LogManager2 extends SubsystemBase {
     if (logEntry != null){
       logEntry.log();
     } else {
-      log("3");
+      
     }
   }
 
@@ -157,7 +157,6 @@ public class LogManager2 extends SubsystemBase {
             }
         }
         logEntry = new LogEntry2<>(this.name, this.data, 3, "");
-        logManager.logEntries.add(logEntry);
     }
     
     return entry;
