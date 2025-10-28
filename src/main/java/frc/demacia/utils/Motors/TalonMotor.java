@@ -172,11 +172,16 @@ public class TalonMotor extends TalonFX implements MotorInterface {
             
 
             
-        LogManager2.addEntry("1", () -> 5).build();
         LogManager2.addEntry("2", positionSignal.getSignal()).build();
         LogManager2.addEntry("3",  new StatusSignal[] {velocitySignal.getSignal(),
         accelerationSignal.getSignal(),
         voltageSignal.getSignal()}).build();
+
+        // LogManager2.addEntry("4", ()->5).build();
+        // LogManager2.addEntry("5", () -> new double[] {6, 7, 8}).build();
+        LogManager2.addEntry("6", () -> 9, () -> 10, () -> 11).build();
+        // LogManager2.addEntry("7", () -> new double[] {12, 13, 14}).build();
+        // LogManager2.addEntry("8", ()->15).build();
     }
 
     public void checkElectronics() {

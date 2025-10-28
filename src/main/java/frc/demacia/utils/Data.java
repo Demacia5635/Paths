@@ -219,6 +219,14 @@ public class Data<T> {
         return signal;
     }
 
+    public Supplier<T> getSupplier() {
+        return (supplier != null && supplier.length > 0) ? supplier[0] : null;
+    }
+
+    public Supplier<T>[] getSuppliers() {
+        return supplier;
+    }
+
     public void refresh() {
         if (currentValues != null) {
             previousValues = Arrays.copyOf(currentValues, currentValues.length);
