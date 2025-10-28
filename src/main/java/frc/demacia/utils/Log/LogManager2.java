@@ -132,7 +132,7 @@ public class LogManager2 extends SubsystemBase {
     LogEntry2<T> entry = new LogEntry2<T>(name, data, logLevel, metaData);
     logEntries.add(entry);
     
-    if(data.isDouble() && !data.isArray() && data.getSignals() != null && data.getSignals().length == 1) {
+    if(data.isDouble() && data.getSignals() != null) {
         if(this.data == null) {
             this.name = name;
             this.data = data;
@@ -142,10 +142,11 @@ public class LogManager2 extends SubsystemBase {
                 StatusSignal<?>[] newSignal = data.getSignals();
                 
                 @SuppressWarnings("unchecked")
-                StatusSignal<Double>[] combined = new StatusSignal[existingSignals.length + 1];
+                StatusSignal<Double>[] combined = new StatusSignal[existingSignals.length + newSignal.length];
                 System.arraycopy(existingSignals, 0, combined, 0, existingSignals.length);
-                combined[existingSignals.length] = (StatusSignal<Double>) newSignal[0];
-                
+                for (int i = 0; i < newSignal.length; i++){
+                  combined[existingSignals.length+i] = (StatusSignal<Double>) newSignal[i];
+                }
                 this.name = this.name + " | " + name;
                 this.data = new Data<>(combined);
                 
