@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 
+import frc.demacia.utils.Log.LogManager2;
+
 public class Data<T> {
     
     @SuppressWarnings("rawtypes")
@@ -15,6 +17,7 @@ public class Data<T> {
 
     private StatusSignal<T>[] signal;
     private Supplier<T>[] supplier;
+    private Supplier<T>[] oldSupplier;
     private T[] currentValues;
     private T[] previousValues;
     private double precision = 0;
@@ -54,6 +57,7 @@ public class Data<T> {
     @SuppressWarnings("unchecked")
     public Data(Supplier<T> ... supplier){
         this.supplier = supplier;
+        this.oldSupplier = supplier;
 
         signals.add(this);
 
@@ -73,6 +77,13 @@ public class Data<T> {
 
         if (value.getClass().isArray()) {
             isArray = true;
+            int arrayLength = java.lang.reflect.Array.getLength(value);
+            oldSupplier = new Supplier[java.lang.reflect.Array.getLength(value)];
+            final T finalValue = value;
+            for (int i = 0; i < arrayLength; i++){
+                final int index = i;
+                oldSupplier[i] = () -> (T) java.lang.reflect.Array.get(finalValue, index);
+            }
             try {
                 Object first = java.lang.reflect.Array.get(value, 0);
                 ((Number) first).doubleValue();
@@ -83,6 +94,20 @@ public class Data<T> {
                 }
             }
         } else {
+            if (length > 1){
+                isArray = true;
+                this.oldSupplier = Arrays.copyOf(supplier, supplier.length);
+                T[] valueArray = (T[]) new Object[length];
+                for (int i = 0; i < length; i++){
+                    LogManager2.log(supplier[i].get());
+                    valueArray[i] = supplier[i].get();
+                    LogManager2.log(valueArray[i]);
+                }
+                final T[] finalValueArray = valueArray;
+                supplier = new Supplier[] {() -> finalValueArray};
+                value = supplier[0].get();
+                length = 1;
+            }
             try {
                 ((Number) value).doubleValue();
                 isDouble = true;
@@ -220,11 +245,11 @@ public class Data<T> {
     }
 
     public Supplier<T> getSupplier() {
-        return (supplier != null && supplier.length > 0) ? supplier[0] : null;
+        return (oldSupplier != null && oldSupplier.length > 0) ? oldSupplier[0] : null;
     }
 
     public Supplier<T>[] getSuppliers() {
-        return supplier;
+        return oldSupplier;
     }
 
     public void refresh() {

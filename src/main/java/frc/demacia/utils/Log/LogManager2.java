@@ -33,18 +33,7 @@ public class LogManager2 extends SubsystemBase {
 
   ArrayList<LogEntry2<?>> logEntries = new ArrayList<>();
   
-  String name = "";
-  Data<?> data = null;
-  LogEntry2<?> logEntry = null;
-  String name2 = "";
-  Data<?> data2 = null;
-  LogEntry2<?> logEntry2 = null;
-  String name3 = "";
-  Data<?> data3 = null;
-  LogEntry2<?> logEntry3 = null;
-  String name4 = "";
-  Data<?> data4 = null;
-  LogEntry2<?> logEntry4 = null;
+  LogEntry2<?>[] finalLogEntries = new LogEntry2<?>[] {null, null, null, null};
 
   public LogManager2() {
     logManager = this;
@@ -130,17 +119,10 @@ public class LogManager2 extends SubsystemBase {
     for (LogEntry2<?> e : logEntries) {
       e.log();
     }
-    if (logEntry != null){
-      logEntry.log();
-    }
-    if (logEntry2 != null){
-      logEntry2.log();
-    }
-    if (logEntry3 != null){
-      logEntry3.log();
-    }
-    if (logEntry4 != null){
-      logEntry4.log();
+    for (LogEntry2<?> e : finalLogEntries) {
+      if (e != null){
+        e.log();
+      }
     }
   }
 
@@ -148,101 +130,62 @@ public class LogManager2 extends SubsystemBase {
     LogEntry2<T> entry = null;
     
     if(data.isDouble() && data.getSignals() != null) {
-        if(this.data == null) {
-            this.name = name;
-            this.data = data;
-        } else {
-            try {
-                StatusSignal<?>[] existingSignals = this.data.getSignals();
-                StatusSignal<?>[] newSignal = data.getSignals();
-                
-                @SuppressWarnings("unchecked")
-                StatusSignal<Double>[] combined = new StatusSignal[existingSignals.length + newSignal.length];
-                System.arraycopy(existingSignals, 0, combined, 0, existingSignals.length);
-                for (int i = 0; i < newSignal.length; i++){
-                  combined[existingSignals.length+i] = (StatusSignal<Double>) newSignal[i];
-                }
-                this.name = this.name + " | " + name;
-                this.data = new Data<>(combined);
-                
-            } catch (Exception e) {
-              
-            }
-        }
-        logEntry = new LogEntry2<>(this.name, this.data, 3, "");
+      entry = addToEntryArray(0, name, data);
     } else if(data.isBoolean() && data.getSignals() != null) {
-      if(this.data2 == null) {
-          this.name2 = name;
-          this.data2 = data;
-      } else {
-          try {
-              StatusSignal<?>[] existingSignals = this.data2.getSignals();
-              StatusSignal<?>[] newSignal = data.getSignals();
-              
-              @SuppressWarnings("unchecked")
-              StatusSignal<Double>[] combined = new StatusSignal[existingSignals.length + newSignal.length];
-              System.arraycopy(existingSignals, 0, combined, 0, existingSignals.length);
-              for (int i = 0; i < newSignal.length; i++){
-                combined[existingSignals.length+i] = (StatusSignal<Double>) newSignal[i];
-              }
-              this.name2 = this.name2 + " | " + name;
-              this.data2 = new Data<>(combined);
-          } catch (Exception e) {
-            
-          }
-      }
-      logEntry2 = new LogEntry2<>(this.name3, this.data3, 3, "");
+      entry = addToEntryArray(1, name, data);
     } else if(data.isDouble() && data.getSuppliers() != null) {
-      if(this.data3 == null) {
-          this.name3 = name;
-          this.data3 = data;
-      } else {
-          try {
-              Supplier<?>[] existingSuppliers = this.data3.getSuppliers();
-              Supplier<?>[] newSupplier = data.getSuppliers();
-              
-              @SuppressWarnings("unchecked")
-              Supplier<Double>[] combined = new Supplier[existingSuppliers.length + newSupplier.length];
-              System.arraycopy(existingSuppliers, 0, combined, 0, existingSuppliers.length);
-              for (int i = 0; i < newSupplier.length; i++){
-                combined[existingSuppliers.length+i] = (Supplier<Double>) newSupplier[i];
-              }
-              this.name3 = this.name3 + " | " + name;
-              this.data3 = new Data<>(combined);
-              
-          } catch (Exception e) {
-            
-          }
-      }
-      logEntry3 = new LogEntry2<>(this.name3, this.data3, 3, "");
+      entry = addToEntryArray(2, name, data);
     } else if(data.isBoolean() && data.getSuppliers() != null) {
-      if(this.data4 == null) {
-          this.name4 = name;
-          this.data4 = data;
-      } else {
-          try {
-              Supplier<?>[] existingSuppliers = this.data4.getSuppliers();
-              Supplier<?>[] newSupplier = data.getSuppliers();
-              
-              @SuppressWarnings("unchecked")
-              Supplier<Double>[] combined = new Supplier[existingSuppliers.length + newSupplier.length];
-              System.arraycopy(existingSuppliers, 0, combined, 0, existingSuppliers.length);
-              for (int i = 0; i < newSupplier.length; i++){
-                combined[existingSuppliers.length+i] = (Supplier<Double>) newSupplier[i];
-              }
-              this.name4 = this.name4 + " | " + name;
-              this.data4 = new Data<>(combined);
-          } catch (Exception e) {
-            
-          }
-      }
-      logEntry4 = new LogEntry2<>(this.name4, this.data4, 3, "");
+      entry = addToEntryArray(3, name, data);
     } else{
       entry = new LogEntry2<T>(name, data, logLevel, metaData);
       logEntries.add(entry);
     }
-    
     return entry;
+  }
+
+  private <T> LogEntry2<T> addToEntryArray(int i, String name, Data<T> data){
+    if(finalLogEntries[i] == null || finalLogEntries[i].data == null) {
+      finalLogEntries[i] = new LogEntry2<>(name, data, 3, "");
+  } else {
+      try {
+          if (i < 2) {
+              StatusSignal<?>[] existingSignals = finalLogEntries[i].data.getSignals();
+              StatusSignal<?>[] newSignals = data.getSignals();
+              @SuppressWarnings("unchecked")
+              StatusSignal<T>[] combined = new StatusSignal[existingSignals.length + newSignals.length];
+              System.arraycopy(existingSignals, 0, combined, 0, existingSignals.length);
+              for (int j = 0; j < newSignals.length; j++) {
+                  combined[existingSignals.length + j] = (StatusSignal<T>) newSignals[j];
+              }
+              finalLogEntries[i] = new LogEntry2<>(
+                  finalLogEntries[i].name + " | " + name, 
+                  new Data<>(combined), 
+                  3, 
+                  ""
+              );
+          } else {
+              Supplier<?>[] existingSuppliers = finalLogEntries[i].data.getSuppliers();
+              Supplier<?>[] newSuppliers = data.getSuppliers();
+              
+              @SuppressWarnings("unchecked")
+              Supplier<T>[] combined = new Supplier[existingSuppliers.length + newSuppliers.length];
+              System.arraycopy(existingSuppliers, 0, combined, 0, existingSuppliers.length);
+              for (int j = 0; j < newSuppliers.length; j++) {
+                  combined[existingSuppliers.length + j] = (Supplier<T>) newSuppliers[j];
+              }
+              finalLogEntries[i] = new LogEntry2<>(
+                  finalLogEntries[i].name + " | " + name, 
+                  new Data<>(combined), 
+                  3, 
+                  ""
+              );
+          }
+      } catch (Exception e) {
+          LogManager2.log("Error combining log entries: " + e.getMessage(), AlertType.kError);
+      }
+    }
+    return (LogEntry2<T>) finalLogEntries[i];
   }
 
 
