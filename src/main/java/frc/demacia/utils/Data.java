@@ -99,13 +99,10 @@ public class Data<T> {
                 this.oldSupplier = Arrays.copyOf(supplier, supplier.length);
                 T[] valueArray = (T[]) new Object[length];
                 for (int i = 0; i < length; i++){
-                    LogManager2.log(supplier[i].get());
                     valueArray[i] = supplier[i].get();
-                    LogManager2.log(valueArray[i]);
                 }
                 final T[] finalValueArray = valueArray;
-                supplier = new Supplier[] {() -> finalValueArray};
-                value = supplier[0].get();
+                this.supplier = new Supplier[] {() -> valueArray};
                 length = 1;
             }
             try {
@@ -117,6 +114,8 @@ public class Data<T> {
                 }
             }
         }
+        
+        value = supplier[0].get();
     }
 
     public Double getDouble() {
