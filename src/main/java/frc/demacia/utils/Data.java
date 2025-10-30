@@ -94,6 +94,14 @@ public class Data<T> {
                 }
             }
         } else {
+            try {
+                ((Number) value).doubleValue();
+                isDouble = true;
+            } catch (Exception e) {
+                if (value instanceof  Boolean){
+                    isBoolean = true;
+                }
+            }
             if (length > 1){
                 isArray = true;
                 this.oldSupplier = Arrays.copyOf(supplier, supplier.length);
@@ -105,17 +113,7 @@ public class Data<T> {
                 this.supplier = new Supplier[] {() -> valueArray};
                 length = 1;
             }
-            try {
-                ((Number) value).doubleValue();
-                isDouble = true;
-            } catch (Exception e) {
-                if (value instanceof  Boolean){
-                    isBoolean = true;
-                }
-            }
         }
-        
-        value = supplier[0].get();
     }
 
     public Double getDouble() {

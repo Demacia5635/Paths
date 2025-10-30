@@ -33,7 +33,7 @@ public class LogManager2 extends SubsystemBase {
 
   ArrayList<LogEntry2<?>> logEntries = new ArrayList<>();
   
-  LogEntry2<?>[] finalLogEntries = new LogEntry2<?>[] {null, null, null, null};
+  LogEntry2<?>[] finalLogEntries = new LogEntry2<?>[16];
 
   public LogManager2() {
     logManager = this;
@@ -129,14 +129,38 @@ public class LogManager2 extends SubsystemBase {
   public <T> LogEntry2<T> add(String name, Data<T> data, int logLevel, String metaData) {
     LogEntry2<T> entry = null;
     
-    if(data.isDouble() && data.getSignals() != null) {
+    if(data.isDouble() && data.getSignals() != null && logLevel == 1) {
       entry = addToEntryArray(0, name, data);
-    } else if(data.isBoolean() && data.getSignals() != null) {
+    } else if(data.isBoolean() && data.getSignals() != null && logLevel == 1) {
       entry = addToEntryArray(1, name, data);
-    } else if(data.isDouble() && data.getSuppliers() != null) {
+    } else if(data.isDouble() && data.getSuppliers() != null && logLevel == 1) {
       entry = addToEntryArray(2, name, data);
-    } else if(data.isBoolean() && data.getSuppliers() != null) {
+    } else if(data.isBoolean() && data.getSuppliers() != null && logLevel == 1) {
       entry = addToEntryArray(3, name, data);
+    } else if(data.isDouble() && data.getSignals() != null && logLevel == 2) {
+      entry = addToEntryArray(4, name, data);
+    } else if(data.isBoolean() && data.getSignals() != null && logLevel == 2) {
+      entry = addToEntryArray(5, name, data);
+    } else if(data.isDouble() && data.getSuppliers() != null && logLevel == 2) {
+      entry = addToEntryArray(6, name, data);
+    } else if(data.isBoolean() && data.getSuppliers() != null && logLevel == 2) {
+      entry = addToEntryArray(7, name, data);
+    } else if(data.isDouble() && data.getSignals() != null && logLevel == 3) {
+      entry = addToEntryArray(8, name, data);
+    } else if(data.isBoolean() && data.getSignals() != null && logLevel == 3) {
+      entry = addToEntryArray(9, name, data);
+    } else if(data.isDouble() && data.getSuppliers() != null && logLevel == 3) {
+      entry = addToEntryArray(10, name, data);
+    } else if(data.isBoolean() && data.getSuppliers() != null && logLevel == 3) {
+      entry = addToEntryArray(11, name, data);
+    } else if(data.isDouble() && data.getSignals() != null && logLevel == 4) {
+      entry = addToEntryArray(12, name, data);
+    } else if(data.isBoolean() && data.getSignals() != null && logLevel == 4) {
+      entry = addToEntryArray(13, name, data);
+    } else if(data.isDouble() && data.getSuppliers() != null && logLevel == 4) {
+      entry = addToEntryArray(14, name, data);
+    } else if(data.isBoolean() && data.getSuppliers() != null && logLevel == 4) {
+      entry = addToEntryArray(15, name, data);
     } else{
       entry = new LogEntry2<T>(name, data, logLevel, metaData);
       logEntries.add(entry);
@@ -149,7 +173,8 @@ public class LogManager2 extends SubsystemBase {
       finalLogEntries[i] = new LogEntry2<>(name, data, 3, "");
   } else {
       try {
-          if (i < 2) {
+          int logLevel = i/4 + 1;
+          if (i/2 % 2 == 0) {
               StatusSignal<?>[] existingSignals = finalLogEntries[i].data.getSignals();
               StatusSignal<?>[] newSignals = data.getSignals();
               @SuppressWarnings("unchecked")
@@ -161,7 +186,7 @@ public class LogManager2 extends SubsystemBase {
               finalLogEntries[i] = new LogEntry2<>(
                   finalLogEntries[i].name + " | " + name, 
                   new Data<>(combined), 
-                  3, 
+                  logLevel, 
                   ""
               );
           } else {
@@ -177,7 +202,7 @@ public class LogManager2 extends SubsystemBase {
               finalLogEntries[i] = new LogEntry2<>(
                   finalLogEntries[i].name + " | " + name, 
                   new Data<>(combined), 
-                  3, 
+                  logLevel, 
                   ""
               );
           }

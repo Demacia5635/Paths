@@ -182,6 +182,10 @@ public class TalonMotor extends TalonFX implements MotorInterface {
         LogManager2.addEntry("9, 10, 11", () -> 9, () -> 10, () -> 11).build();
         LogManager2.addEntry("12, 13, 14", () -> new double[] {12, 13, 14}).build();
         LogManager2.addEntry("15", ()->15).build();
+
+        LogManager2.addEntry("b1", ()->true).build();
+        LogManager2.addEntry("b2, b3, b4", () -> new boolean[] {false, false, true}).build();
+        LogManager2.addEntry("bt", ()->false).build();
     }
 
     public void checkElectronics() {
