@@ -224,37 +224,18 @@ public class Data<T> {
             }
         }
 
-        // Update the signal array
         signal = newSignals;
         length = newSignals.length;
         
-        // Recreate current and previous values arrays
         currentValues = (T[]) new Object[length];
         previousValues = (T[]) new Object[length];
         
-        // Refresh to populate currentValues from the new signals
         refresh();
         
-        // Update isArray based on new length
         if (length > 1) {
             isArray = true;
         } else {
             isArray = false;
-        }
-        
-        // Re-detect isDouble and isBoolean for the new signals
-        if (length > 0) {
-            try {
-                signal[0].getValueAsDouble();
-                isDouble = true;
-            } catch (Exception e) {
-                isDouble = false;
-                if (signal[0].getValue() instanceof Boolean) {
-                    isBoolean = true;
-                } else {
-                    isBoolean = false;
-                }
-            }
         }
     }
     
