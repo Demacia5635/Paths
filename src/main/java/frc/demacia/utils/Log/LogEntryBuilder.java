@@ -7,11 +7,11 @@ import com.ctre.phoenix6.StatusSignal;
 
 import frc.demacia.utils.Data;
 
-public class LogEntryBuilder<T> implements AutoCloseable{
+public class LogEntryBuilder<T> implements AutoCloseable {
     private String name;
     private int logLevel = 3;
-    private String metaData = "";
-    private double precision = 0.0;
+    private String metadata = "";
+    private double precision = -1.0;
     private int skipCycles = 1;
     private BiConsumer<T[], Long> consumer = null;
 
@@ -29,42 +29,57 @@ public class LogEntryBuilder<T> implements AutoCloseable{
         data = new Data<>(suppliers);
     }
     
-    public LogEntryBuilder<T> logLevel(int level) {
+    public LogEntryBuilder<T> withLogLevel(int level) {
         this.logLevel = level;
         return this;
     }
     
-    public LogEntryBuilder<T> metaData(String metaData) {
-        this.metaData = metaData;
+    public LogEntryBuilder<T> withMetaData(String metaData) {
+        this.metadata = metaData;
         return this;
     }
 
     
     
-    public LogEntryBuilder<T> isMotor() {
-        this.metaData = "motor";
+    public LogEntryBuilder<T> WithIsMotor() {
+        this.metadata = "motor";
         return this;
     }
     
-    public LogEntryBuilder<T> precision(double precision) {
+    public LogEntryBuilder<T> WithPrecision(double precision) {
+        if (precision < 0) {
+            throw new IllegalArgumentException("Precision must be non-negative, got: " + precision);
+        }
         this.precision = precision;
         return this;
     }
     
-    public LogEntryBuilder<T> skipCycles(int cycles) {
+    public LogEntryBuilder<T> WithSkipCycles(int cycles) {
         this.skipCycles = cycles;
         return this;
     }
     
-    public LogEntryBuilder<T> consumer(BiConsumer<T[], Long> consumer) {
+    public LogEntryBuilder<T> WithConsumer(BiConsumer<T[], Long> consumer) {
         this.consumer = consumer;
         return this;
     }
     
     public LogEntry2<T> build() {
+        if (LogManager2.logManager == null) {
+            throw new IllegalStateException("LogManager2 not initialized. Create LogManager2 instance before building log entries.");
+        }
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Log entry name cannot be null or empty");
+        }
+        if (logLevel < 1 || logLevel > 4) {
+            throw new IllegalArgumentException("Log level must be between 1 and 4, got: " + logLevel);
+        }
+        if (skipCycles < 1) {
+            throw new IllegalArgumentException("Skip cycles must be positive, got: " + skipCycles);
+        }
         built = true;
-        LogEntry2<T> entry = LogManager2.logManager.add(name, data, logLevel, metaData);
-        if (precision != 0.0) {
+        LogEntry2<T> entry = LogManager2.logManager.add(name, data, logLevel, metadata);
+        if (precision >= 0.0) {
             entry.setPrecision(precision);
         }
         if (skipCycles != 1) {
