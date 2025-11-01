@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.demacia.utils.Data;
 import frc.demacia.utils.UpdateArray;
+import frc.demacia.utils.Log.LogEntry2;
 import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Log.LogManager2;
 
@@ -158,17 +159,17 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     }
 
     private void addLog() {
-        LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP",  new StatusSignal[] {
-            positionSignal.getSignal(),
-            velocitySignal.getSignal(),
-            accelerationSignal.getSignal(),
-            voltageSignal.getSignal(),
-            currentSignal.getSignal(),
-            closedLoopErrorSignal.getSignal(),
-            closedLoopSPSignal.getSignal(),
-            }, 3,"motor");
-            LogManager.addEntry(name + "/ControlMode", 
-            controlModeSignal.getSignal(), 3, "motor");
+        // LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP",  new StatusSignal[] {
+        //     positionSignal.getSignal(),
+        //     velocitySignal.getSignal(),
+        //     accelerationSignal.getSignal(),
+        //     voltageSignal.getSignal(),
+        //     currentSignal.getSignal(),
+        //     closedLoopErrorSignal.getSignal(),
+        //     closedLoopSPSignal.getSignal(),
+        //     }, 3,"motor");
+        //     LogManager.addEntry(name + "/ControlMode", 
+        //     controlModeSignal.getSignal(), 3, "motor");
             
 
             
@@ -185,7 +186,14 @@ public class TalonMotor extends TalonFX implements MotorInterface {
 
         LogManager2.addEntry("b1", ()->true).build();
         LogManager2.addEntry("b2, b3, b4", () -> new boolean[] {false, false, true}).build();
-        LogManager2.addEntry("bt", ()->false).build();
+        LogManager2.addEntry("b5", ()->false).build();
+
+        LogManager2.removeEntry("3");
+
+        LogManager2.removeEntry("6, 7, 8");
+        LogManager2.removeEntry("15");
+
+        LogManager2.removeEntry("b1");
     }
 
     public void checkElectronics() {

@@ -5,10 +5,13 @@
 package frc.demacia.utils.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusSignal;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DataLog;
@@ -34,6 +37,8 @@ public class LogManager2 extends SubsystemBase {
   ArrayList<LogEntry2<?>> logEntries = new ArrayList<>();
   
   LogEntry2<?>[] finalLogEntries = new LogEntry2<?>[16];
+
+  private Map<String, Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> entryLocationMap = new HashMap<>();
 
   public LogManager2() {
     logManager = this;
@@ -63,16 +68,106 @@ public class LogManager2 extends SubsystemBase {
         i--;
       }
     }
+
+    for (int i = 0; i < 4; i++) {
+      if (logManager.finalLogEntries[i] != null && logManager.finalLogEntries[i] != null) {
+        logManager.finalLogEntries[i].removeInComp();
+        if (logManager.finalLogEntries[i].logLevel == 1) {
+          logManager.finalLogEntries[i] = null;
+          int index = i;
+          logManager.entryLocationMap.entrySet().removeIf(entry -> entry.getValue().getFirst().getFirst() == index);
+        }
+      }
+    }
   }
   
   public static void clearEntries() {
     if (logManager != null) {
       logManager.logEntries.clear();
+      for (int i = 0; i < logManager.finalLogEntries.length; i++) {
+        if (logManager.finalLogEntries[i] != null) {
+          logManager.finalLogEntries[i] = null;
+        }
+      }
+      logManager.entryLocationMap.clear();
     }
   }
   
   public static int getEntryCount() {
-    return logManager != null ? logManager.logEntries.size() : 0;
+    if (logManager == null) return 0;
+
+    int count = logManager.logEntries.size();
+    for (LogEntry2<?> entry2 : logManager.finalLogEntries) {
+      if (entry2 != null) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  public static LogEntry2<?> findEntry(String name) {
+    if (logManager == null) return null;
+    
+    Pair< Pair<Integer, Integer>, Pair<Integer, Integer>> location = logManager.entryLocationMap.get(name);
+    if (location == null) return null;
+    
+    int categoryIndex = location.getFirst().getFirst();
+    
+    if (categoryIndex == -1) {
+      int index = location.getFirst().getSecond();
+      if (index >= 0 && index < logManager.logEntries.size()) {
+        return logManager.logEntries.get(index);
+      }
+    } else {
+      return logManager.finalLogEntries[categoryIndex];
+    }
+    
+    return null;
+  }
+
+  public static boolean removeEntry(String name) {
+      if (logManager == null) return false;
+      
+      Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> location = logManager.entryLocationMap.get(name);
+      if (location == null) return false;
+      
+      int categoryIndex = location.getFirst().getFirst();
+      
+      if (categoryIndex == -1) {
+          int index = location.getFirst().getSecond();
+          if (index >= 0 && index < logManager.logEntries.size()) {
+              logManager.logEntries.remove(index);
+              logManager.entryLocationMap.remove(name);
+              
+              logManager.updateIndicesAfterRemoval(index);
+              return true;
+          }
+      } else {
+          int subIndex = location.getFirst().getSecond();
+          int dataIndex = location.getSecond().getFirst();
+          int dataCount = location.getSecond().getSecond();
+          
+          logManager.entryLocationMap.remove(name);
+          
+          logManager.finalLogEntries[categoryIndex].removeData(subIndex, dataIndex, dataCount);
+          
+          logManager.updateSubIndicesAfterRemoval(categoryIndex, subIndex);
+          logManager.updateDataIndicesAfterRemoval(categoryIndex, dataIndex, dataCount);
+          
+          if (logManager.finalLogEntries[categoryIndex].data == null || 
+              logManager.finalLogEntries[categoryIndex].name == null || 
+              logManager.finalLogEntries[categoryIndex].name.trim().isEmpty()) {
+              logManager.finalLogEntries[categoryIndex] = null;
+              final int catIndex = categoryIndex;
+              logManager.entryLocationMap.entrySet().removeIf(
+                  entry -> entry.getValue().getFirst().getFirst() == catIndex
+              );
+          }
+          
+          return true;
+      }
+      
+      return false;
   }
 
   public static ConsoleAlert log(Object message, AlertType alertType) {
@@ -128,89 +223,122 @@ public class LogManager2 extends SubsystemBase {
 
   public <T> LogEntry2<T> add(String name, Data<T> data, int logLevel, String metaData) {
     LogEntry2<T> entry = null;
-    
-    if(data.isDouble() && data.getSignals() != null && logLevel == 1) {
-      entry = addToEntryArray(0, name, data);
-    } else if(data.isBoolean() && data.getSignals() != null && logLevel == 1) {
-      entry = addToEntryArray(1, name, data);
-    } else if(data.isDouble() && data.getSuppliers() != null && logLevel == 1) {
-      entry = addToEntryArray(2, name, data);
-    } else if(data.isBoolean() && data.getSuppliers() != null && logLevel == 1) {
-      entry = addToEntryArray(3, name, data);
-    } else if(data.isDouble() && data.getSignals() != null && logLevel == 2) {
-      entry = addToEntryArray(4, name, data);
-    } else if(data.isBoolean() && data.getSignals() != null && logLevel == 2) {
-      entry = addToEntryArray(5, name, data);
-    } else if(data.isDouble() && data.getSuppliers() != null && logLevel == 2) {
-      entry = addToEntryArray(6, name, data);
-    } else if(data.isBoolean() && data.getSuppliers() != null && logLevel == 2) {
-      entry = addToEntryArray(7, name, data);
-    } else if(data.isDouble() && data.getSignals() != null && logLevel == 3) {
-      entry = addToEntryArray(8, name, data);
-    } else if(data.isBoolean() && data.getSignals() != null && logLevel == 3) {
-      entry = addToEntryArray(9, name, data);
-    } else if(data.isDouble() && data.getSuppliers() != null && logLevel == 3) {
-      entry = addToEntryArray(10, name, data);
-    } else if(data.isBoolean() && data.getSuppliers() != null && logLevel == 3) {
-      entry = addToEntryArray(11, name, data);
-    } else if(data.isDouble() && data.getSignals() != null && logLevel == 4) {
-      entry = addToEntryArray(12, name, data);
-    } else if(data.isBoolean() && data.getSignals() != null && logLevel == 4) {
-      entry = addToEntryArray(13, name, data);
-    } else if(data.isDouble() && data.getSuppliers() != null && logLevel == 4) {
-      entry = addToEntryArray(14, name, data);
-    } else if(data.isBoolean() && data.getSuppliers() != null && logLevel == 4) {
-      entry = addToEntryArray(15, name, data);
-    } else{
+
+    int categoryIndex = getCategoryIndex(data, logLevel, metaData);
+
+    if (categoryIndex == -1){
       entry = new LogEntry2<T>(name, data, logLevel, metaData);
       logEntries.add(entry);
+      int index = logEntries.size() - 1;
+      entryLocationMap.put(name, new Pair<>(new Pair<>(-1, index), new Pair<>(null, null)));
+    } else{
+      entry = addToEntryArray(categoryIndex, name, data);
     }
+
     return entry;
   }
 
-  private <T> LogEntry2<T> addToEntryArray(int i, String name, Data<T> data){
-    if(finalLogEntries[i] == null || finalLogEntries[i].data == null) {
-      finalLogEntries[i] = new LogEntry2<>(name, data, 3, "");
-  } else {
-      try {
-          int logLevel = i/4 + 1;
-          if (i/2 % 2 == 0) {
-              StatusSignal<?>[] existingSignals = finalLogEntries[i].data.getSignals();
-              StatusSignal<?>[] newSignals = data.getSignals();
-              @SuppressWarnings("unchecked")
-              StatusSignal<T>[] combined = new StatusSignal[existingSignals.length + newSignals.length];
-              System.arraycopy(existingSignals, 0, combined, 0, existingSignals.length);
-              for (int j = 0; j < newSignals.length; j++) {
-                  combined[existingSignals.length + j] = (StatusSignal<T>) newSignals[j];
-              }
-              finalLogEntries[i] = new LogEntry2<>(
-                  finalLogEntries[i].name + " | " + name, 
-                  new Data<>(combined), 
-                  logLevel, 
-                  ""
-              );
-          } else {
-              Supplier<?>[] existingSuppliers = finalLogEntries[i].data.getSuppliers();
-              Supplier<?>[] newSuppliers = data.getSuppliers();
-              
-              @SuppressWarnings("unchecked")
-              Supplier<T>[] combined = new Supplier[existingSuppliers.length + newSuppliers.length];
-              System.arraycopy(existingSuppliers, 0, combined, 0, existingSuppliers.length);
-              for (int j = 0; j < newSuppliers.length; j++) {
-                  combined[existingSuppliers.length + j] = (Supplier<T>) newSuppliers[j];
-              }
-              finalLogEntries[i] = new LogEntry2<>(
-                  finalLogEntries[i].name + " | " + name, 
-                  new Data<>(combined), 
-                  logLevel, 
-                  ""
+  @SuppressWarnings("unchecked")
+  private <T> LogEntry2<T> addToEntryArray(int i, String name, Data<T> data) {
+    int subIndex;
+    int dataIndex = 0;
+    
+    if (finalLogEntries[i] == null || finalLogEntries[i].data == null) {
+        finalLogEntries[i] = new LogEntry2<>(name, data, i/4 + 1, "");
+        subIndex = 1;
+        dataIndex = 0;
+    } else {
+        String[] parts = finalLogEntries[i].name.split(" \\| ");
+        subIndex = parts.length + 1;
+
+        if (finalLogEntries[i].data.getSignals() != null) {
+          dataIndex = finalLogEntries[i].data.getSignals().length;
+        } else if (finalLogEntries[i].data.getSuppliers() != null) {
+          dataIndex = finalLogEntries[i].data.getSuppliers().length;
+        }
+
+        try {
+            ((LogEntry2<T>) finalLogEntries[i]).addData(name, data);
+        } catch (Exception e) {
+            LogManager2.log("Error combining log entries: " + e.getMessage(), AlertType.kError);
+        }
+    }
+
+    int dataLength = 0;
+    if (data.getSignals() != null) {
+      dataLength = data.getSignals().length;
+    } else if (data.getSuppliers() != null) {
+      dataLength = data.getSuppliers().length;
+    }
+
+
+    entryLocationMap.put(name, new Pair<>(new Pair<>(i, subIndex), new Pair<>(dataIndex, dataLength)));
+    log("added:" + name + 
+    " with: " + i + 
+    " and: " + subIndex + 
+    " and: " + dataIndex + 
+    " and: " + dataLength);
+    
+    return (LogEntry2<T>) finalLogEntries[i];
+}
+
+  private int getCategoryIndex(Data<?> data, int logLevel, String metaData) {
+    boolean isSignal = data.getSignals() != null;
+    boolean isSupplier = data.getSuppliers() != null;
+    boolean isDouble = data.isDouble();
+    boolean isBoolean = data.isBoolean();
+    
+    if (!(isDouble || isBoolean) || !(isSignal || isSupplier) || metaData != "") {
+      return -1;
+    }
+    
+    int baseIndex = (isSignal ? 0 : 2) + (isDouble ? 0 : 1);
+    int levelOffset = (logLevel - 1) * 4;
+    
+    return baseIndex + levelOffset;
+  }
+
+  private void updateIndicesAfterRemoval(int removedIndex) {
+      for (Map.Entry<String, Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> entry : entryLocationMap.entrySet()) {
+          Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> location = entry.getValue();
+          if (location.getFirst().getFirst() == -1 && location.getFirst().getSecond() > removedIndex) {
+              entry.setValue(
+                  new Pair<>(
+                      new Pair<>(-1, location.getFirst().getSecond() - 1), 
+                      new Pair<>(location.getSecond().getFirst(), location.getSecond().getSecond())
+                  )
               );
           }
-      } catch (Exception e) {
-          LogManager2.log("Error combining log entries: " + e.getMessage(), AlertType.kError);
       }
-    }
-    return (LogEntry2<T>) finalLogEntries[i];
+  }
+
+  private void updateSubIndicesAfterRemoval(int categoryIndex, int removedSubIndex) {
+      for (Map.Entry<String, Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> entry : entryLocationMap.entrySet()) {
+          Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> location = entry.getValue();
+          if (location.getFirst().getFirst() == categoryIndex && location.getFirst().getSecond() > removedSubIndex) {
+              entry.setValue(
+                  new Pair<>(
+                      new Pair<>(categoryIndex, location.getFirst().getSecond() - 1),
+                      new Pair<>(location.getSecond().getFirst(), location.getSecond().getSecond())
+                  )
+              );
+          }
+      }
+  }
+
+  private void updateDataIndicesAfterRemoval(int categoryIndex, int removedDataIndex, int removedCount) {
+      for (Map.Entry<String, Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> entry : entryLocationMap.entrySet()) {
+          Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> location = entry.getValue();
+          if (location.getFirst().getFirst() == categoryIndex && 
+              location.getSecond().getFirst() >= removedDataIndex + removedCount) {
+              entry.setValue(
+                  new Pair<>(
+                      new Pair<>(location.getFirst().getFirst(), location.getFirst().getSecond()),
+                      new Pair<>(location.getSecond().getFirst() - removedCount, location.getSecond().getSecond())
+                  )
+              );
+          }
+      }
   }
 
 

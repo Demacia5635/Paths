@@ -22,6 +22,7 @@ import edu.wpi.first.util.datalog.FloatArrayLogEntry;
 import edu.wpi.first.util.datalog.FloatLogEntry;
 import edu.wpi.first.util.datalog.StringArrayLogEntry;
 import edu.wpi.first.util.datalog.StringLogEntry;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.demacia.utils.Data;
 import frc.robot.RobotContainer;
 
@@ -73,6 +74,76 @@ public class LogEntry2<T> {
             this.ntPublisher = createPublisher(logManager.table, name);
         } else {
             this.ntPublisher = null;
+        }
+    }
+
+    public void addData(String name, Data<T> data){
+        this.name = this.name + " | " + name;
+        if (this.data.getSignals() != null){
+            this.data.expandWithSignals(data.getSignals());
+        } else {
+            this.data.expandWithSuppliers(data.getSuppliers());
+        }
+        this.isArray = this.data.isArray();
+        if (ntPublisher != null) ntPublisher.close();
+        
+        entry = createLogEntry(logManager.log, this.name, metaData);
+
+        if (logLevel == 4 || (logLevel == 3 && !RobotContainer.isComp())) {
+            ntPublisher = createPublisher(logManager.table, this.name);
+        } else {
+            ntPublisher = null;
+        }
+    }
+
+    public void removeData(int nameIndex, int dataIndex, int count) {
+        int actualIndex = nameIndex - 1;
+
+        String[] parts = name.split(" \\| ");
+
+        if (actualIndex >= parts.length || actualIndex < 0) {
+            LogManager2.log("removeData: nameIndex out of range: " + nameIndex + " (parts length: " + parts.length + ")", AlertType.kWarning);
+            return;
+        }
+        StringBuilder newName = new StringBuilder();
+        for (int i = 0; i < parts.length; i++) {
+            if (i != actualIndex) {
+                if (newName.length() > 0) newName.append(" | ");
+                newName.append(parts[i]);
+            }
+        }
+
+        name = newName.toString();
+
+        if (data != null) {
+            try {
+                if (data.getSignals() != null) {
+                    data.removeSignalRange(dataIndex, count);
+                } else if (data.getSuppliers() != null) {
+                    data.removeSupplierRange(dataIndex, count);
+                }
+            } catch (Exception e) {
+                LogManager2.log("removeData: failed to remove from data: " + e.getMessage(), AlertType.kError);
+            }
+        }
+
+        if (name.isEmpty()) {
+            if (ntPublisher != null) {
+                ntPublisher.close();
+                ntPublisher = null;
+            }
+            entry = null;
+            data = null;
+            return;
+        }
+
+        if (ntPublisher != null) ntPublisher.close();
+
+        entry = createLogEntry(logManager.log, name, metaData);
+        if (logLevel == 4 || (logLevel == 3 && !RobotContainer.isComp())) {
+            ntPublisher = createPublisher(logManager.table, name);
+        } else {
+            ntPublisher = null;
         }
     }
 

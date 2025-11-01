@@ -9,8 +9,8 @@ import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Log.LogManager2;
 import frc.robot.testMotors.talonFX.subsystems.Motor;
-import frc.robot.testSensors.ultraSonicSensor.commands.Show;
-import frc.robot.testSensors.ultraSonicSensor.subsystems.UltraSonic;
+import frc.robot.testSensors.piegon.commands.Show;
+import frc.robot.testSensors.piegon.subsystems.Pigeon;
 import frc.robot.testMotors.talonFX.commands.Set;
 import frc.demacia.utils.Sensors.UltraSonicSensor;
 import frc.demacia.utils.chassis.Chassis;
@@ -32,8 +32,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
 
- UltraSonic ultraSonicSensor;
-  Show show;
+  Motor motor;
+  Set set;
   
   public static CommandController driverController;
 
@@ -56,8 +56,8 @@ public class RobotContainer {
 
     driverController = new CommandController(0, ControllerType.kXbox);
 
-    ultraSonicSensor = new UltraSonic();
-    show =new Show(ultraSonicSensor);
+    motor = new Motor();
+    set =new Set(motor);
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
     configureBindings();
@@ -85,8 +85,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    ultraSonicSensor.setDefaultCommand(show);
-
+    motor.setDefaultCommand(set);
   }
 
   /**

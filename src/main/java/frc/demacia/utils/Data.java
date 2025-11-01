@@ -116,6 +116,221 @@ public class Data<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public void expandWithSignals(StatusSignal<T>... newSignals) {
+        if (signal == null || newSignals == null || newSignals.length == 0) {
+            return;
+        }
+        
+        int oldLength = signal.length;
+        int newLength = oldLength + newSignals.length;
+        
+        StatusSignal<T>[] expandedSignals = new StatusSignal[newLength];
+        System.arraycopy(signal, 0, expandedSignals, 0, oldLength);
+        System.arraycopy(newSignals, 0, expandedSignals, oldLength, newSignals.length);
+        signal = expandedSignals;
+        
+        T[] expandedCurrent = (T[]) new Object[newLength];
+        T[] expandedPrevious = (T[]) new Object[newLength];
+        
+        if (currentValues != null) {
+            System.arraycopy(currentValues, 0, expandedCurrent, 0, Math.min(oldLength, currentValues.length));
+        }
+        if (previousValues != null) {
+            System.arraycopy(previousValues, 0, expandedPrevious, 0, Math.min(oldLength, previousValues.length));
+        }
+        
+        currentValues = expandedCurrent;
+        previousValues = expandedPrevious;
+        length = newLength;
+        
+        if (length > 1) {
+            isArray = true;
+        }
+        
+        refresh();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void expandWithSuppliers(Supplier<T>... newSuppliers) {
+        if (supplier == null || newSuppliers == null || newSuppliers.length == 0) {
+            return;
+        }
+    
+        Supplier<?>[] existingSuppliers = getSuppliers();
+        
+        Supplier<T>[] combined = new Supplier[existingSuppliers.length + newSuppliers.length];
+        System.arraycopy(existingSuppliers, 0, combined, 0, existingSuppliers.length);
+        for (int j = 0; j < newSuppliers.length; j++) {
+            combined[existingSuppliers.length + j] = (Supplier<T>) newSuppliers[j];
+        }
+        
+        T value = combined[0].get();
+        
+        if (value == null) {
+            supplier = combined;
+            oldSupplier = combined;
+            length = 0;
+            currentValues = (T[]) new Object[0];
+            previousValues = (T[]) new Object[0];
+            return;
+        }
+        
+        if (value.getClass().isArray()) {
+            isArray = true;
+            int arrayLength = java.lang.reflect.Array.getLength(value);
+            oldSupplier = new Supplier[arrayLength];
+            final T finalValue = value;
+            for (int i = 0; i < arrayLength; i++) {
+                final int index = i;
+                oldSupplier[i] = () -> (T) java.lang.reflect.Array.get(finalValue, index);
+            }
+            supplier = new Supplier[] {combined[0]};
+            length = 1;
+        } else {
+            if (combined.length > 1) {
+                isArray = true;
+                oldSupplier = Arrays.copyOf(combined, combined.length);
+                T[] valueArray = (T[]) new Object[combined.length];
+                for (int i = 0; i < combined.length; i++) {
+                    valueArray[i] = combined[i].get();
+                }
+                supplier = new Supplier[] {() -> valueArray};
+                length = 1;
+            } else {
+                oldSupplier = combined;
+                supplier = combined;
+                length = combined.length;
+            }
+        }
+        
+        currentValues = (T[]) new Object[length];
+        previousValues = (T[]) new Object[length];
+        
+        refresh();
+    }
+
+    @SuppressWarnings("unchecked")
+    public void removeSignalRange(int startIndex, int count) {
+        if (signal == null || signal.length == 0 || count <= 0) return;
+
+        StatusSignal<T>[] newSignals = new StatusSignal[length - count];
+        int c = 0;
+        for (int i = 0; i < length; i++) {
+            if (i < startIndex || i >= startIndex + count) {
+                newSignals[i - c] = signal[i];
+            } else {
+                c += 1;
+            }
+        }
+
+        // Update the signal array
+        signal = newSignals;
+        length = newSignals.length;
+        
+        // Recreate current and previous values arrays
+        currentValues = (T[]) new Object[length];
+        previousValues = (T[]) new Object[length];
+        
+        // Refresh to populate currentValues from the new signals
+        refresh();
+        
+        // Update isArray based on new length
+        if (length > 1) {
+            isArray = true;
+        } else {
+            isArray = false;
+        }
+        
+        // Re-detect isDouble and isBoolean for the new signals
+        if (length > 0) {
+            try {
+                signal[0].getValueAsDouble();
+                isDouble = true;
+            } catch (Exception e) {
+                isDouble = false;
+                if (signal[0].getValue() instanceof Boolean) {
+                    isBoolean = true;
+                } else {
+                    isBoolean = false;
+                }
+            }
+        }
+    }
+    
+    public void removeSignal(int startIndex){
+        removeSignalRange(startIndex, 1);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public void removeSupplierRange(int startIndex, int count) {
+        if (oldSupplier == null || oldSupplier.length == 0 || count <= 0) return;
+        if (startIndex < 0 || startIndex >= oldSupplier.length) return;
+        
+        count = Math.min(count, oldSupplier.length - startIndex);
+        
+        int newLength = oldSupplier.length - count;
+        Supplier<T>[] newOldSuppliers = new Supplier[newLength];
+        
+        System.arraycopy(oldSupplier, 0, newOldSuppliers, 0, startIndex);
+        
+        if (startIndex + count < oldSupplier.length) {
+            System.arraycopy(oldSupplier, startIndex + count, newOldSuppliers, 
+                            startIndex, oldSupplier.length - startIndex - count);
+        }
+        
+        oldSupplier = newOldSuppliers;
+        
+        T value = newOldSuppliers.length > 0 ? newOldSuppliers[0].get() : null;
+        
+        if (value == null) {
+            supplier = newOldSuppliers;
+            length = 0;
+            currentValues = (T[]) new Object[0];
+            previousValues = (T[]) new Object[0];
+            isArray = false;
+            return;
+        }
+        
+        if (value.getClass().isArray()) {
+            isArray = true;
+            int arrayLength = java.lang.reflect.Array.getLength(value);
+            Supplier<T>[] arraySuppliers = new Supplier[arrayLength];
+            final T finalValue = value;
+            for (int i = 0; i < arrayLength; i++) {
+                final int index = i;
+                arraySuppliers[i] = () -> (T) java.lang.reflect.Array.get(finalValue, index);
+            }
+            oldSupplier = arraySuppliers;
+            supplier = new Supplier[] {newOldSuppliers[0]};
+            length = 1;
+        } else {
+            if (newOldSuppliers.length > 1) {
+                isArray = true;
+                T[] valueArray = (T[]) new Object[newOldSuppliers.length];
+                for (int i = 0; i < newOldSuppliers.length; i++) {
+                    valueArray[i] = newOldSuppliers[i].get();
+                }
+                supplier = new Supplier[] {() -> valueArray};
+                length = 1;
+            } else {
+                supplier = newOldSuppliers;
+                length = newOldSuppliers.length;
+                isArray = false;
+            }
+        }
+        
+        currentValues = (T[]) new Object[length];
+        previousValues = (T[]) new Object[length];
+        
+        refresh();
+    }
+
+    public void removeSupplier(int startIndex){
+        removeSupplierRange(startIndex, 1);
+    }
+
     public Double getDouble() {
         if (!isDouble || length == 0) {return null;}
         refresh();
