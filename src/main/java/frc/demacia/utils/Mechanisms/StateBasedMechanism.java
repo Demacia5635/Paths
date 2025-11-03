@@ -5,27 +5,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public abstract class StateBasedMechanism extends BaseMechanism {
 
-    protected enum States{
-        
-    }
-    protected States state;
+    protected Enum<?> state;
 
-    public void addNT() {
-        try {
-            SendableChooser<States> stateChooser = new SendableChooser<>();
-            Class<?> enumClass = Class.forName(getClass().getName() + "$States");
-            States[] possibleStates = (States[]) enumClass.getMethod("values").invoke(null);
-
-            for (States s : possibleStates) {
+    public void addNT(Class<? extends Enum<?>> enumClass) {
+            SendableChooser<Enum<?>> stateChooser = new SendableChooser<>();
+            
+            for (Enum<?> s : enumClass.getEnumConstants()) {
                 stateChooser.addOption(s.name(), s);
             }
 
             stateChooser.onChange(state -> this.state = state);
 
             SmartDashboard.putData(getName() + "/State Chooser", stateChooser);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
