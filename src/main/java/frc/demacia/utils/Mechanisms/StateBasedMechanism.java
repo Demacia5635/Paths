@@ -2,22 +2,30 @@ package frc.demacia.utils.Mechanisms;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.demacia.utils.Motors.BaseMotorConfig;
-import frc.demacia.utils.Sensors.BaseSensorConfig;
+import frc.demacia.utils.Motors.MotorInterface;
+import frc.demacia.utils.Sensors.SensorInterface;
 
 public abstract class StateBasedMechanism extends BaseMechanism {
 
+    public enum StateEnum {
+        Testing,
+        IDLE1,
+        IDLE2;
+
+        public double[] values;
+
+        double[] getValues(){
+            return values;
+        }
+    }
+
+    double[] testValues;
+
     protected Enum<?> state;
 
-    @SuppressWarnings("rawtypes")
-    public StateBasedMechanism(String name, BaseMotorConfig[] motorConfigs, BaseSensorConfig[] sensorConfigs, Class<? extends Enum<?>> enumClass) {
-        super(name, motorConfigs, sensorConfigs);
+    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<StateEnum> enumClass) {
+        super(name, motors, sensors);
         this.addNT(enumClass);
-    }
-    
-    @SuppressWarnings("rawtypes")
-    protected StateBasedMechanism(String name, BaseMotorConfig[] motorConfigs, Class<? extends Enum<?>> enumClass) {
-        this(name, motorConfigs, null, enumClass);
     }
 
     public void addNT(Class<? extends Enum<?>> enumClass) {
@@ -30,5 +38,11 @@ public abstract class StateBasedMechanism extends BaseMechanism {
             stateChooser.onChange(state -> this.state = state);
 
             SmartDashboard.putData(getName() + "/State Chooser", stateChooser);
+    }
+
+    public void periodic(){
+        if (state == StateEnum.Testing){
+
+        }
     }
 }

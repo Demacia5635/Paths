@@ -111,7 +111,7 @@ public class ArmConstants {
                 .withRampTime(RAMP_TIME);
     }
 
-    public static enum ARM_ANGLE_STATES implements ArmState{
+    public static enum ARM_ANGLE_STATES{
         L1(Math.toRadians(37.3), 4.6),
         L2(1.8, 4.4),
         L3(2.64208984375, 4.729228859906724),
