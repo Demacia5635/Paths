@@ -20,6 +20,7 @@ public class PigeonConfig extends BaseSensorConfig<PigeonConfig>{
      */
     public PigeonConfig(int id, CANBus canbus, String name) {
         super(id, canbus, name);
+        sensorType = Pigeon.class;
     }
 
 

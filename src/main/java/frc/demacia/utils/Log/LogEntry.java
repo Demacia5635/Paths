@@ -167,6 +167,7 @@ public class LogEntry<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private T extractPhoenixValue() {
         if (isArray) {
             if (isFloat) {

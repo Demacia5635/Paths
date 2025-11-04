@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.CANBus;
-
 import frc.demacia.utils.Motors.TalonConfig;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 

@@ -7,6 +7,7 @@ public class AnalogEncoderConfig extends AnalogSensorConfig<AnalogEncoderConfig>
 
     public AnalogEncoderConfig(int channel, String name) {
         super(channel, name);
+        sensorType = AnalogEncoder.class;
     }
 
     public AnalogEncoderConfig withFullRange(double fullRange) {

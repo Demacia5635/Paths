@@ -10,6 +10,7 @@ public class DigitalEncoderConfig extends BaseSensorConfig<DigitalEncoderConfig>
 
     public DigitalEncoderConfig(int channel, String name) {
         super(channel, name);
+        sensorType = DigitalEncoder.class;
     }
 
     public DigitalEncoderConfig withScalar(double scalar) {

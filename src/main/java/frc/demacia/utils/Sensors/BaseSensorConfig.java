@@ -3,6 +3,9 @@ package frc.demacia.utils.Sensors;
 import com.ctre.phoenix6.CANBus;
 
 public abstract class BaseSensorConfig<T extends BaseSensorConfig<T>> {
+    
+    public Class<? extends SensorInterface> sensorType;
+    
     public int id;
     public CANBus canbus;
     public String name;
@@ -26,6 +29,10 @@ public abstract class BaseSensorConfig<T extends BaseSensorConfig<T>> {
         this.id = id;
         this.canbus = canbus;
         this.name = name;
+    }
+
+    public Class<? extends SensorInterface> getSensorClass() {
+        return sensorType;
     }
 
     /**

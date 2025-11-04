@@ -17,6 +17,7 @@ public class CancoderConfig extends BaseSensorConfig<CancoderConfig>{
      */
     public CancoderConfig(int id, CANBus canbus, String name) {
         super(id, canbus, name);
+        sensorType = Cancoder.class;
     }
 
     public CancoderConfig withOffset(double offset) {

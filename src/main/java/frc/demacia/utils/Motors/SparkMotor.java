@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Utilities;
 import frc.demacia.utils.Log.LogManager;
-import frc.demacia.utils.Log.LogManager2;
 import frc.robot.RobotContainer;
 
 public class SparkMotor extends SparkMax implements Sendable, MotorInterface {

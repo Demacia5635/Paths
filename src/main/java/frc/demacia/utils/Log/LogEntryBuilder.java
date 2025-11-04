@@ -19,11 +19,13 @@ public class LogEntryBuilder<T> implements AutoCloseable {
 
     private boolean built = false;
     
+    @SuppressWarnings("unchecked")
     LogEntryBuilder(String name, StatusSignal<T> ... statusSignals) {
         this.name = name;
         data = new Data<>(statusSignals);
     }
     
+    @SuppressWarnings("unchecked")
     LogEntryBuilder(String name, Supplier<T> ... suppliers) {
         this.name = name;
         data = new Data<>(suppliers);

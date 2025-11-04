@@ -1,5 +1,6 @@
 package frc.demacia.utils.Motors;
 
+
 /** 
  * Class to hold all Talon FX/SRX configuration
  * Applicable to Phoenix 6

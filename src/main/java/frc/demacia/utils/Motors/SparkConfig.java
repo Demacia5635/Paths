@@ -6,6 +6,8 @@ package frc.demacia.utils.Motors;
  *  */
 public class SparkConfig extends BaseMotorConfig<SparkConfig> {
 
+    // SparkMotorType motorType = SparkMotorType.SparkMax;
+
     /** 
      * Constructor
      * @param id - canbus ID
@@ -20,5 +22,4 @@ public class SparkConfig extends BaseMotorConfig<SparkConfig> {
         this(id,name);
         copyBaseFields(config);
     }
-
 }

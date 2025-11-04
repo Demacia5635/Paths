@@ -97,7 +97,6 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
         setNeutralMode(isBrake ? NeutralMode.Brake : NeutralMode.Coast);
     }
 
-
     public void setDuty(double power){
         set(ControlMode.PercentOutput, power);
         lastControlMode = "Duty Cycle";

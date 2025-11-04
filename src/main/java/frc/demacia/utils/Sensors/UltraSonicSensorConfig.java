@@ -4,5 +4,6 @@ public class UltraSonicSensorConfig extends AnalogSensorConfig<UltraSonicSensorC
     public UltraSonicSensorConfig(int channel, int pingChannel, String name) {
         super(channel, name);
         this.pingChannel = pingChannel;
-        }
+        sensorType = UltraSonicSensor.class;
     }
+}

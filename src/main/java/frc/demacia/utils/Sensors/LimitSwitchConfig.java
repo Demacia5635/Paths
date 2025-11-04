@@ -9,5 +9,6 @@ public class LimitSwitchConfig extends BaseSensorConfig<LimitSwitchConfig>{
      */
     public LimitSwitchConfig(int channel, String name) {
         super(channel, name);
+        sensorType = LimitSwitch.class;
     }
 }

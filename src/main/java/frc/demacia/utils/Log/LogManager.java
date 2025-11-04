@@ -44,6 +44,7 @@ public class LogManager extends SubsystemBase {
     log("log manager is ready");
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> LogEntry<T> addEntry(String name, StatusSignal<T> phoenixStatus, int logLevel, String metaData) {
     boolean isFloat = false;
     boolean isBoolean = false;
@@ -108,7 +109,7 @@ public class LogManager extends SubsystemBase {
       isArray = true;
       try {
         Object first = java.lang.reflect.Array.get(value, 0);
-        double d = ((Number) first).floatValue();
+        ((Number) first).floatValue();
         isFloat = true;
       } catch (Exception e) {
         if (value instanceof boolean[] || value instanceof Boolean[]){
@@ -117,7 +118,7 @@ public class LogManager extends SubsystemBase {
       }
     } else {
         try {
-            float d = ((Number) value).floatValue();
+            ((Number) value).floatValue();
             isFloat = true;
         } catch (Exception e) {
           if (value instanceof  Boolean){
@@ -217,6 +218,7 @@ public class LogManager extends SubsystemBase {
     return entry;
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private LogEntry<?> get(String name) {
     LogEntry<?> e = find(name);
     return e != null 

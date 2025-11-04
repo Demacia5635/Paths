@@ -8,8 +8,6 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 
-import frc.demacia.utils.Log.LogManager2;
-
 public class Data<T> {
     
     @SuppressWarnings("rawtypes")
@@ -109,7 +107,6 @@ public class Data<T> {
                 for (int i = 0; i < length; i++){
                     valueArray[i] = supplier[i].get();
                 }
-                final T[] finalValueArray = valueArray;
                 this.supplier = new Supplier[] {() -> valueArray};
                 length = 1;
             }

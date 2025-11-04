@@ -52,10 +52,12 @@ public class LogManager2 extends SubsystemBase {
     log("log manager is ready");
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> LogEntryBuilder<T> addEntry(String name, StatusSignal<T> ... statusSignals) {
       return new LogEntryBuilder<T>(name, statusSignals);
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> LogEntryBuilder<T> addEntry(String name, Supplier<T> ... suppliers) {
     return new LogEntryBuilder<T>(name, suppliers);
   }
@@ -342,6 +344,7 @@ public class LogManager2 extends SubsystemBase {
   }
 
 
+  @SuppressWarnings("unused")
   private LogEntry2<?> get(String name) {
     LogEntry2<?> e = find(name);
     return e != null 
