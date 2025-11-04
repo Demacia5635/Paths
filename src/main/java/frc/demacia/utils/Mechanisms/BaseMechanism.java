@@ -12,7 +12,7 @@ public abstract class BaseMechanism extends SubsystemBase{
     protected SensorInterface[] sensors;
 
     @SuppressWarnings({ "rawtypes"})
-    protected BaseMechanism(String name, BaseMotorConfig[] motorConfigs, BaseSensorConfig[] sensorConfigs) {
+    public BaseMechanism(String name, BaseMotorConfig[] motorConfigs, BaseSensorConfig[] sensorConfigs) {
         this.name = name;
         int motorLength = motorConfigs == null ? 0 : motorConfigs.length;
         motors = new MotorInterface[motorLength];

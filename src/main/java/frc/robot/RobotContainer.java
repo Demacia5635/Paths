@@ -8,7 +8,11 @@ import frc.demacia.utils.Controller.CommandController;
 import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Log.LogManager2;
+import frc.demacia.utils.Mechanisms.Arm;
+import frc.demacia.utils.Motors.TalonConfig;
 import frc.robot.testMotors.talonFX.subsystems.Motor;
+import frc.robot.testMechanism.ArmConstants;
+import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
 import frc.robot.testMotors.talonFX.commands.Set;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +30,8 @@ public class RobotContainer {
 
   Motor motor;
   Set set;
+
+  Arm arm;
   
   public static CommandController driverController;
 
@@ -50,6 +56,9 @@ public class RobotContainer {
 
     motor = new Motor();
     set =new Set(motor);
+
+    arm = new Arm(ArmConstants.NAME, new TalonConfig[] {ArmAngleMotorConstants.CONFIG}, ArmConstants.ARM_ANGLE_STATES.class);
+
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
     configureBindings();
@@ -77,7 +86,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    motor.setDefaultCommand(set);
+    arm.setDefaultCommand(arm.armCommand());
   }
 
   /**

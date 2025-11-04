@@ -10,7 +10,7 @@ public abstract class StateBasedMechanism extends BaseMechanism {
     protected Enum<?> state;
 
     @SuppressWarnings("rawtypes")
-    protected StateBasedMechanism(String name, BaseMotorConfig[] motorConfigs, BaseSensorConfig[] sensorConfigs, Class<? extends Enum<?>> enumClass) {
+    public StateBasedMechanism(String name, BaseMotorConfig[] motorConfigs, BaseSensorConfig[] sensorConfigs, Class<? extends Enum<?>> enumClass) {
         super(name, motorConfigs, sensorConfigs);
         this.addNT(enumClass);
     }
