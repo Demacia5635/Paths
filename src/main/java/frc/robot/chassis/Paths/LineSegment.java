@@ -26,9 +26,7 @@ public class LineSegment extends SegmentBase{
 
     public Translation2d getStartToFinishVector(){return this.startToFinishVector;}
     public double getFinishVelocity(){return this.finishVelocity;}
-
     
-
     
 
 
