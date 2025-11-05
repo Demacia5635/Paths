@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.chassis.Drive;
 import frc.robot.chassis.subsystems.Chassis;
 import frc.robot.chassis.utils.FieldTarget;
 import frc.robot.chassis.utils.FieldTarget.ELEMENT_POSITION;
@@ -52,8 +51,6 @@ public class RobotContainer{
   public RobotContainer() {
     chassis = new Chassis();
     driverController = new CommandController(0, ControllerType.kXbox);
-    
-    chassis.setDefaultCommand(new Drive(chassis, driverController));
    
    }
 
