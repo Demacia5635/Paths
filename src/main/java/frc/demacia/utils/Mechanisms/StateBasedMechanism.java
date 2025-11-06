@@ -37,7 +37,7 @@ public class StateBasedMechanism extends BaseMechanism {
             for (Enum<?> s : enumClass.getEnumConstants()) {
                 stateChooser.addOption(s.name(), s);
             }
-            stateChooser.addOption("Testing", null);
+            stateChooser.addOption("TESTING", null);
 
             stateChooser.onChange(state -> this.state = state);
 
@@ -63,6 +63,7 @@ public class StateBasedMechanism extends BaseMechanism {
     private void setState(){
         if (state == null) {
             Values = testValues;
+            return;
         };
         for (int i = 0; i < Values.length; i++){
             Values[i] = ((StateEnum) state).getValues()[i];

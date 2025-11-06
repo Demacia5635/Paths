@@ -124,7 +124,6 @@ public class ArmConstants {
         AFTER_ALGAE_TOP(2.5, 4.6),
         CORAL_STATION(1.6, 5.3),
         CLIMB(2.766 ,5.4),
-        TESTING(0,0),
         STARTING(Math.toRadians(33.7), 3.64),
         IDLE(0,0);
 
