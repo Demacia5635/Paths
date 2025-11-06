@@ -7,15 +7,11 @@ package frc.robot;
 import frc.demacia.utils.Controller.CommandController;
 import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.demacia.utils.Log.LogManager;
-import frc.demacia.utils.Log.LogManager2;
-import frc.demacia.utils.Mechanisms.Arm;
-import frc.demacia.utils.Motors.TalonConfig;
+import frc.demacia.utils.Mechanisms.StateBasedMechanism;
+import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Motors.TalonMotor;
-import frc.robot.testMotors.talonFX.subsystems.Motor;
 import frc.robot.testMechanism.ArmConstants;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
-import frc.robot.testMechanism.ArmConstants.GripperAngleMotorConstants;
-import frc.robot.testMotors.talonFX.commands.Set;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -32,6 +28,8 @@ public class RobotContainer {
 
   // Motor motor;
   // Set set;
+
+  StateBasedMechanism stateBasedMechanism;
   
   public static CommandController driverController;
 
@@ -50,12 +48,15 @@ public class RobotContainer {
   public RobotContainer() {
     
     new LogManager();
-    new LogManager2();
 
     driverController = new CommandController(0, ControllerType.kXbox);
 
+
+
     // motor = new Motor();
     // set =new Set(motor);
+
+    stateBasedMechanism = new StateBasedMechanism(ArmConstants.NAME, new MotorInterface[] {new TalonMotor(ArmAngleMotorConstants.CONFIG)}, null, ArmConstants.ARM_ANGLE_STATES.class, ArmConstants.CONSUMER);
 
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););

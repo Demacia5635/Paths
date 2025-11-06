@@ -29,10 +29,6 @@ public class LogManager2 extends SubsystemBase {
   NetworkTable table = NetworkTableInstance.getDefault().getTable("Log");
 
   private static ArrayList<ConsoleAlert> activeConsole;
-  
-  private static int SkipedCycles = 0;
-  private static int SKIP_CYCLES = 1;
-  private static boolean isLoggingEnabled = true;
 
   ArrayList<LogEntry2<?>> logEntries = new ArrayList<>();
   
@@ -189,30 +185,8 @@ public class LogManager2 extends SubsystemBase {
     return log(meesage, AlertType.kInfo);
   }
 
-  public static void setStaticSkipCycles(int cycles) {
-    SKIP_CYCLES = Math.max(1, cycles);
-  }
-
-  public static int getStaticSkipCycles() {
-    return SKIP_CYCLES;
-  }
-  
-  public static void setLoggingEnabled(boolean isenabled) {
-    isLoggingEnabled = isenabled;
-  }
-
-  public static boolean getLoggingEnabled() {
-    return isLoggingEnabled;
-  }
-
   @Override
   public void periodic() {
-    SkipedCycles++;
-    if (SkipedCycles < SKIP_CYCLES || !isLoggingEnabled) {
-      return;
-    }
-    SkipedCycles = 0;
-
     for (LogEntry2<?> e : logEntries) {
       e.log();
     }

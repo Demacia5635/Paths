@@ -1,8 +1,11 @@
 package frc.robot.testMechanism;
 
 
+import java.util.function.BiConsumer;
+
+import frc.demacia.utils.Mechanisms.StateBasedMechanism.StateEnum;
+import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Motors.TalonConfig;
-import frc.demacia.utils.Mechanisms.Arm.ArmState;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 
 public class ArmConstants {
@@ -111,7 +114,7 @@ public class ArmConstants {
                 .withRampTime(RAMP_TIME);
     }
 
-    public static enum ARM_ANGLE_STATES{
+    public static enum ARM_ANGLE_STATES implements StateEnum{
         L1(Math.toRadians(37.3), 4.6),
         L2(1.8, 4.4),
         L3(2.64208984375, 4.729228859906724),
@@ -131,8 +134,12 @@ public class ArmConstants {
             this.angles = angles;
         }
 
-        public double[] getAngels(){
+        public double[] getValues(){
             return angles;
         }
     }
+
+    public static final BiConsumer<MotorInterface[], double[]> CONSUMER = (motors, values) -> {
+        motors[0].setAngle(values[0]);
+    };
 }
