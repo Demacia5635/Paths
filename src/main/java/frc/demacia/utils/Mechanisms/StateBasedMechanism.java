@@ -3,6 +3,7 @@ package frc.demacia.utils.Mechanisms;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -21,16 +22,16 @@ public class StateBasedMechanism extends BaseMechanism {
     protected double[] Values;
     protected double[] testValues;
 
-    BiConsumer<MotorInterface[], double[]> consumer;
+    BiConsumer<MotorInterface[], double[]> motorConsumer;
+    BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> electronicsConsumer;
     Supplier<Boolean> isCalibratedSupplier = () -> true;
 
     protected Enum<?> state;
     
     SendableChooser<Enum<?>> stateChooser = new SendableChooser<>();
 
-    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends Enum<? extends StateEnum>> enumClass, BiConsumer<MotorInterface[], double[]> consumer) {
+    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends Enum<? extends StateEnum>> enumClass) {
         super(name, motors, sensors);
-        this.consumer = consumer;
         this.addNT(enumClass);
         Values = new double[motors.length];
         testValues = new double[motors.length];
@@ -59,6 +60,16 @@ public class StateBasedMechanism extends BaseMechanism {
         return new RunCommand(() -> setToState(), this);
     }
 
+    public StateBasedMechanism withMotorConsumer(BiConsumer<MotorInterface[], double[]> consumer){
+        motorConsumer = consumer;
+        return this;
+    }
+    
+    public StateBasedMechanism withMotorAndSensorsConsumer(BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer){
+        electronicsConsumer = consumer;
+        return this;
+    }
+
     public StateBasedMechanism withStartingOption(Enum<?> state){
         this.state = state;
         return this;
@@ -73,7 +84,11 @@ public class StateBasedMechanism extends BaseMechanism {
     private void setToState(){
         if (!isCalibratedSupplier.get()) return;
         setState();
-        consumer.accept(motors, Values);
+        if (electronicsConsumer != null){
+            electronicsConsumer.accept(new Pair<>(motors, sensors), Values);
+        } else if (motorConsumer != null){
+            motorConsumer.accept(motors, Values);
+        }
     }
 
     private void setState(){

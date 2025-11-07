@@ -59,8 +59,8 @@ public class RobotContainer {
     stateBasedMechanism = new StateBasedMechanism(ArmConstants.NAME, 
     new MotorInterface[] {new TalonMotor(ArmAngleMotorConstants.CONFIG)}, 
     null, 
-    ArmConstants.ARM_ANGLE_STATES.class, 
-    ArmConstants.CONSUMER)
+    ArmConstants.ARM_ANGLE_STATES.class)
+    .withMotorConsumer(ArmConstants.CONSUMER)
     .withStartingOption(ArmConstants.ARM_ANGLE_STATES.STARTING)
     .withCalibrationValue(() -> true);
 

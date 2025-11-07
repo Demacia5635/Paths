@@ -3,9 +3,12 @@ package frc.robot.testMechanism;
 
 import java.util.function.BiConsumer;
 
+import edu.wpi.first.math.Pair;
 import frc.demacia.utils.Mechanisms.StateBasedMechanism.StateEnum;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Motors.TalonConfig;
+import frc.demacia.utils.Sensors.SensorInterface;
+import frc.demacia.utils.Sensors.UltraSonicSensor;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 
 public class ArmConstants {
@@ -140,5 +143,11 @@ public class ArmConstants {
 
     public static final BiConsumer<MotorInterface[], double[]> CONSUMER = (motors, values) -> {
         motors[0].setAngle(values[0]);
+    };
+
+    public static final BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> CONSUMER2 = (electronics, values) -> {
+        if (((UltraSonicSensor) electronics.getSecond()[0]).get() < 1){
+            electronics.getFirst()[0].setAngle(values[0]);
+        }
     };
 }
