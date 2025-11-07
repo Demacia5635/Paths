@@ -170,33 +170,12 @@ public class TalonMotor extends TalonFX implements MotorInterface {
             }, 3,"motor");
             LogManager.addEntry(name + "/ControlMode", 
             controlModeSignal.getSignal(), 3, "motor");
-            
-        // LogManager2.addEntry("2", positionSignal.getSignal()).build();
-        // LogManager2.addEntry("3",  new StatusSignal[] {velocitySignal.getSignal(),
-        // accelerationSignal.getSignal(),
-        // voltageSignal.getSignal()}).build();
-
-        // LogManager2.addEntry("5", ()->5).build();
-        // LogManager2.addEntry("6, 7, 8", () -> new double[] {6, 7, 8}).build();
-        // LogManager2.addEntry("9, 10, 11", () -> 9, () -> 10, () -> 11).build();
-        // LogManager2.addEntry("12, 13, 14", () -> new double[] {12, 13, 14}).build();
-        // LogManager2.addEntry("15", ()->15).build();
-
-        // LogManager2.addEntry("b1", ()->true).build();
-        // LogManager2.addEntry("b2, b3, b4", () -> new boolean[] {false, false, true}).build();
-        // LogManager2.addEntry("b5", ()->false).build();
-
-        // LogManager2.removeEntry("3");
-
-        // LogManager2.removeEntry("6, 7, 8");
-        // LogManager2.removeEntry("15");
-
-        // LogManager2.removeEntry("b1");
     }
 
     public void checkElectronics() {
-        if (getFaultField().getValue() != 0) {
-            LogManager.log(name + " have fault num: " + getFaultField().getValue(), AlertType.kError);
+        int fault = getFaultField().getValue();
+        if (fault != 0) {
+            LogManager.log(name + " have fault num: " + fault, AlertType.kError);
         }
     }
 

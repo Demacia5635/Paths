@@ -29,6 +29,8 @@ public interface MotorInterface {
     double getCurrentVoltage();
     double getCurrentCurrent();
 
+    public void checkElectronics();
+
     void setEncoderPosition(double position);
 
     void showConfigPIDFSlotCommand(int slot);

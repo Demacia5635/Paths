@@ -25,5 +25,9 @@ import edu.wpi.first.wpilibj.AnalogInput;
         return super.getVoltage();
     }
 
+    public void checkElectronics(){
+        
+    }
+
 }
 

@@ -11,8 +11,6 @@ public class LogEntryBuilder<T> implements AutoCloseable {
     private String name;
     private int logLevel = 3;
     private String metadata = "";
-    private double precision = -1.0;
-    private int skipCycles = 1;
     private BiConsumer<T[], Long> consumer = null;
 
     private Data<T> data;
@@ -40,24 +38,9 @@ public class LogEntryBuilder<T> implements AutoCloseable {
         this.metadata = metaData;
         return this;
     }
-
-    
     
     public LogEntryBuilder<T> WithIsMotor() {
         this.metadata = "motor";
-        return this;
-    }
-    
-    public LogEntryBuilder<T> WithPrecision(double precision) {
-        if (precision < 0) {
-            throw new IllegalArgumentException("Precision must be non-negative, got: " + precision);
-        }
-        this.precision = precision;
-        return this;
-    }
-    
-    public LogEntryBuilder<T> WithSkipCycles(int cycles) {
-        this.skipCycles = cycles;
         return this;
     }
     
@@ -76,17 +59,8 @@ public class LogEntryBuilder<T> implements AutoCloseable {
         if (logLevel < 1 || logLevel > 4) {
             throw new IllegalArgumentException("Log level must be between 1 and 4, got: " + logLevel);
         }
-        if (skipCycles < 1) {
-            throw new IllegalArgumentException("Skip cycles must be positive, got: " + skipCycles);
-        }
         built = true;
         LogEntry2<T> entry = LogManager2.logManager.add(name, data, logLevel, metadata);
-        if (precision >= 0.0) {
-            entry.setPrecision(precision);
-        }
-        if (skipCycles != 1) {
-            entry.setSkipCycles(skipCycles);
-        }
         if (consumer != null) {
             entry.setConsumer(consumer);
         }

@@ -27,6 +27,10 @@ public class LimitSwitch extends DigitalInput implements DigitalSensorInterface{
         LogManager.addEntry(name + "/isTriggered", this::get, 3);
     }
 
+    public void checkElectronics(){
+        
+    }
+
     public String getName(){
         return config.name;
     }

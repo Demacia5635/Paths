@@ -25,6 +25,10 @@ public class AnalogEncoder extends edu.wpi.first.wpilibj.AnalogEncoder implement
         LogManager.addEntry(name + "/Position", this::get, 3);
     }
 
+    public void checkElectronics(){
+        
+    }
+
     public String getName(){
         return config.name;
     }

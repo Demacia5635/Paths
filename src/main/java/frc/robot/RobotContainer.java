@@ -56,7 +56,13 @@ public class RobotContainer {
     // motor = new Motor();
     // set =new Set(motor);
 
-    stateBasedMechanism = new StateBasedMechanism(ArmConstants.NAME, new MotorInterface[] {new TalonMotor(ArmAngleMotorConstants.CONFIG)}, null, ArmConstants.ARM_ANGLE_STATES.class, ArmConstants.CONSUMER);
+    stateBasedMechanism = new StateBasedMechanism(ArmConstants.NAME, 
+    new MotorInterface[] {new TalonMotor(ArmAngleMotorConstants.CONFIG)}, 
+    null, 
+    ArmConstants.ARM_ANGLE_STATES.class, 
+    ArmConstants.CONSUMER)
+    .withStartingOption(ArmConstants.ARM_ANGLE_STATES.STARTING)
+    .withCalibrationValue(() -> true);
 
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););

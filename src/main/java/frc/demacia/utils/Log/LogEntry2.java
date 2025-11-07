@@ -36,8 +36,6 @@ public class LogEntry2<T> {
     String name;
     String metaData;
     Publisher ntPublisher;
-    private int skipedCycles = 0;
-    private int SkipCycle = 1;
 
     private boolean isFloat;
     private boolean isBoolean;
@@ -148,12 +146,6 @@ public class LogEntry2<T> {
     }
 
     void log() {
-        skipedCycles++;
-        if (skipedCycles < SkipCycle) {
-            return;
-        }
-        skipedCycles = 0;
-
         if (!data.hasChanged()) {
             return;
         }
@@ -177,14 +169,6 @@ public class LogEntry2<T> {
 
     public double getPrecision() {
         return data.getPrecision();
-    }
-
-    public void setSkipCycles(int interval) {
-        SkipCycle = Math.max(1, interval);
-    }
-
-    public int getSkipCycles() {
-        return SkipCycle;
     }
 
     public void setConsumer(BiConsumer<T[], Long> consumer) {

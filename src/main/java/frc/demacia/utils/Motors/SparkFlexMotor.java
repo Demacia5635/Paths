@@ -85,6 +85,13 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
       }, 3, "motor");
   }
 
+  public void checkElectronics() {
+    Faults faults = getFaults();
+    if (faults != null) {
+        LogManager.log(name + " have fault num: " + faults.toString(), AlertType.kError);
+    }
+}
+
   /**
    * change the slot of the pid and feed forward.
    * will not work if the slot is null

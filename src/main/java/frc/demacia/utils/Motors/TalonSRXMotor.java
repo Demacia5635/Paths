@@ -85,6 +85,14 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
         }, 3, "motor");
     }
 
+    public void checkElectronics() {
+        com.ctre.phoenix.motorcontrol.Faults faults = new com.ctre.phoenix.motorcontrol.Faults();
+        getFaults(faults);
+        if (faults.hasAnyFault()) {
+            LogManager.log(name + " have fault num: " + faults.toString(), AlertType.kError);
+        }
+    }
+
     public void changeSlot(int slot){
         if (slot < 0 || slot > 2) {
             LogManager.log("slot is not between 0 and 2", AlertType.kError);

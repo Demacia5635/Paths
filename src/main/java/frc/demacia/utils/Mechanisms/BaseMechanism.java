@@ -51,12 +51,44 @@ public abstract class BaseMechanism extends SubsystemBase{
         }
     }
 
-    protected MotorInterface getMotor(int index) {
+    public void checkElectronicsAll() {
+        if (motors == null) return;
+        for (MotorInterface motor : motors) {
+            if (motor != null) motor.checkElectronics();
+        }
+        if (sensors == null) return;
+        for (SensorInterface sensor : sensors) {
+            if (sensor != null) sensor.checkElectronics();
+        }
+    }
+
+    public void checkElectronicsMotor(int motorIndex){
+        if (isValidMotorIndex(motorIndex)){
+            motors[motorIndex].checkElectronics();;
+        }
+    }
+
+    public void checkElectronicsSensor(int sensorIndex){
+        if (isValidSensorIndex(sensorIndex)){
+            sensors[sensorIndex].checkElectronics();;
+        }
+    }
+
+    public MotorInterface getMotor(int index) {
         if (isValidMotorIndex(index)) return motors[index];
+        throw new IllegalArgumentException("Invalid motor index " + index);
+    }
+
+    public SensorInterface getSensor(int index) {
+        if (isValidSensorIndex(index)) return sensors[index];
         throw new IllegalArgumentException("Invalid motor index " + index);
     }
 
     private boolean isValidMotorIndex(int index) {
         return index >= 0 && index < motors.length;
+    }
+
+    private boolean isValidSensorIndex(int index) {
+        return index >= 0 && index < sensors.length;
     }
 }

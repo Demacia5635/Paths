@@ -8,9 +8,8 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
         name = config.name;
         addLog();
 		LogManager.log(name + " cancoder initialized");
-        
-
     }
+
     String name;
     UltraSonicSensorConfig config;
     public double get() {
@@ -21,10 +20,7 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
     public String getName() {
         return config.name;
     }
-
-
  
-
     @Override
     public void ping() {
         super.ping();
@@ -34,8 +30,13 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
         ping();
         return getRangeMM() / 100.0;
     }
+    
     private void addLog() {
         LogManager.addEntry(name + "range", () -> getRangeMeters(), 3);
             getRangeMeters();
+    }
+
+    public void checkElectronics(){
+
     }
 }

@@ -48,12 +48,17 @@ public class ColorSensor extends ColorSensorV3 implements SensorInterface {
             lastColor.red, lastColor.green, lastColor.blue, lastProximity
         }, 3);
         LogManager.addEntry(colors + "Colors values:", this::getRGBString, 3);
-    }   
+    }
+
+    public void checkElectronics(){
+        
+    }
+
     public String getName() {
         return config.name;
-        }
+    }
 
-        public String getRedValue() {
+    public String getRedValue() {
         updateReadings();
         return Integer.toString((int)(lastColor.red * 255));
         }
