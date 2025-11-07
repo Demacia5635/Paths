@@ -4,7 +4,7 @@ package frc.robot.testMechanism;
 import java.util.function.BiConsumer;
 
 import edu.wpi.first.math.Pair;
-import frc.demacia.utils.Mechanisms.StateBasedMechanism.StateEnum;
+import frc.demacia.utils.Mechanisms.StateBasedMechanism.MechanismState;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Motors.TalonConfig;
 import frc.demacia.utils.Sensors.SensorInterface;
@@ -117,7 +117,7 @@ public class ArmConstants {
                 .withRampTime(RAMP_TIME);
     }
 
-    public static enum ARM_ANGLE_STATES implements StateEnum{
+    public static enum ARM_ANGLE_STATES implements MechanismState{
         L1(Math.toRadians(37.3), 4.6),
         L2(1.8, 4.4),
         L3(2.64208984375, 4.729228859906724),

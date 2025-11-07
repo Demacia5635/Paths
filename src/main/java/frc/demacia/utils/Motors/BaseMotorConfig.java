@@ -18,9 +18,9 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
 
     public static enum MotorControllerType{TalonFX(TalonMotor.class), TalonSRX(TalonSRXMotor.class), SparkMax(SparkMotor.class), SparkFlex(SparkFlexMotor.class);
     
-        Class<? extends MotorInterface> motorType;
-        private MotorControllerType(Class<? extends MotorInterface> MotorType) {
-            this.motorType = MotorType;
+        Class<? extends MotorInterface> motorClass;
+        private MotorControllerType(Class<? extends MotorInterface> motorClass) {
+            this.motorClass = motorClass;
         }
     }
 
@@ -28,7 +28,7 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
 
     public int id;                  // CAN bus ID
     public Canbus canbus = Canbus.Rio;
-    public MotorControllerType motorType  = MotorControllerType.TalonFX;
+    public MotorControllerType motorClass  = MotorControllerType.TalonFX;
     public String name;             // Name of the motor - used for logging
 
     public double maxVolt = 12;     // Max Volt allowed
@@ -71,12 +71,12 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
     }
     
     public Class<? extends MotorInterface> getMotorClass() {
-        return motorType.motorType;
+        return motorClass.motorClass;
     }
 
     @SuppressWarnings("unchecked")
-    public T withMotorType(MotorControllerType motorType) {
-        this.motorType = motorType;
+    public T withMotorClass(MotorControllerType motorClass) {
+        this.motorClass = motorClass;
         return (T) this;
     }
 

@@ -343,7 +343,7 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     public void showConfigPIDFSlotCommand(int slot) {
         CloseLoopParam p = config.pid[slot];
         if(p != null) {
-            UpdateArray.show(name + " PID " + slot , CloseLoopParam.names, p.toArray(),(double[] array)->updatePID(true));
+            UpdateArray.show(name + " PID " + slot , CloseLoopParam.PARAMETER_NAMES, p.toArray(),(double[] array)->updatePID(true));
         }
     }
 
@@ -482,25 +482,25 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     public void setEncoderPosition(double position) {
       setPosition(position / unitMultiplier);   
     }
-    public Data<Double> getClosedLoopErrorgetSignal() {
+    public Data<Double> getClosedLoopErrorSignal() {
         return closedLoopErrorSignal;
     }
-    public Data<Double> getClosedLoopSPgetSignal() {
+    public Data<Double> getClosedLoopSPSignal() {
         return closedLoopSPSignal;
     }
-    public Data<Angle> getPositiongetSignal() {
+    public Data<Angle> getPositionSignal() {
         return positionSignal;
     }
-    public Data<AngularVelocity> getVelocitygetSignal() {
+    public Data<AngularVelocity> getVelocitySignal() {
         return velocitySignal;
     }
-    public Data<AngularAcceleration> getAccelerationgetSignal() {
+    public Data<AngularAcceleration> getAccelerationSignal() {
         return accelerationSignal;
     }
-    public Data<Voltage> getVoltagegetSignal() {
+    public Data<Voltage> getVoltageSignal() {
         return voltageSignal;
     }
-    public Data<Current> getCurrentgetSignal() {
+    public Data<Current> getCurrentSignal() {
         return currentSignal;
     }
 }

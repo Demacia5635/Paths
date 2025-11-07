@@ -239,7 +239,7 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
   public void showConfigPIDFSlotCommand(int slot) {
     CloseLoopParam p = config.pid[slot];
     if (p != null) {
-      UpdateArray.show(name + " PID " + slot, CloseLoopParam.names, p.toArray(), (double[] array) -> updatePID(true));
+      UpdateArray.show(name + " PID " + slot, CloseLoopParam.PARAMETER_NAMES, p.toArray(), (double[] array) -> updatePID(true));
     }
   }
 

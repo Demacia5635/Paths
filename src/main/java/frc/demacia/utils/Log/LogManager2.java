@@ -30,9 +30,9 @@ public class LogManager2 extends SubsystemBase {
 
   private static ArrayList<ConsoleAlert> activeConsole;
 
-  ArrayList<LogEntry2<?>> logEntries = new ArrayList<>();
+  ArrayList<LogEntry2<?>> individualLogEntries = new ArrayList<>();
   
-  LogEntry2<?>[] finalLogEntries = new LogEntry2<?>[16];
+  LogEntry2<?>[] categoryLogEntries = new LogEntry2<?>[16];
 
   private Map<String, Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> entryLocationMap = new HashMap<>();
 
@@ -59,19 +59,19 @@ public class LogManager2 extends SubsystemBase {
   }
 
   public static void removeInComp() {
-    for (int i = 0; i < logManager.logEntries.size(); i++) {
-      logManager.logEntries.get(i).removeInComp();
-      if (logManager.logEntries.get(i).logLevel == 1) {
-        logManager.logEntries.remove(logManager.logEntries.get(i));
+    for (int i = 0; i < logManager.individualLogEntries.size(); i++) {
+      logManager.individualLogEntries.get(i).removeInComp();
+      if (logManager.individualLogEntries.get(i).logLevel == 1) {
+        logManager.individualLogEntries.remove(logManager.individualLogEntries.get(i));
         i--;
       }
     }
 
     for (int i = 0; i < 4; i++) {
-      if (logManager.finalLogEntries[i] != null && logManager.finalLogEntries[i] != null) {
-        logManager.finalLogEntries[i].removeInComp();
-        if (logManager.finalLogEntries[i].logLevel == 1) {
-          logManager.finalLogEntries[i] = null;
+      if (logManager.categoryLogEntries[i] != null && logManager.categoryLogEntries[i] != null) {
+        logManager.categoryLogEntries[i].removeInComp();
+        if (logManager.categoryLogEntries[i].logLevel == 1) {
+          logManager.categoryLogEntries[i] = null;
           int index = i;
           logManager.entryLocationMap.entrySet().removeIf(entry -> entry.getValue().getFirst().getFirst() == index);
         }
@@ -81,10 +81,10 @@ public class LogManager2 extends SubsystemBase {
   
   public static void clearEntries() {
     if (logManager != null) {
-      logManager.logEntries.clear();
-      for (int i = 0; i < logManager.finalLogEntries.length; i++) {
-        if (logManager.finalLogEntries[i] != null) {
-          logManager.finalLogEntries[i] = null;
+      logManager.individualLogEntries.clear();
+      for (int i = 0; i < logManager.categoryLogEntries.length; i++) {
+        if (logManager.categoryLogEntries[i] != null) {
+          logManager.categoryLogEntries[i] = null;
         }
       }
       logManager.entryLocationMap.clear();
@@ -94,8 +94,8 @@ public class LogManager2 extends SubsystemBase {
   public static int getEntryCount() {
     if (logManager == null) return 0;
 
-    int count = logManager.logEntries.size();
-    for (LogEntry2<?> entry2 : logManager.finalLogEntries) {
+    int count = logManager.individualLogEntries.size();
+    for (LogEntry2<?> entry2 : logManager.categoryLogEntries) {
       if (entry2 != null) {
         count++;
       }
@@ -113,11 +113,11 @@ public class LogManager2 extends SubsystemBase {
     
     if (categoryIndex == -1) {
       int index = location.getFirst().getSecond();
-      if (index >= 0 && index < logManager.logEntries.size()) {
-        return logManager.logEntries.get(index);
+      if (index >= 0 && index < logManager.individualLogEntries.size()) {
+        return logManager.individualLogEntries.get(index);
       }
     } else {
-      return logManager.finalLogEntries[categoryIndex];
+      return logManager.categoryLogEntries[categoryIndex];
     }
     
     return null;
@@ -133,8 +133,8 @@ public class LogManager2 extends SubsystemBase {
       
       if (categoryIndex == -1) {
           int index = location.getFirst().getSecond();
-          if (index >= 0 && index < logManager.logEntries.size()) {
-              logManager.logEntries.remove(index);
+          if (index >= 0 && index < logManager.individualLogEntries.size()) {
+              logManager.individualLogEntries.remove(index);
               logManager.entryLocationMap.remove(name);
               
               logManager.updateIndicesAfterRemoval(index);
@@ -147,15 +147,15 @@ public class LogManager2 extends SubsystemBase {
           
           logManager.entryLocationMap.remove(name);
           
-          logManager.finalLogEntries[categoryIndex].removeData(subIndex, dataIndex, dataCount);
+          logManager.categoryLogEntries[categoryIndex].removeData(subIndex, dataIndex, dataCount);
           
           logManager.updateSubIndicesAfterRemoval(categoryIndex, subIndex);
           logManager.updateDataIndicesAfterRemoval(categoryIndex, dataIndex, dataCount);
           
-          if (logManager.finalLogEntries[categoryIndex].data == null || 
-              logManager.finalLogEntries[categoryIndex].name == null || 
-              logManager.finalLogEntries[categoryIndex].name.trim().isEmpty()) {
-              logManager.finalLogEntries[categoryIndex] = null;
+          if (logManager.categoryLogEntries[categoryIndex].data == null || 
+              logManager.categoryLogEntries[categoryIndex].name == null || 
+              logManager.categoryLogEntries[categoryIndex].name.trim().isEmpty()) {
+              logManager.categoryLogEntries[categoryIndex] = null;
               final int catIndex = categoryIndex;
               logManager.entryLocationMap.entrySet().removeIf(
                   entry -> entry.getValue().getFirst().getFirst() == catIndex
@@ -181,16 +181,16 @@ public class LogManager2 extends SubsystemBase {
     return alert;
   }
 
-  public static ConsoleAlert log(Object meesage) {
-    return log(meesage, AlertType.kInfo);
+  public static ConsoleAlert log(Object message) {
+    return log(message, AlertType.kInfo);
   }
 
   @Override
   public void periodic() {
-    for (LogEntry2<?> e : logEntries) {
+    for (LogEntry2<?> e : individualLogEntries) {
       e.log();
     }
-    for (LogEntry2<?> e : finalLogEntries) {
+    for (LogEntry2<?> e : categoryLogEntries) {
       if (e != null){
         e.log();
       }
@@ -204,8 +204,8 @@ public class LogManager2 extends SubsystemBase {
 
     if (categoryIndex == -1){
       entry = new LogEntry2<T>(name, data, logLevel, metaData);
-      logEntries.add(entry);
-      int index = logEntries.size() - 1;
+      individualLogEntries.add(entry);
+      int index = individualLogEntries.size() - 1;
       entryLocationMap.put(name, new Pair<>(new Pair<>(-1, index), new Pair<>(null, null)));
     } else{
       entry = addToEntryArray(categoryIndex, name, data);
@@ -219,22 +219,22 @@ public class LogManager2 extends SubsystemBase {
     int subIndex;
     int dataIndex = 0;
     
-    if (finalLogEntries[i] == null || finalLogEntries[i].data == null) {
-        finalLogEntries[i] = new LogEntry2<>(name, data, i/4 + 1, "");
+    if (categoryLogEntries[i] == null || categoryLogEntries[i].data == null) {
+        categoryLogEntries[i] = new LogEntry2<>(name, data, i/4 + 1, "");
         subIndex = 1;
         dataIndex = 0;
     } else {
-        String[] parts = finalLogEntries[i].name.split(" \\| ");
+        String[] parts = categoryLogEntries[i].name.split(" \\| ");
         subIndex = parts.length + 1;
 
-        if (finalLogEntries[i].data.getSignals() != null) {
-          dataIndex = finalLogEntries[i].data.getSignals().length;
-        } else if (finalLogEntries[i].data.getSuppliers() != null) {
-          dataIndex = finalLogEntries[i].data.getSuppliers().length;
+        if (categoryLogEntries[i].data.getSignals() != null) {
+          dataIndex = categoryLogEntries[i].data.getSignals().length;
+        } else if (categoryLogEntries[i].data.getSuppliers() != null) {
+          dataIndex = categoryLogEntries[i].data.getSuppliers().length;
         }
 
         try {
-            ((LogEntry2<T>) finalLogEntries[i]).addData(name, data);
+            ((LogEntry2<T>) categoryLogEntries[i]).addData(name, data);
         } catch (Exception e) {
             LogManager2.log("Error combining log entries: " + e.getMessage(), AlertType.kError);
         }
@@ -255,7 +255,7 @@ public class LogManager2 extends SubsystemBase {
     " and: " + dataIndex + 
     " and: " + dataLength);
     
-    return (LogEntry2<T>) finalLogEntries[i];
+    return (LogEntry2<T>) categoryLogEntries[i];
 }
 
   private int getCategoryIndex(Data<?> data, int logLevel, String metaData) {
@@ -306,6 +306,7 @@ public class LogManager2 extends SubsystemBase {
       for (Map.Entry<String, Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> entry : entryLocationMap.entrySet()) {
           Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> location = entry.getValue();
           if (location.getFirst().getFirst() == categoryIndex && 
+              location.getSecond().getFirst() != null &&
               location.getSecond().getFirst() >= removedDataIndex + removedCount) {
               entry.setValue(
                   new Pair<>(
@@ -327,7 +328,7 @@ public class LogManager2 extends SubsystemBase {
   }
 
   private LogEntry2<?> find(String name) {
-    for (LogEntry2<?> entry : logEntries) {
+    for (LogEntry2<?> entry : individualLogEntries) {
       if (entry.name.equals(name)) {
         return entry;
       }

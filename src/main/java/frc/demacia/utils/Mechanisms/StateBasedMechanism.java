@@ -15,7 +15,7 @@ import frc.demacia.utils.Sensors.SensorInterface;
 
 public class StateBasedMechanism extends BaseMechanism {
 
-    public interface StateEnum {
+    public interface MechanismState {
         double[] getValues();
     }
 
@@ -30,7 +30,7 @@ public class StateBasedMechanism extends BaseMechanism {
     
     SendableChooser<Enum<?>> stateChooser = new SendableChooser<>();
 
-    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends Enum<? extends StateEnum>> enumClass) {
+    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends Enum<? extends MechanismState>> enumClass) {
         super(name, motors, sensors);
         this.addNT(enumClass);
         Values = new double[motors.length];
@@ -38,7 +38,7 @@ public class StateBasedMechanism extends BaseMechanism {
         SmartDashboard.putData(this);
     }
 
-    public void addNT(Class<? extends Enum<? extends StateEnum>> enumClass) {
+    public void addNT(Class<? extends Enum<? extends MechanismState>> enumClass) {
             for (Enum<?> state : enumClass.getEnumConstants()) {
                 stateChooser.addOption(state.name(), state);
             }
@@ -97,7 +97,7 @@ public class StateBasedMechanism extends BaseMechanism {
             return;
         };
         for (int i = 0; i < Values.length; i++){
-            Values[i] = ((StateEnum) state).getValues()[i];
+            Values[i] = ((MechanismState) state).getValues()[i];
         }
     }
 

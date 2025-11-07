@@ -10,8 +10,7 @@ import com.ctre.phoenix6.StatusSignal;
 
 public class Data<T> {
     
-    @SuppressWarnings("rawtypes")
-    private static ArrayList<Data> signals = new ArrayList<>();
+    private static ArrayList<Data<?>> signals = new ArrayList<>();
 
     private StatusSignal<T>[] signal;
     private Supplier<T>[] supplier;

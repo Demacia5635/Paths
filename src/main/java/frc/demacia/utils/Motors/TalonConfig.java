@@ -15,7 +15,7 @@ public class TalonConfig extends BaseMotorConfig<TalonConfig> {
      */
     public TalonConfig(int id, Canbus canbus, String name) {
         super(id, name, canbus);
-        motorType = MotorControllerType.TalonFX;
+        motorClass = MotorControllerType.TalonFX;
     }
 
     public TalonConfig(int id, String name, TalonConfig config) {

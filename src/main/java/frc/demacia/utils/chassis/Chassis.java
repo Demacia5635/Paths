@@ -160,7 +160,7 @@ public class Chassis extends SubsystemBase {
         return modules[id].getSteerVel();
     }
 
-    public double getSteeracceleration(int id) {
+    public double getSteerAcceleration(int id) {
         return modules[id].getSteerAccel();
     }
 
@@ -205,7 +205,6 @@ public class Chassis extends SubsystemBase {
         }
     }
 
-    Pose2d visionFusePoseEstimation;
     Rotation2d gyroAngle;
 
     @Override
