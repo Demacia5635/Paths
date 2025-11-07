@@ -27,6 +27,8 @@ public class DemaciaTrajectory {
         this.segments = new ArrayList<SegmentBase>();
         this.arcCount = trajectoryPoints.size() - 2;        
         createCenterCircles();
+        createPathPoints();
+        createSegments();
 
 
 
