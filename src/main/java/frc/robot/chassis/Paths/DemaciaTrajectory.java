@@ -40,8 +40,11 @@ public class DemaciaTrajectory {
         return new Translation2d(toP1Norm, toP1Angle);
     }
 
-    private Translation2d calculateP2OnLastArc(){
+    private Translation2d calculateP2OnLastArc(Translation2d lastCenterCircle, Translation2d lastTrajPoint){
+        double distance = lastTrajPoint.minus(lastCenterCircle).getNorm();
+        Rotation2d angle = new Rotation2d(Math.acos(PathsConstants.MAX_ALLOWED_RADIUS/distance));
 
+        return lastCenterCircle.plus(new Translation2d(distance, angle));
     }
 
     private void createCenterCircles(){
@@ -63,12 +66,12 @@ public class DemaciaTrajectory {
             else{
 
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateExitPointOfArc(circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
-                pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateEntryPointOfArc(circleCenters.get(i+1).centerCircle(), circleCenters.get(i+2).centerCircle()), trajectoryPoints.get(i).getRotation()));
+                pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateEntryPointOfArc(circleCenters.get(i+1).centerCircle(), circleCenters.get(i+2).centerCircle(), pathPoints.get(pathPoints.size()-1).getTranslation()), trajectoryPoints.get(i).getRotation()));
             }
         }
         
-
-        pathPoints.add(new Pose2d(calculateP2OnLastArc(), trajectoryPoints.get(trajectoryPoints.size() - 1).getRotation()));
+        Translation2d lastTrajPoint = trajectoryPoints.get(trajectoryPoints.size()-1).getTranslation();
+        pathPoints.add(new Pose2d(calculateP2OnLastArc(circleCenters.get(circleCenters.size()-1).centerCircle(), lastTrajPoint), trajectoryPoints.get(trajectoryPoints.size() - 1).getRotation()));
         pathPoints.add(trajectoryPoints.get(trajectoryPoints.size() - 1));
     }
     private void createSegments(){

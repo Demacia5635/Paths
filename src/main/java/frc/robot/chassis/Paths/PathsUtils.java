@@ -64,7 +64,13 @@ public class PathsUtils {
 
 
             }
-            public static Translation2d calculateEntryPointOfArc(Translation2d centerCircle1, Translation2d centerCircle2){
+            public static Translation2d calculateEntryPointOfArc(Translation2d centerCircle1, Translation2d centerCircle2, Translation2d prevPoint){
+                Translation2d center1ToPrevPoint = prevPoint.minus(centerCircle1);
+                Translation2d center1toCenter2 = centerCircle2.minus(centerCircle1);
+                Rotation2d centerToPrevPointAngle = new Rotation2d(Math.acos((PathsConstants.MAX_ALLOWED_RADIUS * 2) / center1toCenter2.getNorm())); 
+                double p2ToP3Distance = 2 * PathsConstants.MAX_ALLOWED_RADIUS * centerToPrevPointAngle.getCos();
+               Translation2d p2ToP3 = new Translation2d(p2ToP3Distance, center1ToPrevPoint.getAngle().plus(Rotation2d.kCW_90deg)); 
+                return prevPoint.plus(p2ToP3);
 
             }
         }
