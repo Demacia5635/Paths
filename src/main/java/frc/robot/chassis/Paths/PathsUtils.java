@@ -64,8 +64,8 @@ public class PathsUtils {
 
 
             }
-            public static Translation2d calculateEntryPointOfArc(){
-                return Translation2d.kZero; //TODO
+            public static Translation2d calculateEntryPointOfArc(Translation2d centerCircle1, Translation2d centerCircle2){
+
             }
         }
 
