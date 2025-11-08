@@ -2,13 +2,12 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.utils;
+package frc.robot.chassis.Paths;
 
 import edu.wpi.first.wpilibj.Timer;
-import static frc.robot.chassis.utils.ChassisConstants.*;
 
 /** Add your docs here. */
-public class TrapezoidNoam {
+public class Trapezoid {
     double maxVelocity; // Maximum permissible velocity
     double maxAcceleration; // Maximum permissible acceleration
     private double deltaVelocity; // Velocity increment at each time step
@@ -19,7 +18,7 @@ public class TrapezoidNoam {
 
 
     // Constructor to initialize with maximum velocity and acceleration
-    public TrapezoidNoam(double maxVelocity, double maxAcceleration) {
+    public Trapezoid(double maxVelocity, double maxAcceleration) {
         this.maxAcceleration = maxAcceleration;
         this.maxVelocity = maxVelocity;
         // Velocity increment calculated based on max acceleration
@@ -45,7 +44,7 @@ public class TrapezoidNoam {
         }
 
         double time = Timer.getFPGATimestamp();
-        if(time - lastTime <= CYCLE_DT) {
+        if(time - lastTime <= 0.02) {
             if(lastA > 0 && curentVelocity < lastV) {
                 curentVelocity = lastV;
             } else if(lastA < 0 && curentVelocity > lastV) {

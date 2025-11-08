@@ -22,16 +22,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.chassis.subsystems.Chassis;
-import frc.robot.chassis.utils.FieldTarget;
-import frc.robot.chassis.utils.FieldTarget.ELEMENT_POSITION;
-import frc.robot.chassis.utils.FieldTarget.LEVEL;
-import frc.robot.chassis.utils.FieldTarget.POSITION;
-import frc.robot.utils.CommandController;
-import frc.robot.utils.Elastic;
-import frc.robot.utils.CommandController.ControllerType;
-import frc.robot.utils.Elastic.Notification;
-import frc.robot.utils.Elastic.Notification.NotificationLevel;
 
 
 /**
@@ -44,13 +34,9 @@ public class RobotContainer{
 
   public static boolean isRed = true;
   public static RobotContainer robotContainer;
-  public static CommandController driverController;
   
-  public static Chassis chassis;  
 
   public RobotContainer() {
-    chassis = new Chassis();
-    driverController = new CommandController(0, ControllerType.kXbox);
    
    }
 
