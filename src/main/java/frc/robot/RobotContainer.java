@@ -10,6 +10,7 @@ import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Mechanisms.StateBasedMechanism;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Motors.TalonMotor;
+import frc.demacia.utils.Sensors.SensorInterface;
 import frc.robot.testMechanism.ArmConstants;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -58,7 +59,7 @@ public class RobotContainer {
 
     stateBasedMechanism = new StateBasedMechanism(ArmConstants.NAME, 
     new MotorInterface[] {new TalonMotor(ArmAngleMotorConstants.CONFIG)}, 
-    null, 
+    new SensorInterface[0], 
     ArmConstants.STATES.class)
     .withStartingOption(ArmConstants.STATES.STARTING)
     .withCalibrationValue(() -> true);

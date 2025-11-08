@@ -24,6 +24,7 @@ public class StateBasedMechanism extends BaseMechanism {
     protected double[] testValues;
 
     BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer;
+    BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> testConsumer;
     Supplier<Boolean> isCalibratedSupplier = () -> true;
 
     protected Enum<?> state;
@@ -33,20 +34,29 @@ public class StateBasedMechanism extends BaseMechanism {
     public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends Enum<? extends MechanismState>> enumClass) {
         super(name, motors, sensors);
         this.addNT(enumClass);
+        if (enumClass == null) {
+            throw new IllegalArgumentException("Enum class cannot be null for mechanism: " + name);
+        }
+        Enum<?>[] enumConstants = enumClass.getEnumConstants();
+        if (enumConstants == null || enumConstants.length == 0) {
+            throw new IllegalArgumentException("Enum class must have at least one constant for mechanism: " + name);
+        }
+
+        testConsumer = ((MechanismState) enumClass.getEnumConstants()[0]).getConsumer();
         Values = new double[motors.length];
         testValues = new double[motors.length];
         SmartDashboard.putData(this);
     }
 
     public void addNT(Class<? extends Enum<? extends MechanismState>> enumClass) {
-            for (Enum<?> state : enumClass.getEnumConstants()) {
-                stateChooser.addOption(state.name(), state);
-            }
-            stateChooser.addOption("TESTING", null);
+        for (Enum<?> state : enumClass.getEnumConstants()) {
+            stateChooser.addOption(state.name(), state);
+        }
+        stateChooser.addOption("TESTING", null);
 
-            stateChooser.onChange(state -> this.state = state);
+        stateChooser.onChange(state -> this.state = state);
 
-            SmartDashboard.putData(getName() + "/State Chooser", stateChooser);
+        SmartDashboard.putData(getName() + "/State Chooser", stateChooser);
     }
 
     @Override
@@ -60,6 +70,15 @@ public class StateBasedMechanism extends BaseMechanism {
     }
 
     public StateBasedMechanism withStartingOption(Enum<?> state){
+        if (state == null) {
+            throw new IllegalArgumentException("Starting state cannot be null");
+        }
+        
+        if (!(state instanceof MechanismState)) {
+            throw new IllegalArgumentException("Starting state must implement MechanismState");
+        }
+
+        testConsumer = ((MechanismState) state).getConsumer();
         this.state = state;
         return this;
     }
@@ -73,18 +92,22 @@ public class StateBasedMechanism extends BaseMechanism {
     private void setToState(){
         if (!isCalibratedSupplier.get()) return;
         setState();
+        if (consumer == null) {
+            System.err.println("Consumer is null, cannot set state");
+            return;
+        }
+
         consumer.accept(new Pair<>(motors, sensors), Values);
     }
 
     private void setState(){
-        consumer = ((MechanismState) state).getConsumer();
         if (state == null) {
+            consumer = testConsumer;
             Values = testValues;
             return;
         };
-        for (int i = 0; i < Values.length; i++){
-            Values[i] = ((MechanismState) state).getValues()[i];
-        }
+        consumer = ((MechanismState) state).getConsumer();
+        Values = ((MechanismState) state).getValues();
     }
 
     private double[] getTestValues(){
