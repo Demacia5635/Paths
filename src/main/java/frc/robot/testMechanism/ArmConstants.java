@@ -8,7 +8,6 @@ import frc.demacia.utils.Mechanisms.StateBasedMechanism.MechanismState;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Motors.TalonConfig;
 import frc.demacia.utils.Sensors.SensorInterface;
-import frc.demacia.utils.Sensors.UltraSonicSensor;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 
 public class ArmConstants {
