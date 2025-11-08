@@ -117,7 +117,7 @@ public class ArmConstants {
                 .withRampTime(RAMP_TIME);
     }
 
-    public static enum ARM_ANGLE_STATES implements MechanismState{
+    public static enum STATES implements MechanismState{
         L1(Math.toRadians(37.3), 4.6),
         L2(1.8, 4.4),
         L3(2.64208984375, 4.729228859906724),
@@ -131,23 +131,73 @@ public class ArmConstants {
         IDLE(0,0);
 
         public final double[] angles;
+        public final BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer = 
+        (electronics, values) -> {
+            electronics.getFirst()[0].setAngle(values[0]);
+        };
 
-        ARM_ANGLE_STATES(double... angles) {
+        STATES(double... angles) {
             this.angles = angles;
         }
 
         public double[] getValues(){
             return angles;
         }
+
+        public BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> getConsumer(){
+            return consumer;
+        }
     }
 
-    public static final BiConsumer<MotorInterface[], double[]> CONSUMER = (motors, values) -> {
-        motors[0].setAngle(values[0]);
-    };
+    public static enum STATES2 implements MechanismState{
+        L1((electronics, values) -> {
+            electronics.getFirst()[0].setAngle(values[0]);},
+            Math.toRadians(37.3), 4.6),
+        L2((electronics, values) -> {
+            electronics.getFirst()[0].setAngle(values[0]);},
+            1.8, 4.4),
+        L3((electronics, values) -> {
+            electronics.getFirst()[0].setAngle(values[0]);},
+            2.64208984375, 4.729228859906724),
+        PRE_ALGAE_BOTTOM((electronics, values) -> {
+            electronics.getFirst()[0].setAngle(values[0]);},
+            2.5, 2.5),
+        PRE_ALGAE_TOP((electronics, values) -> {
+            electronics.getFirst()[0].setAngle(values[0]);},
+            1.8, 3.7),
+        AFTER_ALGAE_BOTTOM((electronics, values) -> {
+            electronics.getFirst()[0].setAngle(values[0]);},
+            1.6, 2.5),
+        AFTER_ALGAE_TOP((electronics, values) -> {
+            electronics.getFirst()[0].setAngle(values[0]);},
+            2.5, 4.6),
+        CORAL_STATION((electronics, values) -> {
+            electronics.getFirst()[0].setAngle(values[0]);},
+            1.6, 5.3),
+        CLIMB((electronics, values) -> {
+            electronics.getFirst()[0].setAngle(values[0]);},
+            2.766 ,5.4),
+        STARTING((electronics, values) -> {
+            electronics.getFirst()[0].setAngle(values[0]);},
+            Math.toRadians(33.7), 3.64),
+        IDLE((electronics, values) -> {
+            electronics.getFirst()[0].setAngle(values[0]);},
+            0,0);
 
-    public static final BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> CONSUMER2 = (electronics, values) -> {
-        if (((UltraSonicSensor) electronics.getSecond()[0]).get() < 1){
-            electronics.getFirst()[0].setAngle(values[0]);
+        public final double[] angles;
+        public final BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer;
+
+        STATES2(BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer, double... angles) {
+            this.consumer = consumer;
+            this.angles = angles;
         }
-    };
+
+        public double[] getValues(){
+            return angles;
+        }
+
+        public BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> getConsumer(){
+            return consumer;
+        }
+    }
 }

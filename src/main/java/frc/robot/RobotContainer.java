@@ -59,9 +59,8 @@ public class RobotContainer {
     stateBasedMechanism = new StateBasedMechanism(ArmConstants.NAME, 
     new MotorInterface[] {new TalonMotor(ArmAngleMotorConstants.CONFIG)}, 
     null, 
-    ArmConstants.ARM_ANGLE_STATES.class)
-    .withMotorConsumer(ArmConstants.CONSUMER)
-    .withStartingOption(ArmConstants.ARM_ANGLE_STATES.STARTING)
+    ArmConstants.STATES.class)
+    .withStartingOption(ArmConstants.STATES.STARTING)
     .withCalibrationValue(() -> true);
 
     // Configure the trigger bindings
@@ -91,7 +90,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    
+    stateBasedMechanism.setDefaultCommand(stateBasedMechanism.toStateCommand());
   }
 
   /**

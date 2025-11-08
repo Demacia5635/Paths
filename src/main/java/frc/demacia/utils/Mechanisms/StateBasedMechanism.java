@@ -17,13 +17,13 @@ public class StateBasedMechanism extends BaseMechanism {
 
     public interface MechanismState {
         double[] getValues();
+        BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> getConsumer();
     }
 
     protected double[] Values;
     protected double[] testValues;
 
-    BiConsumer<MotorInterface[], double[]> motorConsumer;
-    BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> electronicsConsumer;
+    BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer;
     Supplier<Boolean> isCalibratedSupplier = () -> true;
 
     protected Enum<?> state;
@@ -52,22 +52,11 @@ public class StateBasedMechanism extends BaseMechanism {
     @Override
     public void initSendable(SendableBuilder builder) {
         super.initSendable(builder);
-
         builder.addDoubleArrayProperty(getName() + "/Test Values", () -> getTestValues(), testValues -> setTestValues(testValues));
     }
 
-    public Command armCommand(){
+    public Command toStateCommand(){
         return new RunCommand(() -> setToState(), this);
-    }
-
-    public StateBasedMechanism withMotorConsumer(BiConsumer<MotorInterface[], double[]> consumer){
-        motorConsumer = consumer;
-        return this;
-    }
-    
-    public StateBasedMechanism withMotorAndSensorsConsumer(BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer){
-        electronicsConsumer = consumer;
-        return this;
     }
 
     public StateBasedMechanism withStartingOption(Enum<?> state){
@@ -84,14 +73,11 @@ public class StateBasedMechanism extends BaseMechanism {
     private void setToState(){
         if (!isCalibratedSupplier.get()) return;
         setState();
-        if (electronicsConsumer != null){
-            electronicsConsumer.accept(new Pair<>(motors, sensors), Values);
-        } else if (motorConsumer != null){
-            motorConsumer.accept(motors, Values);
-        }
+        consumer.accept(new Pair<>(motors, sensors), Values);
     }
 
     private void setState(){
+        consumer = ((MechanismState) state).getConsumer();
         if (state == null) {
             Values = testValues;
             return;
