@@ -7,13 +7,24 @@ package frc.robot;
 import frc.demacia.utils.Controller.CommandController;
 import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.demacia.utils.Log.LogManager;
-import frc.demacia.utils.Mechanisms.StateBasedMechanism;
+import frc.demacia.utils.Mechanisms.Arm;
+import frc.demacia.utils.Mechanisms.Intake;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Motors.TalonMotor;
+import frc.demacia.utils.Motors.TalonSRXMotor;
+import frc.demacia.utils.Sensors.AnalogSensorInterface;
+import frc.demacia.utils.Sensors.DigitalSensorInterface;
+import frc.demacia.utils.Sensors.OpticalSensor;
 import frc.demacia.utils.Sensors.SensorInterface;
+import frc.demacia.utils.Sensors.UltraSonicSensor;
 import frc.robot.testMechanism.ArmConstants;
+import frc.robot.testMechanism.GripperConstants;
+import frc.robot.testMechanism.GripperConstants.GRIPPER_STATES;
+import frc.robot.testMechanism.GripperConstants.SensorConstants;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
+import frc.robot.testMechanism.ArmConstants.GripperAngleMotorConstants;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -30,7 +41,9 @@ public class RobotContainer {
   // Motor motor;
   // Set set;
 
-  StateBasedMechanism stateBasedMechanism;
+  Arm arm;
+  Intake gripper;
+
   
   public static CommandController driverController;
 
@@ -57,12 +70,19 @@ public class RobotContainer {
     // motor = new Motor();
     // set =new Set(motor);
 
-    stateBasedMechanism = new StateBasedMechanism(ArmConstants.NAME, 
-    new MotorInterface[] {new TalonMotor(ArmAngleMotorConstants.CONFIG)}, 
-    new SensorInterface[0], 
-    ArmConstants.STATES.class)
-    .withStartingOption(ArmConstants.STATES.STARTING)
-    .withCalibrationValue(() -> true);
+    arm = new Arm(ArmConstants.NAME, 
+    new MotorInterface[] {new TalonMotor(ArmAngleMotorConstants.CONFIG), new TalonMotor(GripperAngleMotorConstants.CONFIG)}, 
+    ArmConstants.ARM_STATES.class)
+    .withStartingOption(ArmConstants.ARM_STATES.STARTING);
+
+    
+    gripper = new Intake(GripperConstants.NAME, 
+    new MotorInterface[]{
+      new TalonSRXMotor(GripperConstants.MotorConstants.CONFIG)}, 
+    new SensorInterface[] {
+      new UltraSonicSensor(SensorConstants.UP_CONFIG), 
+      new OpticalSensor(SensorConstants.DOWN_CONFOG)}, 
+      GRIPPER_STATES.class);
 
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
@@ -91,7 +111,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    stateBasedMechanism.setDefaultCommand(stateBasedMechanism.toStateCommand());
+    arm.setDefaultCommand(arm.toStateCommand());
   }
 
   /**

@@ -1,5 +1,7 @@
 package frc.demacia.utils.Mechanisms;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -13,11 +15,29 @@ import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Sensors.SensorInterface;
 
-public class StateBasedMechanism extends BaseMechanism {
+public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseMechanism {
 
     public interface MechanismState {
         double[] getValues();
         BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> getConsumer();
+    }
+
+    public static class Trigger {
+        private final Supplier<Boolean> condition;
+        private final Enum<?> state;
+
+        public Trigger(Supplier<Boolean> condition, Enum<?> state) {
+            this.condition = condition;
+            this.state = state;
+        }
+
+        public boolean check() {
+            return condition.get();
+        }
+
+        public Enum<?> getState() {
+            return state;
+        }
     }
 
     protected double[] Values;
@@ -28,6 +48,8 @@ public class StateBasedMechanism extends BaseMechanism {
     Supplier<Boolean> isCalibratedSupplier = () -> true;
 
     protected Enum<?> state;
+
+    private List<Trigger> triggers = new ArrayList<>();
     
     SendableChooser<Enum<?>> stateChooser = new SendableChooser<>();
 
@@ -69,7 +91,8 @@ public class StateBasedMechanism extends BaseMechanism {
         return new RunCommand(() -> setToState(), this);
     }
 
-    public StateBasedMechanism withStartingOption(Enum<?> state){
+    @SuppressWarnings("unchecked")
+    public T withStartingOption(Enum<?> state){
         if (state == null) {
             throw new IllegalArgumentException("Starting state cannot be null");
         }
@@ -80,13 +103,36 @@ public class StateBasedMechanism extends BaseMechanism {
 
         testConsumer = ((MechanismState) state).getConsumer();
         this.state = state;
-        return this;
+        return (T) this;
     }
 
-    public StateBasedMechanism withCalibrationValue(Supplier<Boolean> isCalibratedSupplier){
+    @SuppressWarnings("unchecked")
+    public T withCalibrationValue(Supplier<Boolean> isCalibratedSupplier){
         this.isCalibratedSupplier = isCalibratedSupplier;
         LogManager.addEntry(name + "/is calibrated", isCalibratedSupplier);
-        return this;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T addTrigger(Supplier<Boolean> condition, Enum<?> state) {
+        if (!(state instanceof MechanismState)) {
+            throw new IllegalArgumentException("Target state must implement MechanismState");
+        }
+        
+        triggers.add(new Trigger(condition, state));
+        return (T) this;
+    }
+
+    public void periodic() {
+        for (Trigger trigger : triggers) {
+            if (trigger.check()) {
+                state = trigger.getState();
+            }
+        }
+    }
+
+    public Enum<?> getState() {
+        return state;
     }
 
     private void setToState(){

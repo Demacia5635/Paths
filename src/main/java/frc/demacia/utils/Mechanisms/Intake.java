@@ -6,21 +6,25 @@ import edu.wpi.first.math.Pair;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Sensors.SensorInterface;
 
-public class Arm extends StateBasedMechanism<Arm>{
-    public interface ArmState extends MechanismState{
+// איסוף - Intake (עובד עד שחיישן מזהה או לפי זמן)
+public class Intake extends StateBasedMechanism<Intake>{
+    public interface IntakeState extends MechanismState{
         double[] getValues();
-
+        
         default BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> getConsumer() {
             return (electronics, values) -> {
                 MotorInterface[] motors = electronics.getFirst();
                 for (int i = 0; i < motors.length && i < values.length; i++) {
-                    motors[i].setAngle(values[i]);
+                    motors[i].setDuty(values[i]);
                 }
             };
         }
     }
+    
+    public enum IntakeMode {SENSOR, TIMED, CONTINUOUS}
 
-    public Arm(String name, MotorInterface[] motors, Class<? extends Enum<? extends ArmState>> enumClass) {
-        super(name, motors, new SensorInterface[0], enumClass);
+    public Intake(String name, MotorInterface[] motors, SensorInterface[] sensors, 
+                  Class<? extends Enum<? extends IntakeState>> enumClass) {
+        super(name, motors, sensors, enumClass);
     }
 }

@@ -6,8 +6,8 @@ import edu.wpi.first.math.Pair;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Sensors.SensorInterface;
 
-public class Elevator extends StateBasedMechanism{
-    public interface ArmState extends MechanismState{
+public class Elevator extends StateBasedMechanism<Elevator>{
+    public interface ElevatorState extends MechanismState{
         double[] getValues();
 
         default BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> getConsumer() {
@@ -20,7 +20,7 @@ public class Elevator extends StateBasedMechanism{
         }
     }
 
-    public Elevator(String name, MotorInterface[] motors, Class<? extends Enum<? extends ArmState>> enumClass) {
+    public Elevator(String name, MotorInterface[] motors, Class<? extends Enum<? extends ElevatorState>> enumClass) {
         super(name, motors, new SensorInterface[0], enumClass);
     }
 }
