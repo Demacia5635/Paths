@@ -25,10 +25,18 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     public static class Trigger {
         private final Supplier<Boolean> condition;
         private final Enum<?> state;
+        private final Enum<?> atState;
 
         public Trigger(Supplier<Boolean> condition, Enum<?> state) {
             this.condition = condition;
             this.state = state;
+            atState = null;
+        }
+
+        public Trigger(Supplier<Boolean> condition, Enum<?> state, Enum<?> atState) {
+            this.condition = condition;
+            this.state = state;
+            this.atState = atState;
         }
 
         public boolean check() {
@@ -37,6 +45,10 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
 
         public Enum<?> getState() {
             return state;
+        }
+
+        public Enum<?> getAtState() {
+            return atState;
         }
     }
 
@@ -123,9 +135,19 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
         return (T) this;
     }
 
+    @SuppressWarnings("unchecked")
+    public T addTrigger(Supplier<Boolean> condition, Enum<?> state, Enum<?> atState) {
+        if (!(state instanceof MechanismState)) {
+            throw new IllegalArgumentException("Target state must implement MechanismState");
+        }
+        
+        triggers.add(new Trigger(condition, state, atState));
+        return (T) this;
+    }
+
     public void periodic() {
         for (Trigger trigger : triggers) {
-            if (trigger.check()) {
+            if (trigger.check() && state == trigger.getAtState()) {
                 state = trigger.getState();
             }
         }
