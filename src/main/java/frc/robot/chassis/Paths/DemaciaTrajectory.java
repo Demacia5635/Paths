@@ -6,6 +6,8 @@ package frc.robot.chassis.Paths;
 
 import java.util.ArrayList;
 
+import javax.xml.crypto.dsig.keyinfo.RetrievalMethod;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -34,32 +36,46 @@ public class DemaciaTrajectory {
 
     }
 
-    private Translation2d calculateP1OnIntialArc(Translation2d startingPoint, Translation2d centerCircle) {
-        Translation2d p1ToCenter = centerCircle.minus(startingPoint);
+    private Translation2d calculateP1OnIntialArc(Translation2d startingPoint, CenterCircleWithDirection centerCircle) {
+        Translation2d p1ToCenter = centerCircle.centerCircle().minus(startingPoint);
         double radius = PathsConstants.MAX_ALLOWED_RADIUS;
-        Rotation2d toP1Angle = p1ToCenter.getAngle().plus(new Rotation2d(Math.sin(radius / p1ToCenter.getNorm())));
+        
+        Rotation2d toP1Angle = Rotation2d.kZero;
+        if(centerCircle.isTurningRight()){
+            toP1Angle = p1ToCenter.getAngle().plus(new Rotation2d(Math.asin(radius / p1ToCenter.getNorm())));
+        }
+        else{
+            toP1Angle = p1ToCenter.getAngle().minus(new Rotation2d(Math.asin(radius / p1ToCenter.getNorm())));
+        }
         double toP1Norm = Math.sqrt((radius * radius) + (p1ToCenter.getNorm() * p1ToCenter.getNorm()));
         return new Translation2d(toP1Norm, toP1Angle);
     }
 
-    private Translation2d calculateP2OnLastArc(Translation2d lastCenterCircle, Translation2d lastTrajPoint){
-        double distance = lastTrajPoint.minus(lastCenterCircle).getNorm();
+    private Translation2d calculateP2OnLastArc(CenterCircleWithDirection lastCenterCircle, Translation2d lastTrajPoint){
+        double distance = lastTrajPoint.minus(lastCenterCircle.centerCircle()).getNorm();
         Rotation2d angle = new Rotation2d(Math.acos(PathsConstants.MAX_ALLOWED_RADIUS/distance));
-
-        return lastCenterCircle.plus(new Translation2d(distance, angle));
+        Translation2d vectorToReturn = Translation2d.kZero;
+        if(lastCenterCircle.isTurningRight()){
+            vectorToReturn = lastCenterCircle.centerCircle().plus(new Translation2d(distance, angle));
+        }
+        else{
+            
+            vectorToReturn = lastCenterCircle.centerCircle().minus(new Translation2d(distance, angle));
+        }
+        return vectorToReturn;
     }
 
     private void createCenterCircles(){
         for(int i = 0; i <= trajectoryPoints.size() - 2; i++){
-            Translation2d circleCenter = PathsUtils.ArcUtils.calculateCenterCircle(trajectoryPoints.get(i), trajectoryPoints.get(i+1), trajectoryPoints.get(i+2));
-            Boolean isTurningRight = PathsUtils.ArcUtils.isRightTurn(circleCenter, circleCenter, circleCenter);
-            circleCenters.add(new CenterCircleWithDirection(circleCenter, isTurningRight));
+           CenterCircleWithDirection center = PathsUtils.ArcUtils.calculateCenterCircle(trajectoryPoints.get(i), trajectoryPoints.get(i+1), trajectoryPoints.get(i+2));
+            circleCenters.add(center);
         }
     }
 
     private void createPathPoints(){
         pathPoints.add(trajectoryPoints.get(0));
-        pathPoints.add(new Pose2d(calculateP1OnIntialArc(trajectoryPoints.get(0).getTranslation(), circleCenters.get(0).centerCircle()), trajectoryPoints.get(1).getRotation()));
+        Translation2d firstPointOnArc = calculateP1OnIntialArc(trajectoryPoints.get(0).getTranslation(), circleCenters.get(0));
+        pathPoints.add(new Pose2d(firstPointOnArc, trajectoryPoints.get(1).getRotation()));
         for(int i = 0; i < arcCount - 1; i++){
             if(circleCenters.get(i).isTurningRight() == circleCenters.get(i+1).isTurningRight()){
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateExitPointOfArc(trajectoryPoints.get(i).getTranslation(), circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
@@ -73,7 +89,7 @@ public class DemaciaTrajectory {
         }
         
         Translation2d lastTrajPoint = trajectoryPoints.get(trajectoryPoints.size()-1).getTranslation();
-        pathPoints.add(new Pose2d(calculateP2OnLastArc(circleCenters.get(circleCenters.size()-1).centerCircle(), lastTrajPoint), trajectoryPoints.get(trajectoryPoints.size() - 1).getRotation()));
+        pathPoints.add(new Pose2d(calculateP2OnLastArc(circleCenters.get(circleCenters.size()-1), lastTrajPoint), trajectoryPoints.get(trajectoryPoints.size() - 1).getRotation()));
         pathPoints.add(trajectoryPoints.get(trajectoryPoints.size() - 1));
     }
     private void createSegments(){
@@ -87,5 +103,5 @@ public class DemaciaTrajectory {
 
 
 
-    private record CenterCircleWithDirection(Translation2d centerCircle, boolean isTurningRight) {}
+    public record CenterCircleWithDirection(Translation2d centerCircle, boolean isTurningRight) {}
 }

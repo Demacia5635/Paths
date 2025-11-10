@@ -8,6 +8,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import frc.robot.chassis.Paths.DemaciaTrajectory.CenterCircleWithDirection;
 
 /** Add your docs here. */
 public class PathsUtils {
@@ -23,24 +24,17 @@ public class PathsUtils {
     }
 
     public static class ArcUtils {
-        public static Translation2d calculateCenterCircle(Pose2d p1, Pose2d p2, Pose2d p3) {
-            return calculateCenterCircle(p1.getTranslation(), p2.getTranslation(), p3.getTranslation());
+        public static CenterCircleWithDirection calculateCenterCircle(Pose2d p1, Pose2d p2, Pose2d p3) {
+            return calculateCenterWithDirection(p1.getTranslation(), p2.getTranslation(), p3.getTranslation());
         }
 
-        public static Translation2d calculateCenterCircle(Translation2d trajP1, Translation2d trajP2,
-                Translation2d trajP3) {
+        public static CenterCircleWithDirection calculateCenterWithDirection(Translation2d trajP1, Translation2d trajP2,Translation2d trajP3){
             Translation2d p1p2 = trajP2.minus(trajP1);
             Translation2d p2p3 = trajP3.minus(trajP2);
-            Rotation2d middleAngle = (p1p2.getAngle().plus(p2p3.getAngle())).div(2);
-            return new Translation2d(PathsConstants.MAX_ALLOWED_RADIUS, p1p2.getAngle().plus(middleAngle));
-        }
-
-        public static boolean isRightTurn(Translation2d trajP1, Translation2d trajP2, Translation2d trajP3) {
-
-            Translation2d p1p2 = trajP2.minus(trajP1);
-            Translation2d p2p3 = trajP3.minus(trajP2);
+            Rotation2d middleAngle = (p1p2.getAngle().plus(Rotation2d.k180deg).plus(p2p3.getAngle())).div(2);
             Rotation2d turningAngle = p2p3.getAngle().minus(p1p2.getAngle());
-            return MathUtil.angleModulus(turningAngle.getRadians()) > 0;
+            boolean isTurningRight = MathUtil.angleModulus(turningAngle.getRadians()) > 0;
+            return new CenterCircleWithDirection(new Translation2d(PathsConstants.MAX_ALLOWED_RADIUS, middleAngle), isTurningRight);
         }
 
         public static class Same {
