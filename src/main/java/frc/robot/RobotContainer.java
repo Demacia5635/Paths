@@ -19,9 +19,13 @@ import frc.robot.testMechanism.ArmConstants;
 import frc.robot.testMechanism.GripperConstants;
 import frc.robot.testMechanism.GripperConstants.GRIPPER_STATES;
 import frc.robot.testMechanism.GripperConstants.SensorConstants;
+import frc.robot.testMotors.talonFX.commands.Set;
+import frc.robot.testMotors.talonFX.subsystems.Motor;
 import frc.robot.testMechanism.ArmConstants.ARM_STATES;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
 import frc.robot.testMechanism.ArmConstants.GripperAngleMotorConstants;
+import frc.robot.testMechanism.ClimebConstants;
+import frc.robot.testMechanism.ClimebConstants.ClimbConstants;
 
 import java.util.function.Supplier;
 
@@ -39,10 +43,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
 
-  // Motor motor;
-  // Set set;
+  Motor motor;
+  Set set;
 
   Arm arm;
+  Arm clibeb;
   Intake gripper;
 
   
@@ -68,10 +73,10 @@ public class RobotContainer {
 
 
 
-    // motor = new Motor();
-    // set =new Set(motor);
+    motor = new Motor();
+    set =new Set(motor);
 
-    setMechanism();
+    // setMechanism();
 
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
@@ -83,6 +88,10 @@ public class RobotContainer {
       new MotorInterface[] {new TalonMotor(ArmAngleMotorConstants.CONFIG), new TalonMotor(GripperAngleMotorConstants.CONFIG)}, 
       ArmConstants.ARM_STATES.class)
       .withStartingOption(ARM_STATES.STARTING);
+
+    clibeb = new Arm(ClimebConstants.NAME, 
+    null, 
+    null);
 
     UltraSonicSensor upSensor = new UltraSonicSensor(SensorConstants.UP_CONFIG);
     OpticalSensor downSensor = new OpticalSensor(SensorConstants.DOWN_CONFOG);
@@ -126,7 +135,8 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    arm.setDefaultCommand(arm.toStateCommand());
+    // arm.setDefaultCommand(arm.toStateCommand());
+    motor.setDefaultCommand(set);
   }
 
   /**

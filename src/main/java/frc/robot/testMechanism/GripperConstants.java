@@ -2,7 +2,7 @@ package frc.robot.testMechanism;
 
 import edu.wpi.first.math.Pair;
 import frc.demacia.utils.Mechanisms.Intake.IntakeState;
-import frc.demacia.utils.Motors.TalonConfig;
+import frc.demacia.utils.Motors.TalonSRXConfig;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 import frc.demacia.utils.Sensors.OpticalSensorConfig;
 import frc.demacia.utils.Sensors.UltraSonicSensorConfig;
@@ -22,7 +22,7 @@ public class GripperConstants {
         public static final Canbus CANBUS = Canbus.CANIvore;
         public static final boolean INVERT = false;
         public static final boolean START_NEUTRAL_MODE = true;
-        public static final TalonConfig CONFIG = new TalonConfig(MOTOR_ID, null, NAME)
+        public static final TalonSRXConfig CONFIG = new TalonSRXConfig(MOTOR_ID, NAME)
         .withInvert(INVERT)
         .withBrake(START_NEUTRAL_MODE);
     }

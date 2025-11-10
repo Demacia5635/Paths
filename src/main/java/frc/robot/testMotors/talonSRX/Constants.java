@@ -4,11 +4,9 @@
 
 package frc.robot.testMotors.talonSRX;
 
-import frc.demacia.utils.Motors.TalonConfig;
-import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.Motors.TalonSRXConfig;
 public final class Constants {
   public static final int ID = 30;
-  public static final Canbus CAN_BUS = Canbus.Rio;
   public static final String NAME = "Test Motoor";
 
   public static final double MAX_VOLT = 12;
@@ -39,7 +37,7 @@ public final class Constants {
   public static final double GEAR_RATIO = 1;
 
   /* The config of the motors based on the constants above */
-  public static final TalonConfig CONFIG = new TalonConfig(ID, CAN_BUS, NAME)
+  public static final TalonSRXConfig CONFIG = new TalonSRXConfig(ID, NAME)
     .withPID(KP, KI, KD, KS, KV, KA, KG)
     .withMotionParam(MOTION_MAGIC_VELOCITY, MOTION_MAGIC_ACCELERATION, MOTION_MAGIC_JERK)
     .withBrake(IS_BRAKE)

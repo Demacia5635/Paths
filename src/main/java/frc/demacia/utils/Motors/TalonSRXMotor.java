@@ -14,14 +14,14 @@ import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Log.LogManager;
 
 public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
-    TalonConfig config;
+    TalonSRXConfig config;
     String name;
 
     int slot = 0;
 
     String lastControlMode="";
 
-    public TalonSRXMotor(TalonConfig config) {
+    public TalonSRXMotor(TalonSRXConfig config) {
         super(config.id);
         this.config = config;
         name = config.name;
