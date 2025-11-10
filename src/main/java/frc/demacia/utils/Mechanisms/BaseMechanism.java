@@ -1,5 +1,10 @@
 package frc.demacia.utils.Mechanisms;
 
+import java.util.function.BiConsumer;
+
+import edu.wpi.first.math.Pair;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Sensors.SensorInterface;
@@ -8,15 +13,37 @@ public abstract class BaseMechanism extends SubsystemBase{
     protected String name;
     protected MotorInterface[] motors;
     protected SensorInterface[] sensors;
+    
+    protected double[] values;
 
-    public BaseMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors) {
+    BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer;
+
+    public BaseMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, BiConsumer <Pair<MotorInterface[], SensorInterface[]>, double[]> consumer) {
         this.name = name;
         this.motors = motors;
         this.sensors = sensors;
+        this.consumer = consumer;
     }
 
     public String getName(){
         return name;
+    }
+    
+    public Command Command(){
+        return new RunCommand(() -> set(), this);
+    }
+
+    private void set(){
+        if (consumer == null) {
+            System.err.println("Consumer is null, cannot set state");
+            return;
+        }
+
+        consumer.accept(new Pair<>(motors, sensors), values);
+    }
+
+    public void setValues(double[] values){
+        this.values = values;
     }
 
     public void stopAll(){

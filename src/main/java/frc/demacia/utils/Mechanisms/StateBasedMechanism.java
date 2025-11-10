@@ -19,7 +19,6 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
 
     public interface MechanismState {
         double[] getValues();
-        BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> getConsumer();
     }
 
     public static class Trigger {
@@ -56,7 +55,6 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     protected double[] testValues;
 
     BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer;
-    BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> testConsumer;
     Supplier<Boolean> isCalibratedSupplier = () -> true;
 
     protected Enum<?> state;
@@ -65,8 +63,8 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     
     SendableChooser<Enum<?>> stateChooser = new SendableChooser<>();
 
-    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends Enum<? extends MechanismState>> enumClass) {
-        super(name, motors, sensors);
+    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends Enum<? extends MechanismState>> enumClass, BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer) {
+        super(name, motors, sensors, consumer);
         this.addNT(enumClass);
         if (enumClass == null) {
             throw new IllegalArgumentException("Enum class cannot be null for mechanism: " + name);
@@ -76,7 +74,7 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
             throw new IllegalArgumentException("Enum class must have at least one constant for mechanism: " + name);
         }
 
-        testConsumer = ((MechanismState) enumClass.getEnumConstants()[0]).getConsumer();
+        this.consumer = consumer;
         Values = new double[motors.length];
         testValues = new double[motors.length];
         SmartDashboard.putData(this);
@@ -99,10 +97,6 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
         builder.addDoubleArrayProperty(getName() + "/Test Values", () -> getTestValues(), testValues -> setTestValues(testValues));
     }
 
-    public Command toStateCommand(){
-        return new RunCommand(() -> setToState(), this);
-    }
-
     @SuppressWarnings("unchecked")
     public T withStartingOption(Enum<?> state){
         if (state == null) {
@@ -113,7 +107,6 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
             throw new IllegalArgumentException("Starting state must implement MechanismState");
         }
 
-        testConsumer = ((MechanismState) state).getConsumer();
         this.state = state;
         return (T) this;
     }
@@ -157,6 +150,10 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
         return state;
     }
 
+    public Command toStateCommand(){
+        return new RunCommand(() -> setToState(), this);
+    }
+
     private void setToState(){
         if (!isCalibratedSupplier.get()) return;
         setState();
@@ -170,11 +167,9 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
 
     private void setState(){
         if (state == null) {
-            consumer = testConsumer;
             Values = testValues;
             return;
         };
-        consumer = ((MechanismState) state).getConsumer();
         Values = ((MechanismState) state).getValues();
     }
 
