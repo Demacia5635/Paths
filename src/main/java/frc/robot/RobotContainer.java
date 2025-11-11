@@ -15,6 +15,9 @@ import frc.demacia.utils.Motors.TalonSRXMotor;
 import frc.demacia.utils.Sensors.OpticalSensor;
 import frc.demacia.utils.Sensors.SensorInterface;
 import frc.demacia.utils.Sensors.UltraSonicSensor;
+import frc.demacia.utils.chassis.Chassis;
+import frc.robot.testChassis.ChassisConstants;
+import frc.robot.testChassis.commands.DriveCommand;
 import frc.robot.testMechanism.ArmConstants;
 import frc.robot.testMechanism.GripperConstants;
 import frc.robot.testMechanism.GripperConstants.GRIPPER_STATES;
@@ -43,12 +46,15 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
 
-  Motor motor;
-  Set set;
+  // Motor motor;
+  // Set set;
 
   Arm arm;
   Arm clibeb;
   Intake gripper;
+
+  Chassis chassis;
+  DriveCommand driveCommand;
 
   
   public static CommandController driverController;
@@ -73,8 +79,11 @@ public class RobotContainer {
 
 
 
-    motor = new Motor();
-    set =new Set(motor);
+    // motor = new Motor();
+    // set =new Set(motor);
+
+    chassis = new Chassis(ChassisConstants.CHASSIS_CONFIG);
+    driveCommand = new DriveCommand(chassis, driverController);
 
     // setMechanism();
 
@@ -137,7 +146,8 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // arm.setDefaultCommand(arm.toStateCommand());
-    motor.setDefaultCommand(set);
+    // motor.setDefaultCommand(set);
+    chassis.setDefaultCommand(driveCommand);
   }
 
   /**

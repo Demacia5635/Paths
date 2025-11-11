@@ -14,7 +14,7 @@ import frc.demacia.utils.Sensors.PigeonConfig;
 import frc.demacia.utils.chassis.ChassisConfig;
 import frc.demacia.utils.chassis.SwerveModuleConfig;
 
-public final class Constants {
+public final class ChassisConstants {
   public static final String NAME = "test chassis";
   public static final double STEER_GEAR_RATIO = 151.0/7.0;
     public static final double DRIVE_GEAR_RATIO = 8.14;
@@ -54,7 +54,7 @@ public final class Constants {
     .withInvert(true)
     .withMeterMotor(DRIVE_GEAR_RATIO, wheelDiameter),
     new CancoderConfig(3, new CANBus("canivore"), "frontLeft cancoder"))
-    .withSteerOffset(-0.68569029575781545181333347012135);
+    .withSteerOffset(0.450439*2*Math.PI);
   public static final SwerveModuleConfig frontRightModuleConfig = new SwerveModuleConfig(
     NAME + " frontRight",
     new TalonConfig(5, Canbus.CANIvore, "frontRight steer")
@@ -69,7 +69,7 @@ public final class Constants {
     .withInvert(true)
     .withMeterMotor(DRIVE_GEAR_RATIO, wheelDiameter),
     new CancoderConfig(6, new CANBus("canivore"), "frontRight cancoder"))
-    .withSteerOffset(-3.1139780541647389558965567479405 + Math.PI);
+    .withSteerOffset(-0.356689 * 2 * Math.PI);
   public static final SwerveModuleConfig backLeftModuleConfig = new SwerveModuleConfig(
     NAME + " backLeft",
     new TalonConfig(8, Canbus.CANIvore, "backLeft steer")
@@ -84,7 +84,7 @@ public final class Constants {
     .withInvert(true)
     .withMeterMotor(DRIVE_GEAR_RATIO, wheelDiameter),
     new CancoderConfig(9, new CANBus("canivore"), "backLeft cancoder"))
-    .withSteerOffset(2.7795743657460270044216391356507);
+    .withSteerOffset(0.437256*2*Math.PI);
   public static final SwerveModuleConfig backRightModuleConfig = new SwerveModuleConfig(
     NAME + " backRight",
     new TalonConfig(11, Canbus.CANIvore, "backRight steer")
@@ -99,7 +99,7 @@ public final class Constants {
     .withInvert(true)
     .withMeterMotor(DRIVE_GEAR_RATIO, wheelDiameter),
     new CancoderConfig(12, new CANBus("canivore"), "backRight cancoder"))
-    .withSteerOffset(-0.68875649018771909001407301006343);
+    .withSteerOffset(0.262451*2*Math.PI);
   public static final CANBus PIGEO_CANBUS = new CANBus("rio");
   public static final PigeonConfig pigeonConfig = new PigeonConfig(14, PIGEO_CANBUS, NAME + " pigeon");
   public static final Translation2d frontLeftPosition = new Translation2d(0.34, 0.29);
