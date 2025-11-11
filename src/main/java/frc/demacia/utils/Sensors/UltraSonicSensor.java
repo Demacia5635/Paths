@@ -7,6 +7,7 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
         super(config.pingChannel, config.channel);
         this.config = config;
         name = config.name;
+     setAutomaticMode(true);
         addLog();
 		LogManager.log(name + "UltraSonicSensor initialized");
     }
