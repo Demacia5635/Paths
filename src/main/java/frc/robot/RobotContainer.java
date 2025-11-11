@@ -16,6 +16,9 @@ import frc.demacia.utils.Sensors.LimitSwitch;
 import frc.demacia.utils.Sensors.OpticalSensor;
 import frc.demacia.utils.Sensors.SensorInterface;
 import frc.demacia.utils.Sensors.UltraSonicSensor;
+import frc.demacia.utils.chassis.Chassis;
+import frc.robot.testChassis.ChassisConstants;
+import frc.robot.testChassis.commands.DriveCommand;
 import frc.robot.testMechanism.ArmConstants;
 import frc.robot.testMechanism.GripperConstants;
 import frc.robot.testMechanism.GripperConstants.GRIPPER_STATES;
@@ -53,6 +56,9 @@ OpticalSensor opticalSensor;
   Arm clibeb;
   Intake gripper;
 
+  Chassis chassis;
+  DriveCommand driveCommand;
+
   
   public static CommandController driverController;
 
@@ -73,7 +79,15 @@ OpticalSensor opticalSensor;
     new LogManager();
     opticalSensor= new OpticalSensor(Constants.OPTICAL_SENSOR);
     driverController = new CommandController(0, ControllerType.kXbox);
-    SmartDashboard.putData(opticalSensor);
+
+
+
+    // motor = new Motor();
+    // set =new Set(motor);
+
+    chassis = new Chassis(ChassisConstants.CHASSIS_CONFIG);
+    driveCommand = new DriveCommand(chassis, driverController);
+
     // setMechanism();
 
     // Configure the trigger bindings
