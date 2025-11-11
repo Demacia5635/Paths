@@ -6,6 +6,6 @@ public class Constants {
     public static final double CHANNEL = 0;
     public static final String LIMIT_SWITCH_NAME = "test limit switch";
     public static final boolean INVERTED = false;
-    public static final LimitSwitchConfig LIMIT_SWITCH_CONFIG = new LimitSwitchConfig(0, "Limit Switch")
+    public static final LimitSwitchConfig LIMIT_SWITCH_CONFIG = new LimitSwitchConfig(9, "Limit Switch")
     .withInvert(false);
 }

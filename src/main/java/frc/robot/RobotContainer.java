@@ -12,6 +12,7 @@ import frc.demacia.utils.Mechanisms.Intake;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Motors.TalonMotor;
 import frc.demacia.utils.Motors.TalonSRXMotor;
+import frc.demacia.utils.Sensors.LimitSwitch;
 import frc.demacia.utils.Sensors.OpticalSensor;
 import frc.demacia.utils.Sensors.SensorInterface;
 import frc.demacia.utils.Sensors.UltraSonicSensor;
@@ -21,15 +22,18 @@ import frc.robot.testMechanism.GripperConstants.GRIPPER_STATES;
 import frc.robot.testMechanism.GripperConstants.SensorConstants;
 import frc.robot.testMotors.talonFX.commands.Set;
 import frc.robot.testMotors.talonFX.subsystems.Motor;
+import frc.robot.testSensors.opticSensor.Constants;
 import frc.robot.testMechanism.ArmConstants.ARM_STATES;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
 import frc.robot.testMechanism.ArmConstants.GripperAngleMotorConstants;
 import frc.robot.testMechanism.ClimebConstants;
 import frc.robot.testMechanism.ClimebConstants.CLIMB_STATES;
 
+import java.time.format.TextStyle;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -43,8 +47,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
 
-  Motor motor;
-  Set set;
+OpticalSensor opticalSensor;
 
   Arm arm;
   Arm clibeb;
@@ -68,14 +71,9 @@ public class RobotContainer {
   public RobotContainer() {
     
     new LogManager();
-
+    opticalSensor= new OpticalSensor(Constants.OPTICAL_SENSOR);
     driverController = new CommandController(0, ControllerType.kXbox);
-
-
-
-    motor = new Motor();
-    set =new Set(motor);
-
+    SmartDashboard.putData(opticalSensor);
     // setMechanism();
 
     // Configure the trigger bindings
@@ -137,7 +135,6 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // arm.setDefaultCommand(arm.toStateCommand());
-    motor.setDefaultCommand(set);
   }
 
   /**

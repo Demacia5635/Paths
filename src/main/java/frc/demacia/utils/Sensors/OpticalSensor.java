@@ -1,4 +1,5 @@
 package frc.demacia.utils.Sensors;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.AnalogInput;
     public class OpticalSensor extends AnalogInput implements SensorInterface {
         private final OpticalSensorConfig config;
@@ -13,21 +14,24 @@ import edu.wpi.first.wpilibj.AnalogInput;
         }
     
     
-    public int getValue() {
-        return super.getValue();
+    public double getCurrentValue() {
+        return getVoltage();
     }
 
     public double get(){
-        return getValue();
+        return getCurrentValue();
     }
 
     public double getVoltage() {
-        return super.getVoltage();
+        return getVoltage();
     }
 
     public void checkElectronics(){
         
     }
-
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addDoubleProperty("value" , this::get, null);
+    }
 }
 
