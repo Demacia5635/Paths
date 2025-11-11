@@ -15,7 +15,7 @@ import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Sensors.SensorInterface;
 
-public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseMechanism {
+public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseMechanism<T> {
 
     public interface MechanismState {
         double[] getValues();

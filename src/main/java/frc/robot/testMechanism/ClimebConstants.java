@@ -28,13 +28,13 @@ public class ClimebConstants {
     }
     public static final int LIMIT_SWITCH_CHANNEL = 4;
 
-    public static enum ARM_STATES implements ArmState{
+    public static enum CLIMB_STATES implements ArmState{
         UP(0.3),
         DOWN(-0.3);
 
         public final double[] angles;
 
-        ARM_STATES(double... angles) {
+        CLIMB_STATES(double... angles) {
             this.angles = angles;
         }
 

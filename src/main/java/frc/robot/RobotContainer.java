@@ -25,6 +25,7 @@ import frc.robot.testMechanism.ArmConstants.ARM_STATES;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
 import frc.robot.testMechanism.ArmConstants.GripperAngleMotorConstants;
 import frc.robot.testMechanism.ClimebConstants;
+import frc.robot.testMechanism.ClimebConstants.CLIMB_STATES;
 
 import java.util.function.Supplier;
 
@@ -91,7 +92,7 @@ public class RobotContainer {
 
     clibeb = new Arm(ClimebConstants.NAME, 
     new MotorInterface[]{new TalonMotor(ClimebConstants.MOTOR_CONFIG)}, 
-    ClimebConstants.ARM_STATES.class);
+    CLIMB_STATES.class);
 
     UltraSonicSensor upSensor = new UltraSonicSensor(SensorConstants.UP_CONFIG);
     OpticalSensor downSensor = new OpticalSensor(SensorConstants.DOWN_CONFOG);

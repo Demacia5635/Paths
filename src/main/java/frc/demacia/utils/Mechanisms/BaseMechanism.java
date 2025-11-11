@@ -1,6 +1,9 @@
 package frc.demacia.utils.Mechanisms;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -9,41 +12,102 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Sensors.SensorInterface;
 
-public abstract class BaseMechanism extends SubsystemBase{
+public abstract class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
+
+    public static class Trigger {
+        private final Supplier<Boolean> condition;
+        private final BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer;
+
+        public Trigger(Supplier<Boolean> condition, BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer) {
+            this.condition = condition;
+            this.consumer = consumer;
+        }
+
+        public boolean check() {
+            return condition.get();
+        }
+
+        public BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> getConsumer() {
+            return consumer;
+        }
+    }
+
     protected String name;
     protected MotorInterface[] motors;
     protected SensorInterface[] sensors;
-    
     protected double[] values;
 
-    BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer;
+    
+    private List<Trigger> triggers = new ArrayList<>();
+    private BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer;
 
     public BaseMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, BiConsumer <Pair<MotorInterface[], SensorInterface[]>, double[]> consumer) {
         this.name = name;
-        this.motors = motors;
-        this.sensors = sensors;
+        this.motors = motors != null ? motors : new MotorInterface[0];;
+        this.sensors = sensors != null ? sensors : new SensorInterface[0];
         this.consumer = consumer;
+        values = new double[0];
     }
 
     public String getName(){
         return name;
     }
-    
-    public Command Command(){
-        return new RunCommand(() -> set(), this);
+
+    public void setValues(double[] values){
+        this.values = values != null ? values : new double[0];
     }
 
-    private void set(){
+
+
+    @SuppressWarnings("unchecked")
+    public T addTrigger(Supplier<Boolean> condition, BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer) {
+        if (condition == null || consumer == null) {
+            throw new IllegalArgumentException("Trigger condition and consumer cannot be null");
+        }
+        triggers.add(new Trigger(condition, consumer));
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T addStop(Supplier<Boolean> condition) {
+        if (condition == null) {
+            throw new IllegalArgumentException("Stop condition cannot be null");
+        }
+        BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> stopConsumer = 
+        (electronics, values) -> {
+            for (MotorInterface motor : electronics.getFirst()) {
+                motor.setDuty(0);
+            }};
+        triggers.add(new Trigger(condition, stopConsumer));
+        return (T) this;
+    }
+    
+    public Command runMechanismCommand(){
+        return new RunCommand(() -> {
+            checkTriggers();
+            runMechanism();}
+            , this);
+    }
+
+    private void runMechanism(){
         if (consumer == null) {
-            System.err.println("Consumer is null, cannot set state");
+            System.err.println("Consumer is null, cannot run mechanism");
+            return;
+        }
+        if (values == null) {
+            System.err.println("Values is null, cannot run mechanism");
             return;
         }
 
         consumer.accept(new Pair<>(motors, sensors), values);
     }
 
-    public void setValues(double[] values){
-        this.values = values;
+    private void checkTriggers() {
+        for (Trigger trigger : triggers) {
+            if (trigger.check()) {
+                trigger.getConsumer().accept(new Pair<>(motors, sensors), values);
+            }
+        }
     }
 
     public void stopAll(){
@@ -74,7 +138,7 @@ public abstract class BaseMechanism extends SubsystemBase{
 
     public void setNeutralMode(int motorIndex, boolean isBrake){
         if (isValidMotorIndex(motorIndex)){
-            motors[motorIndex].setNeutralMode(isBrake);;
+            motors[motorIndex].setNeutralMode(isBrake);
         }
     }
 
@@ -91,13 +155,13 @@ public abstract class BaseMechanism extends SubsystemBase{
 
     public void checkElectronicsMotor(int motorIndex){
         if (isValidMotorIndex(motorIndex)){
-            motors[motorIndex].checkElectronics();;
+            motors[motorIndex].checkElectronics();
         }
     }
 
     public void checkElectronicsSensor(int sensorIndex){
         if (isValidSensorIndex(sensorIndex)){
-            sensors[sensorIndex].checkElectronics();;
+            sensors[sensorIndex].checkElectronics();
         }
     }
 
@@ -108,7 +172,7 @@ public abstract class BaseMechanism extends SubsystemBase{
 
     public SensorInterface getSensor(int index) {
         if (isValidSensorIndex(index)) return sensors[index];
-        throw new IllegalArgumentException("Invalid motor index " + index);
+        throw new IllegalArgumentException("Invalid sensor index " + index);
     }
 
     private boolean isValidMotorIndex(int index) {
