@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.demacia.utils.Data;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 
 public class LogManager2 extends SubsystemBase {
 
@@ -61,7 +62,7 @@ public class LogManager2 extends SubsystemBase {
   public static void removeInComp() {
     for (int i = 0; i < logManager.individualLogEntries.size(); i++) {
       logManager.individualLogEntries.get(i).removeInComp();
-      if (logManager.individualLogEntries.get(i).logLevel == 1) {
+      if (logManager.individualLogEntries.get(i).logLevel == LogLevel.LOG_ONLY_NOT_IN_COMP) {
         logManager.individualLogEntries.remove(logManager.individualLogEntries.get(i));
         i--;
       }
@@ -70,7 +71,7 @@ public class LogManager2 extends SubsystemBase {
     for (int i = 0; i < 4; i++) {
       if (logManager.categoryLogEntries[i] != null && logManager.categoryLogEntries[i] != null) {
         logManager.categoryLogEntries[i].removeInComp();
-        if (logManager.categoryLogEntries[i].logLevel == 1) {
+        if (logManager.categoryLogEntries[i].logLevel == LogLevel.LOG_ONLY_NOT_IN_COMP) {
           logManager.categoryLogEntries[i] = null;
           int index = i;
           logManager.entryLocationMap.entrySet().removeIf(entry -> entry.getValue().getFirst().getFirst() == index);
@@ -197,7 +198,7 @@ public class LogManager2 extends SubsystemBase {
     }
   }
 
-  public <T> LogEntry2<T> add(String name, Data<T> data, int logLevel, String metaData) {
+  public <T> LogEntry2<T> add(String name, Data<T> data, LogLevel logLevel, String metaData) {
     LogEntry2<T> entry = null;
 
     int categoryIndex = getCategoryIndex(data, logLevel, metaData);
@@ -220,7 +221,9 @@ public class LogManager2 extends SubsystemBase {
     int dataIndex = 0;
     
     if (categoryLogEntries[i] == null || categoryLogEntries[i].data == null) {
-        categoryLogEntries[i] = new LogEntry2<>(name, data, i/4 + 1, "");
+        categoryLogEntries[i] = new LogEntry2<>(name, data, 
+        i <= 3? LogLevel.LOG_ONLY_NOT_IN_COMP: i <= 7? LogLevel.LOG_ONLY: i <= 11? LogLevel.LOG_AND_NT_NOT_IN_COMP: LogLevel.LOG_AND_NT
+        , "");
         subIndex = 1;
         dataIndex = 0;
     } else {
@@ -258,7 +261,7 @@ public class LogManager2 extends SubsystemBase {
     return (LogEntry2<T>) categoryLogEntries[i];
 }
 
-  private int getCategoryIndex(Data<?> data, int logLevel, String metaData) {
+  private int getCategoryIndex(Data<?> data, LogLevel logLevel, String metaData) {
     boolean isSignal = data.getSignals() != null;
     boolean isSupplier = data.getSuppliers() != null;
     boolean isDouble = data.isDouble();
@@ -269,7 +272,10 @@ public class LogManager2 extends SubsystemBase {
     }
     
     int baseIndex = (isSignal ? 0 : 2) + (isDouble ? 0 : 1);
-    int levelOffset = (logLevel - 1) * 4;
+    int levelOffset = logLevel == LogLevel.LOG_ONLY_NOT_IN_COMP? 0:
+    logLevel == LogLevel.LOG_ONLY? 4:
+    logLevel == LogLevel.LOG_AND_NT_NOT_IN_COMP?8 :
+    12;//logLevel == LogLevel.LOG_AND_NT
     
     return baseIndex + levelOffset;
   }
@@ -324,7 +330,7 @@ public class LogManager2 extends SubsystemBase {
     LogEntry2<?> e = find(name);
     return e != null 
     ?e 
-    :new LogEntry2<>(name, null, 1, "");
+    :new LogEntry2<>(name, null, LogLevel.LOG_ONLY_NOT_IN_COMP, "");
   }
 
   private LogEntry2<?> find(String name) {

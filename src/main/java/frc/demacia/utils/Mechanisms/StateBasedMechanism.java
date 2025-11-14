@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -52,7 +51,6 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
 
     protected double[] testValues;
 
-    BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer;
     Supplier<Boolean> isCalibratedSupplier = () -> true;
 
     protected Enum<?> state;
@@ -61,7 +59,7 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     
     SendableChooser<Enum<?>> stateChooser = new SendableChooser<>();
 
-    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends Enum<? extends MechanismState>> enumClass, BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer) {
+    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends Enum<? extends MechanismState>> enumClass, BiConsumer<MotorInterface[], double[]> consumer) {
         super(name, motors, sensors, consumer);
         this.addNT(enumClass);
         if (enumClass == null) {
@@ -72,7 +70,7 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
             throw new IllegalArgumentException("Enum class must have at least one constant for mechanism: " + name);
         }
 
-        this.consumer = consumer;
+        super.consumer = consumer;
         testValues = new double[motors.length];
         SmartDashboard.putData(this);
     }
@@ -135,21 +133,22 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
         return (T) this;
     }
 
-    public void periodic() {
-        for (StateTrigger trigger : triggers) {
-            if (trigger.check() && state == trigger.getWhen()) {
-                state = trigger.getState();
-            }
-        }
-    }
-
     public Enum<?> getState() {
         return state;
     }
 
     public Command runStateMechanismCommand(){
+        checkStateTriggers();
         setState();
         return runMechanismCommand();
+    }
+
+    private void checkStateTriggers() {
+        for (StateTrigger trigger : triggers) {
+            if (trigger.check() && (state == trigger.getWhen() || trigger.getWhen() == null)) {
+                state = trigger.getState();
+            }
+        }
     }
 
     private void setState(){

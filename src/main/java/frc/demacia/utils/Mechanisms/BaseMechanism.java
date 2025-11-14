@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,9 +15,9 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
 
     public static class Trigger {
         private final Supplier<Boolean> condition;
-        private final BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer;
+        private final BiConsumer<MotorInterface[], double[]> consumer;
 
-        public Trigger(Supplier<Boolean> condition, BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer) {
+        public Trigger(Supplier<Boolean> condition, BiConsumer<MotorInterface[], double[]> consumer) {
             this.condition = condition;
             this.consumer = consumer;
         }
@@ -27,7 +26,7 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
             return condition.get();
         }
 
-        public BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> getConsumer() {
+        public BiConsumer<MotorInterface[], double[]> getConsumer() {
             return consumer;
         }
     }
@@ -39,9 +38,9 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
 
     
     private List<Trigger> triggers = new ArrayList<>();
-    private BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer;
+    protected BiConsumer<MotorInterface[], double[]> consumer;
 
-    public BaseMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, BiConsumer <Pair<MotorInterface[], SensorInterface[]>, double[]> consumer) {
+    public BaseMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, BiConsumer<MotorInterface[], double[]> consumer) {
         this.name = name;
         this.motors = motors != null ? motors : new MotorInterface[0];;
         this.sensors = sensors != null ? sensors : new SensorInterface[0];
@@ -60,7 +59,7 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
 
 
     @SuppressWarnings("unchecked")
-    public T addTrigger(Supplier<Boolean> condition, BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> consumer) {
+    public T addTrigger(Supplier<Boolean> condition, BiConsumer<MotorInterface[], double[]> consumer) {
         if (condition == null || consumer == null) {
             throw new IllegalArgumentException("Trigger condition and consumer cannot be null");
         }
@@ -73,9 +72,9 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
         if (condition == null) {
             throw new IllegalArgumentException("Stop condition cannot be null");
         }
-        BiConsumer<Pair<MotorInterface[], SensorInterface[]>, double[]> stopConsumer = 
-        (electronics, values) -> {
-            for (MotorInterface motor : electronics.getFirst()) {
+        BiConsumer<MotorInterface[], double[]> stopConsumer = 
+        (motors, values) -> {
+            for (MotorInterface motor : motors) {
                 motor.setDuty(0);
             }};
         triggers.add(new Trigger(condition, stopConsumer));
@@ -89,6 +88,14 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
             , this);
     }
 
+    private void checkTriggers() {
+        for (Trigger trigger : triggers) {
+            if (trigger.check()) {
+                trigger.getConsumer().accept(motors, values);
+            }
+        }
+    }
+
     private void runMechanism(){
         if (consumer == null) {
             System.err.println("Consumer is null, cannot run mechanism");
@@ -99,15 +106,7 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
             return;
         }
 
-        consumer.accept(new Pair<>(motors, sensors), values);
-    }
-
-    private void checkTriggers() {
-        for (Trigger trigger : triggers) {
-            if (trigger.check()) {
-                trigger.getConsumer().accept(new Pair<>(motors, sensors), values);
-            }
-        }
+        consumer.accept(motors, values);
     }
 
     public void stopAll(){

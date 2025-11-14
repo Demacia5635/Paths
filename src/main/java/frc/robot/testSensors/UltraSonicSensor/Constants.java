@@ -1,5 +1,5 @@
 
-package frc.robot.testSensors.UltraSonicSensor;
+package frc.robot.testSensors.ultraSonicSensor;
 import frc.demacia.utils.Sensors.UltraSonicSensorConfig;
 
 public class Constants {

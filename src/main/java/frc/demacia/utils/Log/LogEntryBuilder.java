@@ -8,8 +8,11 @@ import com.ctre.phoenix6.StatusSignal;
 import frc.demacia.utils.Data;
 
 public class LogEntryBuilder<T> implements AutoCloseable {
+
+    public static enum LogLevel { LOG_ONLY_NOT_IN_COMP, LOG_ONLY, LOG_AND_NT_NOT_IN_COMP, LOG_AND_NT} 
+
     private String name;
-    private int logLevel = 3;
+    private LogLevel logLevel = LogLevel.LOG_AND_NT_NOT_IN_COMP;
     private String metadata = "";
     private BiConsumer<T[], Long> consumer = null;
 
@@ -29,7 +32,7 @@ public class LogEntryBuilder<T> implements AutoCloseable {
         data = new Data<>(suppliers);
     }
     
-    public LogEntryBuilder<T> withLogLevel(int level) {
+    public LogEntryBuilder<T> withLogLevel(LogLevel level) {
         this.logLevel = level;
         return this;
     }
@@ -56,7 +59,7 @@ public class LogEntryBuilder<T> implements AutoCloseable {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Log entry name cannot be null or empty");
         }
-        if (logLevel < 1 || logLevel > 4) {
+        if (logLevel == null) {
             throw new IllegalArgumentException("Log level must be between 1 and 4, got: " + logLevel);
         }
         built = true;

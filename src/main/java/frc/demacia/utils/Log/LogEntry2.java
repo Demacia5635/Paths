@@ -24,6 +24,7 @@ import edu.wpi.first.util.datalog.StringArrayLogEntry;
 import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.demacia.utils.Data;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.robot.RobotContainer;
 
 public class LogEntry2<T> {
@@ -41,19 +42,12 @@ public class LogEntry2<T> {
     private boolean isBoolean;
     private boolean isArray;
 
-    /*
-        * the log levels are this:
-        * 1 -> log if it is not in a compition
-        * 2 -> only log
-        * 3 -> log and add to network tables if not in a compition
-        * 4 -> log and add to network tables
-    */
-    public int logLevel;
+    public LogLevel logLevel;
 
     /*
         * Constructor with the suppliers and boolean if add to network table
     */
-    LogEntry2(String name, Data<T> data, int logLevel, String metaData) {
+    LogEntry2(String name, Data<T> data, LogLevel logLevel, String metaData) {
 
         logManager = LogManager2.logManager;
 
@@ -68,7 +62,7 @@ public class LogEntry2<T> {
 
         this.entry = createLogEntry(logManager.log, name, metaData);
 
-        if (logLevel == 4 || (logLevel == 3 && !RobotContainer.isComp())) {
+        if (logLevel == LogLevel.LOG_AND_NT || (logLevel == LogLevel.LOG_AND_NT_NOT_IN_COMP && !RobotContainer.isComp())) {
             this.ntPublisher = createPublisher(logManager.table, name);
         } else {
             this.ntPublisher = null;
@@ -87,7 +81,7 @@ public class LogEntry2<T> {
         
         entry = createLogEntry(logManager.log, this.name, metaData);
 
-        if (logLevel == 4 || (logLevel == 3 && !RobotContainer.isComp())) {
+        if (logLevel == LogLevel.LOG_AND_NT || (logLevel == LogLevel.LOG_AND_NT_NOT_IN_COMP && !RobotContainer.isComp())) {
             ntPublisher = createPublisher(logManager.table, this.name);
         } else {
             ntPublisher = null;
@@ -138,7 +132,7 @@ public class LogEntry2<T> {
         if (ntPublisher != null) ntPublisher.close();
 
         entry = createLogEntry(logManager.log, name, metaData);
-        if (logLevel == 4 || (logLevel == 3 && !RobotContainer.isComp())) {
+        if (logLevel == LogLevel.LOG_AND_NT || (logLevel == LogLevel.LOG_AND_NT_NOT_IN_COMP && !RobotContainer.isComp())) {
             ntPublisher = createPublisher(logManager.table, name);
         } else {
             ntPublisher = null;
@@ -176,7 +170,7 @@ public class LogEntry2<T> {
     }
 
     public void removeInComp() {
-        if (logLevel == 3 && ntPublisher != null) {
+        if (logLevel == LogLevel.LOG_AND_NT_NOT_IN_COMP && ntPublisher != null) {
             ntPublisher.close();
         }
     }

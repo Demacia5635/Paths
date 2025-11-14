@@ -13,8 +13,7 @@ public class Intake extends StateBasedMechanism<Intake>{
     public Intake(String name, MotorInterface[] motors, SensorInterface[] sensors, 
                   Class<? extends Enum<? extends IntakeState>> enumClass) {
         super(name, motors, sensors, enumClass, 
-        (electronics, values) -> {
-            MotorInterface[] motor = electronics.getFirst();
+        (motor, values) -> {
             for (int i = 0; i < motor.length && i < values.length; i++) {
                 motor[i].setDuty(values[i]);
             }});
