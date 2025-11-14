@@ -25,7 +25,7 @@ public class Data<T> {
     private boolean isArray = false;
 
     @SuppressWarnings("unchecked")
-    public Data(StatusSignal<T> ... signal){
+    public Data(StatusSignal<T>... signal){
         this.signal = signal;
 
         signals.add(this);
@@ -52,7 +52,7 @@ public class Data<T> {
     }
     
     @SuppressWarnings("unchecked")
-    public Data(Supplier<T> ... supplier){
+    public Data(Supplier<T>... supplier){
         this.supplier = supplier;
         this.oldSupplier = supplier;
 
@@ -113,7 +113,7 @@ public class Data<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public void expandWithSignals(StatusSignal<T>... newSignals) {
+    public void expandWithSignals(StatusSignal<T>[] newSignals) {
         if (signal == null || newSignals == null || newSignals.length == 0) {
             return;
         }
@@ -148,7 +148,7 @@ public class Data<T> {
     }
     
     @SuppressWarnings("unchecked")
-    public void expandWithSuppliers(Supplier<T>... newSuppliers) {
+    public void expandWithSuppliers(Supplier<T>[] newSuppliers) {
         if (supplier == null || newSuppliers == null || newSuppliers.length == 0) {
             return;
         }

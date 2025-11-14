@@ -3,6 +3,7 @@ package frc.demacia.utils.Sensors;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.demacia.utils.UpdateArray;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Log.LogManager;
 
 public class DigitalEncoder extends DutyCycleEncoder implements SensorInterface{
@@ -24,8 +25,10 @@ public class DigitalEncoder extends DutyCycleEncoder implements SensorInterface{
         setAssumedFrequency(config.frequency);
     }
 
+    @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + "/Position", this::get, 3);
+        LogManager.addEntry(name + "/Position", this::get)
+        .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
     public String getName(){

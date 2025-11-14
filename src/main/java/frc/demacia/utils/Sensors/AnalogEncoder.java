@@ -1,6 +1,7 @@
 package frc.demacia.utils.Sensors;
 
 import frc.demacia.utils.UpdateArray;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Log.LogManager;
 
 public class AnalogEncoder extends edu.wpi.first.wpilibj.AnalogEncoder implements AnalogSensorInterface{
@@ -21,8 +22,10 @@ public class AnalogEncoder extends edu.wpi.first.wpilibj.AnalogEncoder implement
         setVoltagePercentageRange(config.minRange, config.maxRange);
     }
 
+    @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + "/Position", this::get, 3);
+        LogManager.addEntry(name + "/Position", this::get)
+        .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
     public void checkElectronics(){

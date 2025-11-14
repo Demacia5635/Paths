@@ -7,6 +7,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import frc.demacia.utils.UpdateArray;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Log.LogManager;
 
 import com.ctre.phoenix6.StatusSignal;
@@ -87,6 +88,7 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void addLog() {
         LogManager.addEntry(name + "/yaw and pitch and x velocity and y velocity and z velocity", () -> new double[] {
             getCurrentYaw(),
@@ -100,8 +102,7 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
             getXAngularAcceleration(),
             getYAngularAcceleration(),
             getZAngularAcceleration()
-        }, 3);
-        LogManager.addEntry(name + "/yaw", () -> getYaw() , 3);
+        }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
     public String getName(){

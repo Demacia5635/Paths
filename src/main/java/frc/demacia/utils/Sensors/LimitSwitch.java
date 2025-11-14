@@ -2,6 +2,7 @@ package frc.demacia.utils.Sensors;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.demacia.utils.UpdateArray;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Log.LogManager;
 
 public class LimitSwitch extends DigitalInput implements DigitalSensorInterface{
@@ -23,8 +24,10 @@ public class LimitSwitch extends DigitalInput implements DigitalSensorInterface{
         inverted = config.isInverted;
     }
 
+    @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + "/isTriggered", this::get, 3);
+        LogManager.addEntry(name + "/isTriggered", this::get)
+        .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
     public void checkElectronics(){

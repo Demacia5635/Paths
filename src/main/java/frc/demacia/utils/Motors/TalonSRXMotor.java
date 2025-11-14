@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 
 public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
     TalonSRXConfig config;
@@ -72,6 +73,7 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
         configMotionCruiseVelocity((int) (config.maxVelocity/ config.motorRatio));
     }
 
+    @SuppressWarnings("unchecked")
     private void addLog() {
       LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP2", 
         () -> new double[] {
@@ -82,7 +84,8 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
           getCurrentCurrent(),
           getCurrentClosedLoopError(),
           getCurrentClosedLoopSP(),
-        }, 3, "motor");
+        }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP)
+        .WithIsMotor().build();
     }
 
     public void checkElectronics() {

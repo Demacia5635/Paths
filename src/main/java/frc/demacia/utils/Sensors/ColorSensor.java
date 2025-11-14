@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj.util.Color;
 import com.revrobotics.ColorSensorV3;
 import com.revrobotics.ColorMatch;
 import com.revrobotics.ColorMatchResult;
+
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Log.LogManager;
 
 public class ColorSensor extends ColorSensorV3 implements SensorInterface {
@@ -43,11 +45,13 @@ public class ColorSensor extends ColorSensorV3 implements SensorInterface {
         lastProximity = getProximity(); 
     }
 
+    @SuppressWarnings("unchecked")
     private void addLog() {
         LogManager.addEntry(name + " Color and Proximity", () -> new double[] {
             lastColor.red, lastColor.green, lastColor.blue, lastProximity
-        }, 3);
-        LogManager.addEntry(colors + "Colors values:", this::getRGBString, 3);
+        }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
+        LogManager.addEntry(colors + "Colors values:", this::getRGBString)
+        .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
     public void checkElectronics(){

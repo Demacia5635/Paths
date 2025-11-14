@@ -16,13 +16,11 @@ import frc.demacia.utils.Sensors.OpticalSensor;
 import frc.demacia.utils.Sensors.SensorInterface;
 import frc.demacia.utils.Sensors.UltraSonicSensor;
 import frc.demacia.utils.chassis.Chassis;
-import frc.robot.testChassis.ChassisConstants;
 import frc.robot.testChassis.commands.DriveCommand;
 import frc.robot.testMechanism.ArmConstants;
 import frc.robot.testMechanism.GripperConstants;
 import frc.robot.testMechanism.GripperConstants.GRIPPER_STATES;
 import frc.robot.testMechanism.GripperConstants.SensorConstants;
-import frc.robot.testSensors.opticSensor.Constants;
 import frc.robot.testMechanism.ArmConstants.ARM_STATES;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
 import frc.robot.testMechanism.ArmConstants.GripperAngleMotorConstants;
@@ -44,8 +42,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-
-OpticalSensor opticalSensor;
 
   Arm arm;
   Arm clibeb;
@@ -72,16 +68,10 @@ OpticalSensor opticalSensor;
   public RobotContainer() {
     
     new LogManager();
-    opticalSensor= new OpticalSensor(Constants.OPTICAL_SENSOR);
     driverController = new CommandController(0, ControllerType.kXbox);
 
-
-
-    // motor = new Motor();
-    // set =new Set(motor);
-
-    chassis = new Chassis(ChassisConstants.CHASSIS_CONFIG);
-    driveCommand = new DriveCommand(chassis, driverController);
+    // chassis = new Chassis(ChassisConstants.CHASSIS_CONFIG);
+    // driveCommand = new DriveCommand(chassis, driverController);
 
     // setMechanism();
 

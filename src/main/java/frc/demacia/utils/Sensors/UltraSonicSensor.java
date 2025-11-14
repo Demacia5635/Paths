@@ -1,6 +1,7 @@
 package frc.demacia.utils.Sensors;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Ultrasonic;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Log.LogManager;
 public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterface {
     public UltraSonicSensor(UltraSonicSensorConfig config) {
@@ -36,9 +37,10 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
         return getRangeMM() / 1000d;
     }
     
+    @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + "range", () -> getRangeMeters(), 3);
-            getRangeMeters();
+        LogManager.addEntry(name + "range", () -> getRangeMeters())
+        .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
     public void checkElectronics(){

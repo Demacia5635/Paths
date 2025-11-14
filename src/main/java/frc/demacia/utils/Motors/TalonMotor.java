@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.demacia.utils.Data;
 import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 
 public class TalonMotor extends TalonFX implements MotorInterface {
 
@@ -167,9 +168,12 @@ public class TalonMotor extends TalonFX implements MotorInterface {
             currentSignal.getSignal(),
             closedLoopErrorSignal.getSignal(),
             closedLoopSPSignal.getSignal(),
-            }, 3,"motor");
-            LogManager.addEntry(name + "/ControlMode", 
-            controlModeSignal.getSignal(), 3, "motor");
+            }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP)
+            .WithIsMotor().build();
+        LogManager.addEntry(name + "/ControlMode", 
+            controlModeSignal.getSignal())
+            .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP)
+            .WithIsMotor().build();
     }
 
     public void checkElectronics() {

@@ -9,6 +9,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.demacia.utils.UpdateArray;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Log.LogManager;
 
 public class Cancoder extends CANcoder implements AnalogSensorInterface{
@@ -57,13 +58,15 @@ public class Cancoder extends CANcoder implements AnalogSensorInterface{
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void addLog() {
         LogManager.addEntry(name + "Position and Velocity",  () -> new double[] {
             getCurrentAbsPosition(),
             getCurrentPosition(),
             getCurrentVelocity(),
             getCurrentAcceleration()
-        }, 3);
+        }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
+
     }
 
     public String getName(){

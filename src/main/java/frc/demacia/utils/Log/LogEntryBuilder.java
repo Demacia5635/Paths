@@ -7,18 +7,16 @@ import com.ctre.phoenix6.StatusSignal;
 
 import frc.demacia.utils.Data;
 
-public class LogEntryBuilder<T> implements AutoCloseable {
+public class LogEntryBuilder<T> {
 
     public static enum LogLevel { LOG_ONLY_NOT_IN_COMP, LOG_ONLY, LOG_AND_NT_NOT_IN_COMP, LOG_AND_NT} 
 
     private String name;
-    private LogLevel logLevel = LogLevel.LOG_AND_NT_NOT_IN_COMP;
+    private LogLevel logLevel = LogLevel.LOG_ONLY_NOT_IN_COMP;
     private String metadata = "";
     private BiConsumer<T[], Long> consumer = null;
 
     private Data<T> data;
-
-    private boolean built = false;
     
     @SuppressWarnings("unchecked")
     LogEntryBuilder(String name, StatusSignal<T> ... statusSignals) {
@@ -52,8 +50,8 @@ public class LogEntryBuilder<T> implements AutoCloseable {
         return this;
     }
     
-    public LogEntry2<T> build() {
-        if (LogManager2.logManager == null) {
+    public LogEntry<T> build() {
+        if (LogManager.logManager == null) {
             throw new IllegalStateException("LogManager2 not initialized. Create LogManager2 instance before building log entries.");
         }
         if (name == null || name.trim().isEmpty()) {
@@ -62,18 +60,10 @@ public class LogEntryBuilder<T> implements AutoCloseable {
         if (logLevel == null) {
             throw new IllegalArgumentException("Log level must be between 1 and 4, got: " + logLevel);
         }
-        built = true;
-        LogEntry2<T> entry = LogManager2.logManager.add(name, data, logLevel, metadata);
+        LogEntry<T> entry = LogManager.logManager.add(name, data, logLevel, metadata);
         if (consumer != null) {
             entry.setConsumer(consumer);
         }
         return entry;
-    }
-    
-    @Override
-    public void close() {
-        if (!built) {
-            build();
-        }
     }
 }

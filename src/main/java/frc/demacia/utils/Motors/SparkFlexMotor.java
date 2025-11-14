@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Utilities;
 import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.robot.RobotContainer;
 
 public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterface {
@@ -72,6 +73,7 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
     }
   }
 
+  @SuppressWarnings("unchecked")
   private void addLog() {
     LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP2", 
       () -> new double[] {
@@ -82,7 +84,8 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
         getCurrentCurrent(),
         getCurrentClosedLoopError(),
         getCurrentClosedLoopSP(),
-      }, 3, "motor");
+      }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP)
+      .WithIsMotor().build();
   }
 
   public void checkElectronics() {
