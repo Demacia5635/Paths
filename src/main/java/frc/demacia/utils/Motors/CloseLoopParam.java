@@ -1,21 +1,53 @@
 package frc.demacia.utils.Motors;
 
-/** 
-* Class to hold closed loop param
-*  */
-class CloseLoopParam { // calculate volts - not -1 to 1 !!!
+/**
+ * Container class for closed-loop control parameters (PID + feed-forward).
+ * 
+ * <p>Stores seven control parameters used for precise motor control:</p>
+ * <ul>
+ *   <li>kp, ki, kd - PID gains</li>
+ *   <li>ks - Static friction compensation</li>
+ *   <li>kv - Velocity feed-forward</li>
+ *   <li>ka - Acceleration feed-forward</li>
+ *   <li>kg - Gravity feed-forward</li>
+ * </ul>
+ * 
+ * <p><b>Note:</b> This class calculates output in <i>volts</i>, not normalized [-1, 1].</p>
+ */
+class CloseLoopParam {
 
     public static String[] PARAMETER_NAMES = {"kp", "ki", "kd", "ks", "kv", "ka", "kg"};
 
     private double[] parameters = {0,0,0,0,0,0,0};
 
+    /**
+     * Default constructor. Initializes all parameters to zero.
+     */
+    CloseLoopParam() {}
 
-    CloseLoopParam() {
-    }
-
+    /**
+     * Constructor with all seven control parameters.
+     * 
+     * @param kp Proportional gain
+     * @param ki Integral gain
+     * @param kd Derivative gain
+     * @param ks Static friction feed-forward (volts)
+     * @param kv Velocity feed-forward (volts per unit/sec)
+     * @param ka Acceleration feed-forward (volts per unit/sec²)
+     * @param kg Gravity feed-forward (volts)
+     */
     CloseLoopParam(double kp, double ki, double kd, double ks, double kv, double ka, double kg) {
         set(kp,ki,kd,ks,kv,ka,kg);
     }
+
+    /**
+     * Simplified constructor with feed-forward (legacy).
+     * 
+     * @param kp Proportional gain
+     * @param ki Integral gain
+     * @param kd Derivative gain
+     * @param kf Feed-forward gain (mapped to kv)
+     */
     CloseLoopParam(double kp, double ki, double kd, double kf) {
         set(kp,ki,kd,0,kf,0,0);
     }

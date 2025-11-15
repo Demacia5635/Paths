@@ -22,6 +22,29 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.demacia.utils.Data;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 
+/**
+ * Centralized logging system for robot telemetry and diagnostics.
+ * 
+ * <p>Features:</p>
+ * <ul>
+ *   <li>Automatic data logging to file</li>
+ *   <li>NetworkTables publishing for dashboard viewing</li>
+ *   <li>Smart log entry grouping for performance</li>
+ *   <li>Hot-reload compatible</li>
+ *   <li>Competition-aware (can disable NT in comp)</li>
+ * </ul>
+ * 
+ * <p><b>Usage:</b></p>
+ * <pre>
+ * // In RobotContainer constructor
+ * new LogManager();
+ * 
+ * // In subsystems
+ * LogManager.addEntry("DriveLeft/Voltage", () -> leftMotor.getCurrentVoltage())
+ *     .withLogLevel(LogLevel.LOG_AND_NT)
+ *     .build();
+ * </pre>
+ */
 public class LogManager extends SubsystemBase {
 
   public static LogManager logManager;
@@ -49,16 +72,41 @@ public class LogManager extends SubsystemBase {
     log("log manager is ready");
   }
 
+
+  /**
+   * Creates a log entry builder for StatusSignal-based logging (CTRE Phoenix 6).
+   * 
+   * <p>StatusSignals provide timestamp synchronization and efficient data transfer.</p>
+   * 
+   * @param name Log entry name (use "/" for hierarchy, e.g., "Drive/Left/Current")
+   * @param statusSignals One or more CTRE StatusSignal objects
+   * @return Builder for configuring the log entry
+   */
   @SuppressWarnings("unchecked")
   public static <T> LogEntryBuilder<T> addEntry(String name, StatusSignal<T>... statusSignals) {
       return new LogEntryBuilder<T>(name, statusSignals);
   }
 
+  /**
+   * Creates a log entry builder for Supplier-based logging (REV, generic data).
+   * 
+   * <p>Suppliers are called each cycle to get fresh data.</p>
+   * 
+   * @param name Log entry name (use "/" for hierarchy)
+   * @param suppliers One or more Supplier functions
+   * @return Builder for configuring the log entry
+   */
   @SuppressWarnings("unchecked")
   public static <T> LogEntryBuilder<T> addEntry(String name, Supplier<T>... suppliers) {
     return new LogEntryBuilder<T>(name, suppliers);
   }
 
+  /**
+   * Removes NetworkTables publishers for entries marked LOG_ONLY_NOT_IN_COMP.
+   * 
+   * <p>Call this when entering competition mode to reduce network traffic
+   * and improve loop timing. Data continues to be logged to file.</p>
+   */
   public static void removeInComp() {
     for (int i = 0; i < logManager.individualLogEntries.size(); i++) {
       logManager.individualLogEntries.get(i).removeInComp();
@@ -80,6 +128,9 @@ public class LogManager extends SubsystemBase {
     }
   }
   
+  /**
+   * Clears all log entries. Useful for testing or hot-reload scenarios.
+   */
   public static void clearEntries() {
     if (logManager != null) {
       logManager.individualLogEntries.clear();
@@ -92,6 +143,11 @@ public class LogManager extends SubsystemBase {
     }
   }
   
+  /**
+   * Gets the total number of active log entries.
+   * 
+   * @return Number of entries being logged
+   */
   public static int getEntryCount() {
     if (logManager == null) return 0;
 
@@ -104,6 +160,12 @@ public class LogManager extends SubsystemBase {
     return count;
   }
 
+  /**
+   * Finds a log entry by name.
+   * 
+   * @param name The entry name to search for
+   * @return The log entry, or null if not found
+   */
   public static LogEntry<?> findEntry(String name) {
     if (logManager == null) return null;
     
@@ -124,6 +186,14 @@ public class LogManager extends SubsystemBase {
     return null;
   }
 
+  /**
+   * Removes a log entry by name.
+   * 
+   * <p>Useful for hot-reload or dynamic logging scenarios.</p>
+   * 
+   * @param name The entry name to remove
+   * @return true if entry was found and removed, false otherwise
+   */
   public static boolean removeEntry(String name) {
       if (logManager == null) return false;
       
@@ -169,6 +239,20 @@ public class LogManager extends SubsystemBase {
       return false;
   }
 
+  /**
+   * Logs a message with specified alert level.
+   * 
+   * <p>Messages are written to:</p>
+   * <ul>
+   *   <li>Driver Station console</li>
+   *   <li>Log file</li>
+   *   <li>On-screen alerts (for warnings/errors)</li>
+   * </ul>
+   * 
+   * @param message The message to log
+   * @param alertType Severity level (kInfo, kWarning, kError)
+   * @return ConsoleAlert object for additional control
+   */
   public static ConsoleAlert log(Object message, AlertType alertType) {
     DataLogManager.log(String.valueOf(message));
     
@@ -182,6 +266,12 @@ public class LogManager extends SubsystemBase {
     return alert;
   }
 
+  /**
+   * Logs an info-level message.
+   * 
+   * @param message The message to log
+   * @return ConsoleAlert object
+   */
   public static ConsoleAlert log(Object message) {
     return log(message, AlertType.kInfo);
   }
