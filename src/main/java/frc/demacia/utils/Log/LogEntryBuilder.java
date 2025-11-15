@@ -58,7 +58,7 @@ public class LogEntryBuilder<T> {
             throw new IllegalArgumentException("Log entry name cannot be null or empty");
         }
         if (logLevel == null) {
-            throw new IllegalArgumentException("Log level must be between 1 and 4, got: " + logLevel);
+            throw new IllegalArgumentException("Log level cant be null: ");
         }
         LogEntry<T> entry = LogManager.logManager.add(name, data, logLevel, metadata);
         if (consumer != null) {

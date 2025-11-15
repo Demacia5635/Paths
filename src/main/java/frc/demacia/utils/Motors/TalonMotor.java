@@ -172,8 +172,7 @@ public class TalonMotor extends TalonFX implements MotorInterface {
             .WithIsMotor().build();
         LogManager.addEntry(name + "/ControlMode", 
             controlModeSignal.getSignal())
-            .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP)
-            .WithIsMotor().build();
+            .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
     public void checkElectronics() {
