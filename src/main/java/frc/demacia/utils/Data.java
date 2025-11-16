@@ -8,6 +8,44 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 
+/**
+ * Generic data wrapper for telemetry and logging.
+ * 
+ * <p>Handles both CTRE StatusSignals and generic Suppliers with change detection
+ * and type conversion for logging.</p>
+ * 
+ * <p><b>Features:</b></p>
+ * <ul>
+ *   <li>Automatic type detection (double, boolean, string)</li>
+ *   <li>Change detection with configurable precision</li>
+ *   <li>Array and scalar support</li>
+ *   <li>Timestamp synchronization for CTRE signals</li>
+ *   <li>Dynamic expansion for grouped logging</li>
+ * </ul>
+ * 
+ * <p><b>Example Usage:</b></p>
+ * <pre>
+ * // From CTRE StatusSignals
+ * Data<Double> motorData = new Data<>(
+ *     motor.getPosition(),
+ *     motor.getVelocity(),
+ *     motor.getMotorVoltage()
+ * );
+ * 
+ * // From Suppliers
+ * Data<Double> sensorData = new Data<>(
+ *     () -> sensor1.getValue(),
+ *     () -> sensor2.getValue()
+ * );
+ * 
+ * // Check if data changed (for efficient logging)
+ * if (motorData.hasChanged()) {
+ *     log(motorData.getDoubleArray());
+ * }
+ * </pre>
+ * 
+ * @param <T> The data type (Double, Boolean, String, or arrays)
+ */
 public class Data<T> {
     
     private static ArrayList<Data<?>> signals = new ArrayList<>();
@@ -24,6 +62,13 @@ public class Data<T> {
     private boolean isBoolean = false;
     private boolean isArray = false;
 
+    /**
+     * Constructor from CTRE StatusSignals.
+     * 
+     * <p>Provides timestamp synchronization and efficient bulk refresh.</p>
+     * 
+     * @param signal One or more StatusSignal objects
+     */
     @SuppressWarnings("unchecked")
     public Data(StatusSignal<T>... signal){
         this.signal = signal;
@@ -51,6 +96,13 @@ public class Data<T> {
         }
     }
     
+    /**
+     * Constructor from Suppliers.
+     * 
+     * <p>Calls suppliers each cycle to get fresh data.</p>
+     * 
+     * @param supplier One or more Supplier functions
+     */
     @SuppressWarnings("unchecked")
     public Data(Supplier<T>... supplier){
         this.supplier = supplier;
@@ -112,6 +164,13 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Expands this Data object with additional signals.
+     * 
+     * <p>Used by LogManager to group related signals for efficient logging.</p>
+     * 
+     * @param newSignals Signals to add
+     */
     @SuppressWarnings("unchecked")
     public void expandWithSignals(StatusSignal<T>[] newSignals) {
         if (signal == null || newSignals == null || newSignals.length == 0) {
@@ -147,6 +206,12 @@ public class Data<T> {
         refresh();
     }
     
+
+    /**
+     * Expands this Data object with additional suppliers.
+     * 
+     * @param newSuppliers Suppliers to add
+     */
     @SuppressWarnings("unchecked")
     public void expandWithSuppliers(Supplier<T>[] newSuppliers) {
         if (supplier == null || newSuppliers == null || newSuppliers.length == 0) {
@@ -206,6 +271,14 @@ public class Data<T> {
         refresh();
     }
 
+    /**
+     * Removes a range of signals.
+     * 
+     * <p>Used when log entries are removed.</p>
+     * 
+     * @param startIndex First index to remove
+     * @param count Number of signals to remove
+     */
     @SuppressWarnings("unchecked")
     public void removeSignalRange(int startIndex, int count) {
         if (signal == null || signal.length == 0 || count <= 0) return;
@@ -235,6 +308,7 @@ public class Data<T> {
         }
     }
     
+
     public void removeSignal(int startIndex){
         removeSignalRange(startIndex, 1);
     }
@@ -308,6 +382,11 @@ public class Data<T> {
         removeSupplierRange(startIndex, 1);
     }
 
+    /**
+     * Gets the current value as a double.
+     * 
+     * @return Double value, or null if not a double type
+     */
     public Double getDouble() {
         if (!isDouble || length == 0) {return null;}
         refresh();
@@ -319,6 +398,11 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Gets the current values as a double array.
+     * 
+     * @return Array of doubles, or null if not a double type
+     */
     public double[] getDoubleArray() {
         if (!isDouble || length == 0) {return null;}
         refresh();
@@ -334,6 +418,11 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Gets the current value as a float (for NT publishing).
+     * 
+     * @return Float value, or null if not a double type
+     */
     public Float getFloat() {
         if (!isDouble || length == 0) {return null;}
         refresh();
@@ -346,6 +435,11 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Gets the current values as a float array (for NT publishing).
+     * 
+     * @return Array of floats, or null if not a double type
+     */
     public float[] getFloatArray() {
         if (!isDouble || length == 0) {return null;}
         refresh();
@@ -361,6 +455,11 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Gets the current value as a boolean.
+     * 
+     * @return Boolean value, or null if not a boolean type
+     */
     public Boolean getBoolean() {
         if (!isBoolean || length == 0) {return null;}
         refresh();
@@ -372,6 +471,11 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Gets the current values as a boolean array.
+     * 
+     * @return Array of booleans, or null if not a boolean type
+     */
     public boolean[] getBooleanArray() {
         if (!isBoolean || length == 0) {return null;}
         refresh();
@@ -387,6 +491,11 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Gets the current value as a string.
+     * 
+     * @return String value, or empty string if numeric type
+     */
     public String getString() {
         if (isDouble || isBoolean || length == 0) {return "";}
         refresh();
@@ -398,6 +507,11 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Gets the current values as a string array.
+     * 
+     * @return Array of strings, or null if numeric type
+     */
     public String[] getStringArray() {
         if (isDouble || isBoolean || length == 0) {return null;}
         refresh();
@@ -441,6 +555,11 @@ public class Data<T> {
         return oldSupplier;
     }
 
+    /**
+     * Refreshes all values from sources.
+     * 
+     * <p>For StatusSignals, performs bulk refresh. For Suppliers, calls get().</p>
+     */
     public void refresh() {
         if (currentValues != null) {
             previousValues = Arrays.copyOf(currentValues, currentValues.length);
@@ -464,6 +583,11 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Refreshes all Data objects globally.
+     * 
+     * <p>Efficient bulk refresh of all CTRE signals at once.</p>
+     */
     @SuppressWarnings("rawtypes")
     public static void refreshAll() {
         for(Data s : signals) {
@@ -471,6 +595,13 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Checks if the data has changed since last refresh.
+     * 
+     * <p>Uses configured precision for double comparisons.</p>
+     * 
+     * @return true if any value changed beyond precision threshold
+     */
     public boolean hasChanged() {
         if (previousValues == null) {
             return true;
@@ -520,6 +651,14 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Sets the precision threshold for change detection.
+     * 
+     * <p>Values that change by less than precision are considered unchanged.
+     * Reduces log spam from noisy sensors.</p>
+     * 
+     * @param precision Minimum change to detect (e.g., 0.01 for ±1% changes)
+     */
     public void setPrecision(double precision) {
         this.precision = precision;
     }
@@ -528,6 +667,11 @@ public class Data<T> {
         return precision;
     }
 
+    /**
+     * Gets the timestamp of the data (for CTRE signals).
+     * 
+     * @return Timestamp in microseconds, or 0 for Suppliers
+     */
     public long getTime() {
         if (signal != null) {
             return (long) (signal[0].getTimestamp().getTime() * 1000);
@@ -535,14 +679,29 @@ public class Data<T> {
         return 0;
     }
 
+    /**
+     * Checks if this Data object contains double values.
+     * 
+     * @return true if type is numeric
+     */
     public boolean isDouble(){
         return isDouble;
     }
 
+    /**
+     * Checks if this Data object contains boolean values.
+     * 
+     * @return true if type is boolean
+     */
     public boolean isBoolean(){
         return isBoolean;
     }
 
+    /**
+     * Checks if this Data object contains array values.
+     * 
+     * @return true if multiple values
+     */
     public boolean isArray(){
         return isArray;
     }
