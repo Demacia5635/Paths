@@ -22,11 +22,8 @@ import frc.demacia.utils.Sensors.SensorInterface;
  * </pre>
  */
 public class Arm extends StateBasedMechanism<Arm>{
-    public interface ArmState extends MechanismState{
-        double[] getValues();
-    }
 
-    public Arm(String name, MotorInterface[] motors, Class<? extends Enum<? extends ArmState>> enumClass) {
+    public Arm(String name, MotorInterface[] motors, Class<? extends Enum<? extends MechanismState>> enumClass) {
         super(name, motors, new SensorInterface[0], enumClass, 
         (motor, values) -> {
             for (int i = 0; i < motor.length && i < values.length; i++) {

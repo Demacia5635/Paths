@@ -1,7 +1,7 @@
 package frc.robot.testMechanism;
 
-import frc.demacia.utils.Mechanisms.Arm.ArmState;
 import frc.demacia.utils.Motors.TalonConfig;
+import frc.demacia.utils.Mechanisms.StateBasedMechanism.MechanismState;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 
 public class ArmConstants {
@@ -110,7 +110,7 @@ public class ArmConstants {
                 .withRampTime(RAMP_TIME);
     }
 
-    public static enum ARM_STATES implements ArmState{
+    public static enum ARM_STATES implements MechanismState{
         L1(Math.toRadians(37.3), 4.6),
         L2(1.8, 4.4),
         L3(2.64208984375, 4.729228859906724),

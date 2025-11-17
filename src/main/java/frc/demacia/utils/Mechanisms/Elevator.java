@@ -23,11 +23,8 @@ import frc.demacia.utils.Sensors.SensorInterface;
  * </pre>
  */
 public class Elevator extends StateBasedMechanism<Elevator>{
-    public interface ElevatorState extends MechanismState{
-        double[] getValues();
-    }
 
-    public Elevator(String name, MotorInterface[] motors, Class<? extends Enum<? extends ElevatorState>> enumClass) {
+    public Elevator(String name, MotorInterface[] motors, Class<? extends Enum<? extends MechanismState>> enumClass) {
         super(name, motors, new SensorInterface[0], enumClass, 
         (motor, values) -> {
             for (int i = 0; i < motor.length && i < values.length; i++) {
