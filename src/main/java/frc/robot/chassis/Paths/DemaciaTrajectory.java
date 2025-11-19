@@ -11,6 +11,7 @@ import javax.xml.crypto.dsig.keyinfo.RetrievalMethod;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /** Add your docs here. */
 public class DemaciaTrajectory {
@@ -20,20 +21,71 @@ public class DemaciaTrajectory {
 
     private ArrayList<SegmentBase> segments;
     private ArrayList<CenterCircleWithDirection> circleCenters;
+    private SegmentBase currentSegment;
     private int arcCount;
+    private int currentSegmentIndex;
+    private boolean isFinishedTrajectory;
+    
 
     public DemaciaTrajectory(ArrayList<Pose2d> trajectoryPoints) {
         this.trajectoryPoints = trajectoryPoints;
         this.pathPoints = new ArrayList<Pose2d>();
         this.circleCenters = new ArrayList<CenterCircleWithDirection>();
         this.segments = new ArrayList<SegmentBase>();
-        this.arcCount = trajectoryPoints.size() - 2;        
+        this.arcCount = trajectoryPoints.size() - 2;
+        this.isFinishedTrajectory = false;
+                
         createCenterCircles();
         createPathPoints();
         createSegments();
+        currentSegmentIndex = 0;
+        currentSegment = segments.get(currentSegmentIndex);
 
 
+    }
 
+    private boolean isFinishedSegment(ChassisSpeeds currentSpeeds, Pose2d currentPose, SegmentBase currentSegment){
+        double distanceFromFinishPoint = currentSegment.getFinishPoint().getTranslation().getDistance(currentPose.getTranslation());
+        Rotation2d currentVelocityHeading = new Translation2d(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond).getAngle();
+
+        if(currentSegment instanceof LineSegment){
+
+            
+            boolean isVelocityHeadingTowardesFinishPoint = PathsUtils.isVelocityHeadingInRange(currentVelocityHeading, ((LineSegment)currentSegment).getStartToFinishVector().getAngle());
+            if(currentSegmentIndex == segments.size() -1){
+                return (distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_FINAL_POINT);
+            }
+            
+            return (distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH) || ((distanceFromFinishPoint < (PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH * 3)) && isVelocityHeadingTowardesFinishPoint);
+            
+            
+        }
+
+        else{
+            ArcSegment segment = (ArcSegment) currentSegment;
+            Translation2d centerToFinish = segment.getCenterCircle().minus(segment.getFinishPoint().getTranslation());
+            Rotation2d wantedVelocityHeading = centerToFinish.getAngle().minus(Rotation2d.kCW_90deg);
+            boolean isHeadingTowardesNextSegment = PathsUtils.isVelocityHeadingInRange(currentVelocityHeading, wantedVelocityHeading);
+
+
+            
+
+            return (distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH) || ((distanceFromFinishPoint < (PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH * 3)) && isHeadingTowardesNextSegment);
+        }
+    }
+
+    public ChassisSpeeds calculateSpeeds(ChassisSpeeds currentSpeeds, Pose2d currentPose) {
+        
+        double finishVelocity = currentSegmentIndex == segments.size() - 1 ? 0 : PathsConstants.MAX_LINEAR_VELOCITY;
+        ChassisSpeeds speeds = SegmentFollow.getInstance().calculateSpeeds(segments.get(currentSegmentIndex), currentSpeeds, currentPose, finishVelocity);
+
+        if(isFinishedSegment(currentSpeeds, currentPose, currentSegment)){
+            if(currentSegmentIndex == segments.size() - 1) isFinishedTrajectory = true;
+            currentSegmentIndex++;
+            currentSegment = segments.get(currentSegmentIndex);
+        }
+
+        return speeds;
     }
 
     private Translation2d calculateP1OnIntialArc(Translation2d startingPoint, CenterCircleWithDirection centerCircle) {
@@ -98,6 +150,10 @@ public class DemaciaTrajectory {
             segments.add(new ArcSegment(pathPoints.get(i+1), pathPoints.get(i+2), circleCenters.get(i).centerCircle()));
         }
         segments.add(new LineSegment(pathPoints.get(pathPoints.size() - 2), pathPoints.get(pathPoints.size() - 1)));
+    }
+
+    public boolean isFinishedTrajectory(){
+        return this.isFinishedTrajectory;
     }
 
 

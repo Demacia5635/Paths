@@ -4,37 +4,31 @@
 
 package frc.robot.chassis.Paths;
 
-import static frc.robot.chassis.utils.ChassisConstants.MAX_DRIVE_VELOCITY;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.trajectory.ExponentialProfile.Constraints;
-import frc.robot.utils.TrapezoidNoam;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import static frc.robot.chassis.Paths.PathsConstants.*;
 
 /** Add your docs here. */
 public class SegmentFollow {
     private TrapezoidExpo driveTrapezoid;
     
-    private TrapezoidNoam rotationTrapezoid;
+    private Trapezoid rotationTrapezoid;
     private static SegmentFollow instace;
     
    
-    private SegmentFollow(double maxVel, double maxAccel, double maxJerk){
-        this.driveTrapezoid = new TrapezoidExpo(maxVel, maxAccel, maxJerk);
-        this.rotationTrapezoid = new TrapezoidNoam(PathsConstants.MAX_OMEGA_ACCEL, PathsConstants.MAX_OMEGA_VELOCITY);
+    private SegmentFollow(){
+        this.driveTrapezoid = new TrapezoidExpo(MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCEL, MAX_JERK);
+        this.rotationTrapezoid = new Trapezoid(MAX_OMEGA_ACCEL, MAX_OMEGA_VELOCITY);
 
     }
     public static SegmentFollow getInstance(){
-        if(instace == null) instace = new SegmentFollow(PathsConstants.MAX_LINEAR_VELOCITY, PathsConstants.MAX_LINEAR_ACCEL, PathsConstants.MAX_LINEAR_ACCEL * 2 );
+        if(instace == null) instace = new SegmentFollow();
         return instace;
-    }
-
-    public ChassisSpeeds calculateSpeeds(SegmentBase currentSegment, ChassisSpeeds currentVelocity, Pose2d chassisPose){
-        return calculateSpeeds(currentSegment, currentVelocity, chassisPose, PathsConstants.MAX_LINEAR_VELOCITY);
     }
 
     public ChassisSpeeds calculateSpeeds(SegmentBase currentSegment, ChassisSpeeds currentVelocity, Pose2d chassisPose, double finishVelocity){
