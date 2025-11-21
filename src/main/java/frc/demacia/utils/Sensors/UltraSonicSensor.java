@@ -3,52 +3,118 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Log.LogManager;
-public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterface {
-    public UltraSonicSensor(UltraSonicSensorConfig config) {
-        super(config.pingChannel, config.channel);
-        this.config = config;
-        name = config.name;
-     setAutomaticMode(true);
-        addLog();
-		LogManager.log(name + "UltraSonicSensor initialized");
-    }
 
+/**
+ * Ultrasonic distance sensor wrapper (e.g., MaxBotix, HC-SR04).
+ * 
+ * <p>Provides distance measurement using ultrasonic time-of-flight with:</p>
+ * <ul>
+ *   <li>Automatic conversion to meters</li>
+ *   <li>Range validity checking</li>
+ *   <li>Automatic ping mode</li>
+ *   <li>Logging support</li>
+ * </ul>
+ * 
+ * <p><b>How It Works:</b></p>
+ * <ol>
+ *   <li>Ping channel sends ultrasonic pulse</li>
+ *   <li>Echo channel receives reflected pulse</li>
+ *   <li>Time difference calculated to determine distance</li>
+ * </ol>
+ * 
+ * <p><b>Limitations:</b></p>
+ * <ul>
+ *   <li>Narrow beam angle (~15°)</li>
+ *   <li>Affected by soft surfaces, angles</li>
+ *   <li>Limited range (typically 0.1-5 meters)</li>
+ *   <li>Slower update rate than other sensors</li>
+ * </ul>
+ * 
+ * <p><b>Example:</b></p>
+ * <pre>
+ * UltraSonicSensorConfig config = new UltraSonicSensorConfig(
+ *     0,  // Echo channel
+ *     1,  // Ping channel
+ *     "FrontDistance"
+ * );
+ * 
+ * UltraSonicSensor sensor = new UltraSonicSensor(config);
+ * 
+ * if (sensor.isRangeValid()) {
+ *     double distance = sensor.get();  // Meters
+ *     System.out.println("Object at: " + distance + "m");
+ * }
+ * </pre>
+ */
+public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterface {
     String name;
     UltraSonicSensorConfig config;
 
     /**
-     * @return the range in meters;
+     * Creates an ultrasonic distance sensor.
+     * 
+     * @param config Configuration with ping and echo channels
      */
-    public double get() {
-        return getRangeMeters();
+    public UltraSonicSensor(UltraSonicSensorConfig config) {
+        super(config.pingChannel, config.channel);
+        this.config = config;
+        name = config.name;
+        setAutomaticMode(true);
+        addLog();
+		LogManager.log(name + "UltraSonicSensor initialized");
     }
 
-
-    public String getName() {
-        return config.name;
-    }
- 
-    @Override
-    public void ping() {
-        super.ping();
-    }
-
-    public double getRangeMeters() {
-        return getRangeMM() / 1000d;
-    }
-    
     @SuppressWarnings("unchecked")
     private void addLog() {
         LogManager.addEntry(name + "range", () -> getRangeMeters())
         .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
+    /**
+     * Gets the sensor name.
+     * 
+     * @return Sensor name from configuration
+     */ 
+    public String getName() {
+        return config.name;
+    }
+
+    /**
+     * Checks if sensor is returning valid ranges.
+     * 
+     * <p>Logs warning if range is invalid (too close, too far, or no echo).</p>
+     */
     public void checkElectronics(){
         if (!isRangeValid()) {
             LogManager.log(name + " is at invalid range");
         }
     }
 
+    /**
+     * Gets the measured distance in meters.
+     * 
+     * <p>Check isRangeValid() before using this value to ensure measurement is reliable.</p>
+     * 
+     * @return Distance in meters (typically 0.1-5.0m range)
+     */
+    public double get() {
+        return getRangeMeters();
+    }
+
+    /**
+     * Gets distance in meters (same as get()).
+     * 
+     * @return Distance in meters
+     */
+    public double getRangeMeters() {
+        return getRangeMM() / 1000d;
+    }
+
+    /**
+     * Initializes dashboard display.
+     * 
+     * @param builder Sendable builder for dashboard integration
+     */
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.addDoubleProperty("value", this::get, null);

@@ -12,6 +12,43 @@ import frc.demacia.utils.Log.LogManager;
 
 import com.ctre.phoenix6.StatusSignal;
 
+/**
+ * CTRE Pigeon2 IMU (Inertial Measurement Unit) wrapper.
+ * 
+ * <p>Provides access to 3-axis gyroscope and accelerometer data with:</p>
+ * <ul>
+ *   <li>Automatic unit conversion (degrees → radians)</li>
+ *   <li>Yaw, pitch, roll measurements</li>
+ *   <li>Angular velocities and accelerations</li>
+ *   <li>Automatic logging</li>
+ *   <li>Fault monitoring</li>
+ * </ul>
+ * 
+ * <p><b>Coordinate System:</b></p>
+ * <ul>
+ *   <li><b>Yaw:</b> Rotation around vertical axis (heading)</li>
+ *   <li><b>Pitch:</b> Forward/backward tilt</li>
+ *   <li><b>Roll:</b> Left/right tilt</li>
+ * </ul>
+ * 
+ * <p><b>Example Usage:</b></p>
+ * <pre>
+ * PigeonConfig config = new PigeonConfig(10, CANBus.CANivore, "MainGyro")
+ *     .withYawOffset(0)
+ *     .withInvert(false);
+ * 
+ * Pigeon gyro = new Pigeon(config);
+ * 
+ * // Get current heading
+ * double heading = gyro.getCurrentYaw();  // Radians
+ * 
+ * // Use for field-relative drive
+ * ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+ *     vx, vy, omega,
+ *     new Rotation2d(gyro.getCurrentYaw())
+ * );
+ * </pre>
+ */
 public class Pigeon extends Pigeon2 implements SensorInterface{
     PigeonConfig config;
     String name;
@@ -37,6 +74,11 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
     double lastYAcceleration;
     double lastZAcceleration;
 
+    /**
+     * Creates a Pigeon2 IMU.
+     * 
+     * @param config Configuration with CAN ID, bus, and calibration
+     */
     public Pigeon(PigeonConfig config){
         super(config.id, config.canbus);
         this.config = config;
@@ -46,6 +88,7 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
         addLog();
 		LogManager.log(name + " pigeon initialized");
     }
+
     private void configPigeon() {
         pigeonConfig = new Pigeon2Configuration();
         pigeonConfig.MountPose.MountPosePitch = config.pitchOffset;
@@ -82,6 +125,16 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
         lastZAcceleration = zAccelerationSignal.getValueAsDouble();
     }
 
+    /**
+     * Checks for Pigeon2 faults and logs them.
+     * 
+     * <p>Detects:</p>
+     * <ul>
+     *   <li>Calibration errors</li>
+     *   <li>CAN bus issues</li>
+     *   <li>Hardware failures</li>
+     * </ul>
+     */
     public void checkElectronics() {
         if (getFaultField().getValue() != 0) {
             LogManager.log(name + " have a fault: " + getFaultField().getValue());
@@ -105,90 +158,179 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
         }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
+    /**
+     * Gets the sensor name.
+     * 
+     * @return Sensor name from configuration
+     */
     public String getName(){
         return config.name;
     }
 
+    /**
+     * Gets the current yaw (heading) angle.
+     * 
+     * <p>Most commonly used for robot heading in swerve drive.
+     * Returns angle in radians, can be positive or negative.</p>
+     * 
+     * @return Yaw angle in radians (unbounded)
+     */
     public double getCurrentYaw() {
         lastYaw = StatusSignalHelper.getStatusSignalInRad(yawSignal, lastYaw);
         return lastYaw;
     }
 
+    /**
+     * Gets yaw normalized to 0-2π range.
+     * 
+     * @return Yaw angle in radians (0 to 2π)
+     */
     public double getYawInZeroTo2Pi() {
         return (getCurrentYaw()% (2* Math.PI) + (2* Math.PI)) % (2* Math.PI);
     }
 
+    /**
+     * Gets the current pitch angle (forward/back tilt).
+     * 
+     * @return Pitch angle in radians
+     */
     public double getCurrentPitch() {
         lastPitch = StatusSignalHelper.getStatusSignalInRad(pitchSignal, lastPitch);
         return lastPitch;
     }
 
+    /**
+     * Gets pitch normalized to 0-2π range.
+     * 
+     * @return Pitch angle in radians (0 to 2π)
+     */
     public double getPitchInZeroTo2Pi() {
         return (getCurrentPitch() % (2* Math.PI) + (2* Math.PI)) % (2* Math.PI);
     }
 
+    /**
+     * Gets the current roll angle (left/right tilt).
+     * 
+     * @return Roll angle in radians
+     */
     public double getCurrentRoll() {
         lastRoll = StatusSignalHelper.getStatusSignalInRad(rollSignal, lastRoll);
         return lastRoll;
     }
 
+    /**
+     * Gets roll normalized to 0-2π range.
+     * 
+     * @return Roll angle in radians (0 to 2π)
+     */
     public double getRollInZeroTo2Pi() {
         return (getCurrentRoll()% (2* Math.PI) + (2* Math.PI)) % (2* Math.PI);
     }
 
+    /**
+     * Gets X-axis angular velocity (pitch rate).
+     * 
+     * @return Angular velocity in radians per second
+     */
     public double getXVelocity() {
         lastXVelocity = StatusSignalHelper.getStatusSignalBasic(xVelocitySignal, lastXVelocity);
         return lastXVelocity;
     }
 
+    /**
+     * Gets Y-axis angular velocity (roll rate).
+     * 
+     * @return Angular velocity in radians per second
+     */
     public double getYVelocity() {
         lastYVelocity = StatusSignalHelper.getStatusSignalBasic(yVelocitySignal, lastYVelocity);
         return lastYVelocity;
     }
 
+    /**
+     * Gets Z-axis angular velocity (yaw rate).
+     * 
+     * @return Angular velocity in radians per second
+     */
     public double getZVelocity() {
         lastZVelocity = StatusSignalHelper.getStatusSignalBasic(zVelocitySignal, lastZVelocity);
         return lastZVelocity;
     }
 
+    /**
+     * Gets X-axis linear acceleration.
+     * 
+     * @return Acceleration in m/s²
+     */
     public double getXAcceleration() {
         lastXAcceleration = StatusSignalHelper.getStatusSignalBasic(xAccelerationSignal, lastXAcceleration);
         return lastXAcceleration;
     }
 
+    /**
+     * Gets Y-axis linear acceleration.
+     * 
+     * @return Acceleration in m/s²
+     */
     public double getYAcceleration() {
         lastYAcceleration = StatusSignalHelper.getStatusSignalBasic(yAccelerationSignal, lastYAcceleration);
         return lastYAcceleration;
     }
 
+    /**
+     * Gets Z-axis linear acceleration (includes gravity).
+     * 
+     * @return Acceleration in m/s² (9.8 when stationary)
+     */
     public double getZAcceleration() {
         lastZAcceleration = StatusSignalHelper.getStatusSignalBasic(zAccelerationSignal, lastZAcceleration);
         return lastZAcceleration;
     }
 
+    /**
+     * Gets X-axis angular acceleration (calculated).
+     * 
+     * @return Angular acceleration in rad/s²
+     */
     public double getXAngularAcceleration() {
         double acceleration = (StatusSignalHelper.getStatusSignalBasic(xVelocitySignal, lastXVelocity)) - lastXVelocity;
         lastXVelocity = xVelocitySignal.getValueAsDouble();
         return acceleration;
     }
 
+    /**
+     * Gets Y-axis angular acceleration (calculated).
+     * 
+     * @return Angular acceleration in rad/s²
+     */
     public double getYAngularAcceleration() {
         double acceleration = (StatusSignalHelper.getStatusSignalBasic(yVelocitySignal, lastYVelocity)) - lastYVelocity;
         lastYVelocity = yVelocitySignal.getValueAsDouble();
         return acceleration;
     }
 
+    /**
+     * Gets Z-axis angular acceleration (calculated).
+     * 
+     * @return Angular acceleration in rad/s²
+     */
     public double getZAngularAcceleration() {
         double acceleration = (StatusSignalHelper.getStatusSignalBasic(zVelocitySignal, lastZVelocity)) - lastZVelocity;
         lastZVelocity = zVelocitySignal.getValueAsDouble();
         return acceleration;
     }
 
+    /**
+     * Resets all gyro angles to zero.
+     */
     public void reset() {
         super.reset();
     }
-
-public void showConfigMotorCommand() {
+    
+    /**
+     * Creates hot-reload widget for calibration tuning.
+     */
+    public void showConfigMotorCommand() {
         UpdateArray.show(name + " CONFIG",
             new String[] {
                 "pitch Offset",
