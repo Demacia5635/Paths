@@ -31,8 +31,8 @@ import com.ctre.phoenix6.CANBus;
  * 
  * @param <T> The concrete config type (for method chaining)
  * 
- * @see TalonConfig
- * @see SparkConfig
+ * @see TalonFXConfig
+ * @see SparkMaxConfig
  * @see TalonSRXConfig
  */
 public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
@@ -55,7 +55,7 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
      * Enum mapping motor controller types to their implementation classes.
      * Used internally to instantiate the correct motor class based on configuration.
      */
-    public static enum MotorControllerType{TalonFX(TalonMotor.class), TalonSRX(TalonSRXMotor.class), SparkMax(SparkMotor.class), SparkFlex(SparkFlexMotor.class);
+    public static enum MotorControllerType{TalonFX(TalonFXMotor.class), TalonSRX(TalonSRXMotor.class), SparkMax(SparkMaxMotor.class), SparkFlex(SparkFlexMotor.class);
     
         Class<? extends MotorInterface> motorClass;
         private MotorControllerType(Class<? extends MotorInterface> motorClass) {

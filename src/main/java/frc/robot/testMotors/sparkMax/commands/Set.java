@@ -5,14 +5,14 @@
 package frc.robot.testMotors.sparkMax.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.demacia.utils.Motors.SparkMotor;
+import frc.demacia.utils.Motors.SparkMaxMotor;
 import frc.robot.testMotors.sparkMax.subsystems.Motor;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class Set extends Command {
   Motor motor;
 
-  SparkMotor testMotor;
+  SparkMaxMotor testMotor;
 
   /** Creates a new Set. */
   public Set(Motor motor) {

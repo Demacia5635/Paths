@@ -4,7 +4,7 @@
 
 package frc.robot.testMotors.sparkMax;
 
-import frc.demacia.utils.Motors.SparkConfig;
+import frc.demacia.utils.Motors.SparkMaxConfig;
 public final class Constants {
   public static final int ID = 2;
   public static final String NAME = "Test Motor";
@@ -34,7 +34,7 @@ public final class Constants {
   public static final double GEAR_RATIO = 1;
 
   /* The config of the motors based on the constants above */
-  public static final SparkConfig CONFIG = new SparkConfig(ID, NAME)
+  public static final SparkMaxConfig CONFIG = new SparkMaxConfig(ID, NAME)
     .withPID(KP, KI, KD, KS, KV, KA, KG)
     .withMotionParam(MOTION_MAGIC_VELOCITY, MOTION_MAGIC_ACCELERATION, MOTION_MAGIC_JERK)
     .withBrake(IS_BRAKE)

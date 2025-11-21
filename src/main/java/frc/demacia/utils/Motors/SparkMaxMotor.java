@@ -18,9 +18,9 @@ import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.robot.RobotContainer;
 
-public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
+public class SparkMaxMotor extends SparkMax implements Sendable, MotorInterface {
 
-  private SparkConfig config;
+  private frc.demacia.utils.Motors.SparkMaxConfig config;
   private String name;
   private SparkMaxConfig cfg;
   private int slot = 0;
@@ -34,7 +34,7 @@ public class SparkMotor extends SparkMax implements Sendable, MotorInterface {
   private int lastCycleNum = 0;
   private double lastTime = 0;
 
-  public SparkMotor(SparkConfig config) {
+  public SparkMaxMotor(frc.demacia.utils.Motors.SparkMaxConfig config) {
     super(config.id, SparkLowLevel.MotorType.kBrushless);
     this.config = config;
     name = config.name;

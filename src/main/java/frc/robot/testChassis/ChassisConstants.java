@@ -7,7 +7,7 @@ package frc.robot.testChassis;
 import com.ctre.phoenix6.CANBus;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.demacia.utils.Motors.TalonConfig;
+import frc.demacia.utils.Motors.TalonFXConfig;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 import frc.demacia.utils.Sensors.CancoderConfig;
 import frc.demacia.utils.Sensors.PigeonConfig;
@@ -42,13 +42,13 @@ public final class ChassisConstants {
 
   public static final SwerveModuleConfig frontLeftModuleConfig = new SwerveModuleConfig(
     NAME + " frontLeft",
-    new TalonConfig(2, Canbus.CANIvore, "frontLeft steer")
+    new TalonFXConfig(2, Canbus.CANIvore, "frontLeft steer")
     .withPID(STEER_KP, STEER_KI, STEER_KD, STEER_KS, STEER_KV, STEER_KA, 0)
     .withMotionParam(MOTION_MAGIC_VEL, MOTION_MAGIC_ACCEL, MOTION_MAGIC_JERK)
     .withBrake(true)
     .withRadiansMotor(STEER_GEAR_RATIO)
     .withRampTime(RAMP_TIME_STEER),
-    new TalonConfig(1, Canbus.CANIvore, "frontLeft drive")
+    new TalonFXConfig(1, Canbus.CANIvore, "frontLeft drive")
     .withPID(DRIVE_KP, DRIVE_KI, DRIVE_KD, DRIVE_KS, DRIVE_KV, DRIVE_KA, 0)
     .withBrake(true)
     .withInvert(true)
@@ -57,13 +57,13 @@ public final class ChassisConstants {
     .withSteerOffset(0.450439*2*Math.PI);
   public static final SwerveModuleConfig frontRightModuleConfig = new SwerveModuleConfig(
     NAME + " frontRight",
-    new TalonConfig(5, Canbus.CANIvore, "frontRight steer")
+    new TalonFXConfig(5, Canbus.CANIvore, "frontRight steer")
     .withPID(STEER_KP, STEER_KI, STEER_KD, STEER_KS, STEER_KV, STEER_KA, 0)
     .withMotionParam(MOTION_MAGIC_VEL, MOTION_MAGIC_ACCEL, MOTION_MAGIC_JERK)
     .withBrake(true)
     .withRadiansMotor(STEER_GEAR_RATIO)
     .withRampTime(RAMP_TIME_STEER),
-    new TalonConfig(4, Canbus.CANIvore, "frontRight drive")
+    new TalonFXConfig(4, Canbus.CANIvore, "frontRight drive")
     .withPID(DRIVE_KP, DRIVE_KI, DRIVE_KD, DRIVE_KS, DRIVE_KV, DRIVE_KA, 0)
     .withBrake(true)
     .withInvert(true)
@@ -72,13 +72,13 @@ public final class ChassisConstants {
     .withSteerOffset(-0.356689 * 2 * Math.PI);
   public static final SwerveModuleConfig backLeftModuleConfig = new SwerveModuleConfig(
     NAME + " backLeft",
-    new TalonConfig(8, Canbus.CANIvore, "backLeft steer")
+    new TalonFXConfig(8, Canbus.CANIvore, "backLeft steer")
     .withPID(STEER_KP, STEER_KI, STEER_KD, STEER_KS, STEER_KV, STEER_KA, 0)
     .withMotionParam(MOTION_MAGIC_VEL, MOTION_MAGIC_ACCEL, MOTION_MAGIC_JERK)
     .withBrake(true)
     .withRadiansMotor(STEER_GEAR_RATIO)
     .withRampTime(RAMP_TIME_STEER),
-    new TalonConfig(7, Canbus.CANIvore, "backLeft drive")
+    new TalonFXConfig(7, Canbus.CANIvore, "backLeft drive")
     .withPID(DRIVE_KP, DRIVE_KI, DRIVE_KD, DRIVE_KS, DRIVE_KV, DRIVE_KA, 0)
     .withBrake(true)
     .withInvert(true)
@@ -87,13 +87,13 @@ public final class ChassisConstants {
     .withSteerOffset(0.437256*2*Math.PI);
   public static final SwerveModuleConfig backRightModuleConfig = new SwerveModuleConfig(
     NAME + " backRight",
-    new TalonConfig(11, Canbus.CANIvore, "backRight steer")
+    new TalonFXConfig(11, Canbus.CANIvore, "backRight steer")
     .withPID(STEER_KP, STEER_KI, STEER_KD, STEER_KS, STEER_KV, STEER_KA, 0)
     .withMotionParam(MOTION_MAGIC_VEL, MOTION_MAGIC_ACCEL, MOTION_MAGIC_JERK)
     .withBrake(true)
     .withRadiansMotor(STEER_GEAR_RATIO)
     .withRampTime(RAMP_TIME_STEER),
-    new TalonConfig(10, Canbus.CANIvore, "backRight drive")
+    new TalonFXConfig(10, Canbus.CANIvore, "backRight drive")
     .withPID(DRIVE_KP, DRIVE_KI, DRIVE_KD, DRIVE_KS, DRIVE_KV, DRIVE_KA, 0)
     .withBrake(true)
     .withInvert(true)

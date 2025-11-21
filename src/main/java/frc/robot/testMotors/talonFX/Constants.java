@@ -4,7 +4,7 @@
 
 package frc.robot.testMotors.talonFX;
 
-import frc.demacia.utils.Motors.TalonConfig;
+import frc.demacia.utils.Motors.TalonFXConfig;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 public final class Constants {
   public static final int ID = 10;
@@ -39,7 +39,7 @@ public final class Constants {
   public static final double GEAR_RATIO = 1;
 
   /* The config of the motors based on the constants above */
-  public static final TalonConfig CONFIG = new TalonConfig(ID, CAN_BUS, NAME)
+  public static final TalonFXConfig CONFIG = new TalonFXConfig(ID, CAN_BUS, NAME)
     .withPID(KP, KI, KD, KS, KV, KA, KG)
     .withMotionParam(MOTION_MAGIC_VELOCITY, MOTION_MAGIC_ACCELERATION, MOTION_MAGIC_JERK)
     .withBrake(IS_BRAKE)

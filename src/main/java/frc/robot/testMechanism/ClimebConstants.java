@@ -1,6 +1,6 @@
 package frc.robot.testMechanism;
 
-import frc.demacia.utils.Motors.TalonConfig;
+import frc.demacia.utils.Motors.TalonFXConfig;
 import frc.demacia.utils.Mechanisms.StateBasedMechanism.MechanismState;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 
@@ -11,8 +11,8 @@ public class ClimebConstants {
     public static final String NAME = "Climb";
     public static final Canbus CANBUS = Canbus.Rio;
 
-    public static final TalonConfig MOTOR_CONFIG = 
-            new TalonConfig(MotorConstants.MOTOR_ID, CANBUS, NAME + "Motor")
+    public static final TalonFXConfig MOTOR_CONFIG = 
+            new TalonFXConfig(MotorConstants.MOTOR_ID, CANBUS, NAME + "Motor")
             .withInvert(MotorConstants.INVERT)
             .withBrake(MotorConstants.START_NEUTRAL_MODE)
             .withRadiansMotor(ClimbConstants.CLIMB_RATIO);

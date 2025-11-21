@@ -5,18 +5,18 @@
 package frc.robot.testMotors.talonFX.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.demacia.utils.Motors.TalonMotor;
+import frc.demacia.utils.Motors.TalonFXMotor;
 import frc.robot.testMotors.talonFX.Constants;
 
 public class Motor extends SubsystemBase {
-  private TalonMotor talonMotor;
+  private TalonFXMotor talonMotor;
 
   /** Creates a new motor. */
   public Motor() {
-    talonMotor = new TalonMotor(Constants.CONFIG);
+    talonMotor = new TalonFXMotor(Constants.CONFIG);
   }
 
-  public TalonMotor getMotor(){
+  public TalonFXMotor getMotor(){
     return talonMotor;
   }
 }

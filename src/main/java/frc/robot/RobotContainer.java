@@ -10,7 +10,7 @@ import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Mechanisms.Arm;
 import frc.demacia.utils.Mechanisms.Intake;
 import frc.demacia.utils.Motors.MotorInterface;
-import frc.demacia.utils.Motors.TalonMotor;
+import frc.demacia.utils.Motors.TalonFXMotor;
 import frc.demacia.utils.Motors.TalonSRXMotor;
 import frc.demacia.utils.Sensors.OpticalSensor;
 import frc.demacia.utils.Sensors.SensorInterface;
@@ -83,12 +83,12 @@ public class RobotContainer {
   @SuppressWarnings("unused")
   private void setMechanism(){
     arm = new Arm(ArmConstants.NAME, 
-      new MotorInterface[] {new TalonMotor(ArmAngleMotorConstants.CONFIG), new TalonMotor(GripperAngleMotorConstants.CONFIG)}, 
+      new MotorInterface[] {new TalonFXMotor(ArmAngleMotorConstants.CONFIG), new TalonFXMotor(GripperAngleMotorConstants.CONFIG)}, 
       ArmConstants.ARM_STATES.class)
       .withStartingOption(ARM_STATES.STARTING);
 
     clibeb = new Arm(ClimebConstants.NAME, 
-    new MotorInterface[]{new TalonMotor(ClimebConstants.MOTOR_CONFIG)}, 
+    new MotorInterface[]{new TalonFXMotor(ClimebConstants.MOTOR_CONFIG)}, 
     CLIMB_STATES.class);
 
     UltraSonicSensor upSensor = new UltraSonicSensor(SensorConstants.UP_CONFIG);

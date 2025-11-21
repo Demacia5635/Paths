@@ -4,7 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import frc.demacia.utils.Motors.TalonMotor;
+import frc.demacia.utils.Motors.TalonFXMotor;
 import frc.demacia.utils.Sensors.Cancoder;
 
 /**
@@ -23,14 +23,14 @@ import frc.demacia.utils.Sensors.Cancoder;
  * reverse drive direction and rotate <90° instead for faster response.</p>
  */
 public class SwerveModule {
-    private TalonMotor steerMotor;
-    private TalonMotor driveMotor;
+    private TalonFXMotor steerMotor;
+    private TalonFXMotor driveMotor;
     private Cancoder cancoder;
     public String name;
 
     public SwerveModule(SwerveModuleConfig config) {
-        steerMotor = new TalonMotor(config.steerConfig);
-        driveMotor = new TalonMotor(config.driveConfig);
+        steerMotor = new TalonFXMotor(config.steerConfig);
+        driveMotor = new TalonFXMotor(config.driveConfig);
         cancoder = new Cancoder(config.cancoderConfig);
         name = config.name;
 

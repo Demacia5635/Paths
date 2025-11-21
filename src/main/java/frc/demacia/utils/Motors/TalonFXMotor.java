@@ -28,9 +28,9 @@ import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 
-public class TalonMotor extends TalonFX implements MotorInterface {
+public class TalonFXMotor extends TalonFX implements MotorInterface {
 
-    TalonConfig config;
+    TalonFXConfig config;
     String name;
     TalonFXConfiguration cfg;
 
@@ -53,7 +53,7 @@ public class TalonMotor extends TalonFX implements MotorInterface {
     Data<Voltage> voltageSignal;
     Data<Current> currentSignal;
 
-    public TalonMotor(TalonConfig config) {
+    public TalonFXMotor(TalonFXConfig config) {
         super(config.id, config.canbus.canbus);
         this.config = config;
         name = config.name;

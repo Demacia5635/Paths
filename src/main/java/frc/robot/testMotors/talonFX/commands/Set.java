@@ -5,14 +5,14 @@
 package frc.robot.testMotors.talonFX.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.demacia.utils.Motors.TalonMotor;
+import frc.demacia.utils.Motors.TalonFXMotor;
 import frc.robot.testMotors.talonFX.subsystems.Motor;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class Set extends Command {
   Motor motor;
 
-  TalonMotor testMotor;
+  TalonFXMotor testMotor;
 
   /** Creates a new Set. */
   public Set(Motor motor) {

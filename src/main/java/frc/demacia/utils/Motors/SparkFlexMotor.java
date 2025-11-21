@@ -20,7 +20,7 @@ import frc.robot.RobotContainer;
 
 public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterface {
 
-  private SparkConfig config;
+  private frc.demacia.utils.Motors.SparkFlexConfig config;
   private String name;
   private SparkFlexConfig cfg;
   private int slot = 0;
@@ -34,7 +34,7 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
   private int lastCycleNum = 0;
   private double lastTime = 0;
 
-  public SparkFlexMotor(SparkConfig config) {
+  public SparkFlexMotor(frc.demacia.utils.Motors.SparkFlexConfig config) {
     super(config.id, SparkLowLevel.MotorType.kBrushless);
     this.config = config;
     name = config.name;

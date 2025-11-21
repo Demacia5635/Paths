@@ -5,18 +5,18 @@
 package frc.robot.testMotors.sparkMax.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.demacia.utils.Motors.SparkMotor;
+import frc.demacia.utils.Motors.SparkMaxMotor;
 import frc.robot.testMotors.sparkMax.Constants;
 
 public class Motor extends SubsystemBase {
-  private SparkMotor sparkMotor;
+  private SparkMaxMotor sparkMotor;
 
   /** Creates a new motor. */
   public Motor() {
-    sparkMotor = new SparkMotor(Constants.CONFIG);
+    sparkMotor = new SparkMaxMotor(Constants.CONFIG);
   }
 
-  public SparkMotor getMotor(){
+  public SparkMaxMotor getMotor(){
     return sparkMotor;
   }
 }

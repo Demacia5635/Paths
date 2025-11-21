@@ -1,6 +1,6 @@
 package frc.demacia.utils.chassis;
 
-import frc.demacia.utils.Motors.TalonConfig;
+import frc.demacia.utils.Motors.TalonFXConfig;
 import frc.demacia.utils.Sensors.CancoderConfig;
 
 /**
@@ -22,8 +22,8 @@ public class SwerveModuleConfig {
 
     public String name;             // Name of the motor - used for logging
 
-    public TalonConfig steerConfig;
-    public TalonConfig driveConfig;
+    public TalonFXConfig steerConfig;
+    public TalonFXConfig driveConfig;
     public CancoderConfig cancoderConfig;
     public double steerOffset;
 
@@ -32,7 +32,7 @@ public class SwerveModuleConfig {
      * @param id - CAN bus ID
      * @param name - name of motor for logging
      */
-    public SwerveModuleConfig(String name, TalonConfig steerConfig, TalonConfig driveConfig, CancoderConfig cancoderConfig) {
+    public SwerveModuleConfig(String name, TalonFXConfig steerConfig, TalonFXConfig driveConfig, CancoderConfig cancoderConfig) {
         this.name = name;
         this.steerConfig = steerConfig;
         this.driveConfig = driveConfig;

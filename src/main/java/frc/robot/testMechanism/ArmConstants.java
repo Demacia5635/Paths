@@ -1,6 +1,6 @@
 package frc.robot.testMechanism;
 
-import frc.demacia.utils.Motors.TalonConfig;
+import frc.demacia.utils.Motors.TalonFXConfig;
 import frc.demacia.utils.Mechanisms.StateBasedMechanism.MechanismState;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 
@@ -49,7 +49,7 @@ public class ArmConstants {
         public static final double FWD_LIMIT = 2.904541015625;
 
         /* The config of the motors based on the constants above */
-        public static final TalonConfig CONFIG = new TalonConfig(ID, CAN_BUS, NAME)
+        public static final TalonFXConfig CONFIG = new TalonFXConfig(ID, CAN_BUS, NAME)
                 .withPID(KP, KI, KD, KS, KV, KA, KG)
                 .withMotionParam(MOTION_MAGIC_VELOCITY, MOTION_MAGIC_ACCELERATION, MOTION_MAGIC_JERK)
                 .withBrake(IS_BRAKE)
@@ -100,7 +100,7 @@ public class ArmConstants {
         public static final double FWD_LIMIT = 5.4;
 
         /* The config of the motor based on the constants above */
-        public static final TalonConfig CONFIG = new TalonConfig(ID, CAN_BUS, NAME)
+        public static final TalonFXConfig CONFIG = new TalonFXConfig(ID, CAN_BUS, NAME)
                 .withPID(KP, KI, KD, KS, KV, KA, KG)
                 .withPID(1, KP*3, KI, KD, KS, KV, KA, KG)
                 .withMotionParam(MOTION_MAGIC_VELOCITY, MOTION_MAGIC_ACCELERATION, MOTION_MAGIC_JERK)

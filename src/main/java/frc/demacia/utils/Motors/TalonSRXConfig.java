@@ -18,7 +18,7 @@ public class TalonSRXConfig extends BaseMotorConfig<TalonSRXConfig> {
         motorClass = MotorControllerType.TalonSRX;
     }
 
-    public TalonSRXConfig(int id, String name, TalonConfig config) {
+    public TalonSRXConfig(int id, String name, TalonFXConfig config) {
         super(id, name);
         copyBaseFields(config);
     }
