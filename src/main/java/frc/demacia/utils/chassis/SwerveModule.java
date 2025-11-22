@@ -4,7 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import frc.demacia.utils.Motors.TalonFXMotor;
+import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Sensors.Cancoder;
 
 /**
@@ -23,18 +23,18 @@ import frc.demacia.utils.Sensors.Cancoder;
  * reverse drive direction and rotate <90° instead for faster response.</p>
  */
 public class SwerveModule {
-    private TalonFXMotor steerMotor;
-    private TalonFXMotor driveMotor;
+    private MotorInterface steerMotor;
+    private MotorInterface driveMotor;
     private Cancoder cancoder;
     public String name;
 
     public SwerveModule(SwerveModuleConfig config) {
-        steerMotor = new TalonFXMotor(config.steerConfig);
-        driveMotor = new TalonFXMotor(config.driveConfig);
+        steerMotor = config.steerConfig.getMotorClass().create(config.steerConfig);
+        driveMotor = config.driveConfig.getMotorClass().create(config.driveConfig);
         cancoder = new Cancoder(config.cancoderConfig);
         name = config.name;
 
-        steerMotor.setPosition(getAbsoluteAngle() - config.steerOffset);
+        steerMotor.setEncoderPosition(getAbsoluteAngle() - config.steerOffset);
     }
 
     /**
@@ -52,7 +52,7 @@ public class SwerveModule {
     }
 
     public void setSteerPower(double power) {
-        steerMotor.set(power);
+        steerMotor.setDuty(power);
     }
 
     /**
@@ -65,7 +65,7 @@ public class SwerveModule {
     }
 
     public void setDrivePower(double power) {
-        driveMotor.set(power);
+        driveMotor.setDuty(power);
     }
 
     public void setSteerVelocity(double velocityRadsPerSecond) {
@@ -101,7 +101,7 @@ public class SwerveModule {
         return steerMotor.getCurrentVelocity();
     }
     public double getSteerAccel() {
-        return steerMotor.getAcceleration().getValueAsDouble();
+        return steerMotor.getCurrentAcceleration();
     }
 
     public double getDriveVel() {
@@ -155,7 +155,7 @@ public class SwerveModule {
      * Stops both motors immediately.
      */
     public void stop() {
-        steerMotor.stopMotor();
-        driveMotor.stopMotor();
+        steerMotor.setDuty(0);
+        driveMotor.setDuty(0);
     }
 }

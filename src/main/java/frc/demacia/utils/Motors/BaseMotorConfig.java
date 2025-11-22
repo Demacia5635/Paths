@@ -52,15 +52,49 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
     } 
 
     /**
-     * Enum mapping motor controller types to their implementation classes.
-     * Used internally to instantiate the correct motor class based on configuration.
+     * Defines all supported motor controller types and acts as a factory
+     * for constructing motor controller implementations.
+     *
+     * <p>Each enum constant implements {@link #create(BaseMotorConfig)} and returns
+     * the appropriate {@link MotorInterface} instance based on the configuration
+     * provided.</p>
      */
-    public static enum MotorControllerType{TalonFX(TalonFXMotor.class), TalonSRX(TalonSRXMotor.class), SparkMax(SparkMaxMotor.class), SparkFlex(SparkFlexMotor.class);
-    
-        Class<? extends MotorInterface> motorClass;
-        private MotorControllerType(Class<? extends MotorInterface> motorClass) {
-            this.motorClass = motorClass;
-        }
+    public static enum MotorControllerType{
+        TalonFX {
+            @Override
+            public MotorInterface create(BaseMotorConfig<?> config) {
+                return new TalonFXMotor((TalonFXConfig) config);
+            }
+        },
+
+        TalonSRX {
+            @Override
+            public MotorInterface create(BaseMotorConfig<?> config) {
+                return new TalonSRXMotor((TalonSRXConfig) config);
+            }
+        },
+
+        SparkMax {
+            @Override
+            public MotorInterface create(BaseMotorConfig<?> config) {
+                return new SparkMaxMotor((SparkMaxConfig) config);
+            }
+        },
+
+        SparkFlex {
+            @Override
+            public MotorInterface create(BaseMotorConfig<?> config) {
+                return new SparkFlexMotor((SparkFlexConfig) config);
+            }
+        };
+
+        /**
+         * Creates a new motor controller instance from the given configuration.
+         *
+         * @param config a configuration object appropriate for this controller type
+         * @return a motor controller instance
+         */
+        public abstract MotorInterface create(BaseMotorConfig<?> config);
     }
 
     public int id;                  // CAN bus ID
@@ -115,8 +149,8 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         this.canbus = canbus;
     }
     
-    public Class<? extends MotorInterface> getMotorClass() {
-        return motorClass.motorClass;
+    public MotorControllerType getMotorClass() {
+        return motorClass;
     }
 
     /**
