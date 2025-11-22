@@ -1,7 +1,6 @@
 package frc.demacia.utils.chassis;
 
 import frc.demacia.utils.Motors.BaseMotorConfig;
-import frc.demacia.utils.Motors.TalonFXConfig;
 import frc.demacia.utils.Sensors.CancoderConfig;
 
 /**
