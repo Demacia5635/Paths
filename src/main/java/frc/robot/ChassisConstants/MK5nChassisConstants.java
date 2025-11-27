@@ -32,7 +32,7 @@ public class MK5nChassisConstants {
     }
     
     public static final int GYRO_ID = 14;
-    public static final Canbus CAN_BUS = Canbus.CANIvore;
+    public static final Canbus CAN_BUS = Canbus.Rio;
     public static final CANBus GYRO_CAN_BUS = new CANBus("rio");
     public static final double STEER_GEAR_RATIO = 287.0/11.0;
     public static final double DRIVE_GEAR_RATIO = 7.03;

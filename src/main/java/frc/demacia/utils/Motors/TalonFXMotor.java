@@ -160,7 +160,7 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP",  new StatusSignal[] {
+        LogManager.addEntry(name + "Position, Velocity, Acceleration, Voltage, Current, CloseLoopError, CloseLoopSP",  new StatusSignal[] {
             positionSignal.getSignal(),
             velocitySignal.getSignal(),
             accelerationSignal.getSignal(),
@@ -168,8 +168,8 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
             currentSignal.getSignal(),
             closedLoopErrorSignal.getSignal(),
             closedLoopSPSignal.getSignal(),
-            }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP)
-            .WithIsMotor().build();
+            }).withLogLevel(LogLevel.LOG_AND_NT_NOT_IN_COMP)
+            /*.WithIsMotor()*/.build();
         LogManager.addEntry(name + "/ControlMode", 
             controlModeSignal.getSignal())
             .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
