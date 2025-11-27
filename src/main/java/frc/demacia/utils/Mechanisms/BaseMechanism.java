@@ -114,7 +114,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         this.consumer = consumer;
         motorsLimits = new MotorLimits[motors.length];
         values = new double[motors.length];
-        LogManager.addEntry(name + "/values", () -> values)
+        LogManager.addEntry(name + " values", () -> values)
         .withLogLevel(LogLevel.LOG_AND_NT_NOT_IN_COMP).build();
     }
 

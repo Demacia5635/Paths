@@ -59,7 +59,7 @@ public class DigitalEncoder extends DutyCycleEncoder implements AnalogSensorInte
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + "/Position", this::get)
+        LogManager.addEntry(name + " Position", this::get)
         .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 

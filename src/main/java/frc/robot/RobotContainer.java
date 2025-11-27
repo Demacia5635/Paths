@@ -26,8 +26,6 @@ import frc.robot.testMechanism.GripperConstants.SensorConstants;
 import frc.robot.testMechanism.ArmConstants.ARM_STATES;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
 import frc.robot.testMechanism.ArmConstants.GripperAngleMotorConstants;
-import frc.robot.testMechanism.ClimebConstants;
-import frc.robot.testMechanism.ClimebConstants.CLIMB_STATES;
 
 import java.util.function.Supplier;
 
@@ -75,7 +73,7 @@ public class RobotContainer {
     // chassis = new Chassis(ChassisConstants.CHASSIS_CONFIG);
     // driveCommand = new DriveCommand(chassis, driverController);
 
-    // setMechanism();
+    setMechanism();
 
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
@@ -106,9 +104,9 @@ public class RobotContainer {
     .setMotorLimits(1, GripperAngleMotorConstants.BACK_LIMIT, GripperAngleMotorConstants.FWD_LIMIT);
 
     //clibebMechanism
-    clibeb = new Arm(ClimebConstants.NAME, 
-    new MotorInterface[]{new TalonFXMotor(ClimebConstants.MOTOR_CONFIG)}, 
-    CLIMB_STATES.class);
+    // clibeb = new Arm(ClimebConstants.NAME, 
+    // new MotorInterface[]{new TalonFXMotor(ClimebConstants.MOTOR_CONFIG)}, 
+    // CLIMB_STATES.class);
 
     //gripperMechanism
     UltraSonicSensor upSensor = new UltraSonicSensor(SensorConstants.UP_CONFIG);

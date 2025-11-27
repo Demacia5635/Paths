@@ -66,7 +66,7 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + "range", () -> getRangeMeters())
+        LogManager.addEntry(name + " range", () -> getRangeMeters())
         .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
