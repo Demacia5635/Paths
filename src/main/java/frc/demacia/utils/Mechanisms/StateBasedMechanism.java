@@ -9,7 +9,6 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Sensors.SensorInterface;
 
@@ -84,8 +83,6 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
 
     protected double[] testValues;
 
-    Supplier<Boolean> isCalibratedSupplier = () -> true;
-
     protected Enum<?> state;
 
     private List<StateTrigger> triggers = new ArrayList<>();
@@ -143,22 +140,6 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
         }
 
         this.state = state;
-        return (T) this;
-    }
-
-    /**
-     * Sets a calibration check function.
-     * 
-     * <p>Mechanism will only run if calibration supplier returns true.
-     * Useful for mechanisms that need zeroing before use.</p>
-     * 
-     * @param isCalibratedSupplier Supplier that returns calibration status
-     * @return this mechanism for chaining
-     */
-    @SuppressWarnings("unchecked")
-    public T withCalibrationValue(Supplier<Boolean> isCalibratedSupplier){
-        this.isCalibratedSupplier = isCalibratedSupplier;
-        LogManager.addEntry(name + "/is calibrated", isCalibratedSupplier);
         return (T) this;
     }
 

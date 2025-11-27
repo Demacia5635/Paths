@@ -3,6 +3,7 @@ package frc.robot.testMechanism;
 import frc.demacia.utils.Motors.TalonFXConfig;
 import frc.demacia.utils.Mechanisms.StateBasedMechanism.MechanismState;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.Sensors.DigitalEncoderConfig;
 
 public class ArmConstants {
     
@@ -80,6 +81,7 @@ public class ArmConstants {
 
         /* the channel of the absolute sensor */
         public static final int ABSOLUTE_SENSOR_CHANNEL = 1;
+        public static final DigitalEncoderConfig DIGITAL_ENCODER_CONFIG = new DigitalEncoderConfig(ABSOLUTE_SENSOR_CHANNEL, NAME + " DIGITAL ENCODER");
 
         /* all the basic configs of the motor */
         public static final boolean IS_BRAKE = true;

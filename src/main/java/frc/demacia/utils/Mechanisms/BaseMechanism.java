@@ -8,7 +8,11 @@ import java.util.function.Supplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Motors.MotorInterface;
+import frc.demacia.utils.Sensors.AnalogSensorInterface;
+import frc.demacia.utils.Sensors.DigitalSensorInterface;
 import frc.demacia.utils.Sensors.SensorInterface;
 
 /**
@@ -44,7 +48,7 @@ import frc.demacia.utils.Sensors.SensorInterface;
  * 
  * @param <T> The concrete mechanism type (for method chaining)
  */
-public abstract class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
+public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
 
     public static class Trigger {
         private final Supplier<Boolean> condition;
@@ -64,21 +68,54 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
         }
     }
 
+    public static class MotorLimits {
+        private final double min;
+        private final double max;
+
+        public MotorLimits(double min, double max) {
+            if (min > max) {
+                throw new IllegalArgumentException("Min limit cannot be greater than max limit");
+            }
+            this.min = min;
+            this.max = max;
+        }
+
+        public double clamp(double value) {
+            if (value < min) return min;
+            if (value > max) return max;
+            return value;
+        }
+
+        public double getMin() {
+            return min;
+        }
+
+        public double getMax() {
+            return max;
+        }
+    }
+
     protected String name;
     protected MotorInterface[] motors;
     protected SensorInterface[] sensors;
     protected double[] values;
 
+    protected Supplier<Boolean> isCalibratedSupplier = () -> true;
     
-    private List<Trigger> triggers = new ArrayList<>();
+    protected List<Trigger> triggers = new ArrayList<>();
+    protected MotorLimits[] motorsLimits;
     protected BiConsumer<MotorInterface[], double[]> consumer;
 
+    @SuppressWarnings("unchecked")
     public BaseMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, BiConsumer<MotorInterface[], double[]> consumer) {
         this.name = name;
         this.motors = motors != null ? motors : new MotorInterface[0];;
         this.sensors = sensors != null ? sensors : new SensorInterface[0];
         this.consumer = consumer;
-        values = new double[0];
+        motorsLimits = new MotorLimits[motors.length];
+        values = new double[motors.length];
+        LogManager.addEntry(name + "/values", () -> values)
+        .withLogLevel(LogLevel.LOG_AND_NT_NOT_IN_COMP).build();
     }
 
     public String getName(){
@@ -88,12 +125,24 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
     /**
      * Sets the values to be used by the mechanism consumer.
      * 
-     * <p>These values are typically motor powers, positions, or velocities.</p>
+     * <p>These values are typically motor powers, positions, angles, or velocities.</p>
      * 
      * @param values Array of values (interpretation depends on consumer)
      */
     public void setValues(double[] values){
-        this.values = values != null ? values : new double[0];
+        if (values.length != motors.length) {
+            throw new IllegalArgumentException("Values size must match motor count");
+        }
+        this.values = values != null ? values : new double[motors.length];
+    }
+
+    /**
+     * Get the values that will be used by the mechanism consumer.
+     * 
+     * <p>These values are typically motor powers, positions, angles, or velocities.</p>
+     */
+    public double[] getValues(){
+        return values;
     }
 
     /**
@@ -136,6 +185,169 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
         triggers.add(new Trigger(condition, stopConsumer));
         return (T) this;
     }
+
+    /**
+     * Adds a stop trigger that activates when a digital sensor reaches the target state.
+     *
+     * <p>This is a convenience method for common cases such as:
+     * <ul>
+     *   <li>Stop when a limit switch is pressed</li>
+     *   <li>Stop when a beam break is triggered</li>
+     * </ul>
+     * </p>
+     *
+     * @param index Index of the sensor in the mechanism
+     * @param targetState The boolean state required to trigger the stop
+     * @return this mechanism for chaining
+     * @throws IllegalArgumentException if index is invalid or sensor is not DigitalSensorInterface
+     */
+    public T addStopWhenSensor(int index, boolean targetState) {
+        if (!isValidSensorIndex(index)) {
+            throw new IllegalArgumentException(
+                "addStopWhenSensor (digital): invalid sensor index " + index
+            );
+        }
+
+        if (!(sensors[index] instanceof DigitalSensorInterface)) {
+            throw new IllegalArgumentException(
+                "addStopWhenSensor (digital): sensor at index " + index +
+                " is not a DigitalSensorInterface"
+            );
+        }
+
+        DigitalSensorInterface digital = (DigitalSensorInterface) sensors[index];
+        return (T) addStop(() -> digital.get() == targetState);
+    }
+
+    /**
+     * Adds a stop trigger that activates when an analog sensor reads a given value.
+     *
+     * <p>Useful for mechanisms that stop at specific analog positions such as:
+     * <ul>
+     *   <li>Potentiometers</li>
+     *   <li>Analog range/limit sensors</li>
+     * </ul>
+     * </p>
+     *
+     * @param index Index of the sensor in the mechanism
+     * @param targetState The analog value at which the stop should activate
+     * @return this mechanism for chaining
+     * @throws IllegalArgumentException if index is invalid or sensor is not AnalogSensorInterface
+     */
+    public T addStopWhenSensor(int index, double targetState) {
+        if (!isValidSensorIndex(index)) {
+            throw new IllegalArgumentException(
+                "addStopWhenSensor (analog): invalid sensor index " + index
+            );
+        }
+
+        if (!(sensors[index] instanceof AnalogSensorInterface)) {
+            throw new IllegalArgumentException(
+                "addStopWhenSensor (analog): sensor at index " + index +
+                " is not an AnalogSensorInterface"
+            );
+        }
+
+        AnalogSensorInterface analog = (AnalogSensorInterface) sensors[index];
+        return (T) addStop(() -> analog.get() == targetState);
+    }
+
+    /**
+     * Sets limits for a specific motor.
+     * 
+     * <p>Values will be clamped to [min, max] range before being sent to the motor.</p>
+     * 
+     * @param motorIndex Index of motor
+     * @param min Minimum allowed value
+     * @param max Maximum allowed value
+     * @return this mechanism for chaining
+     */
+    @SuppressWarnings("unchecked")
+    public T setMotorLimits(int motorIndex, double min, double max) {
+        if (!isValidMotorIndex(motorIndex)) {
+            throw new IllegalArgumentException("Invalid motor index: " + motorIndex);
+        }
+        motorsLimits[motorIndex] = new MotorLimits(min, max);
+        return (T) this;
+    }
+
+    /**
+     * Sets only a minimum limit for a specific motor.
+     * 
+     * @param motorIndex Index of motor
+     * @param min Minimum allowed value
+     * @return this mechanism for chaining
+     */
+    public T setMotorMinLimit(int motorIndex, double min) {
+        return setMotorLimits(motorIndex, min, Double.POSITIVE_INFINITY);
+    }
+
+    /**
+     * Sets only a maximum limit for a specific motor.
+     * 
+     * @param motorIndex Index of motor
+     * @param max Maximum allowed value
+     * @return this mechanism for chaining
+     */
+    public T setMotorMaxLimit(int motorIndex, double max) {
+        return setMotorLimits(motorIndex, Double.NEGATIVE_INFINITY, max);
+    }
+
+    /**
+     * Removes limits for a specific motor.
+     * 
+     * @param motorIndex Index of motor
+     * @return this mechanism for chaining
+     */
+    @SuppressWarnings("unchecked")
+    public T removeMotorLimits(int motorIndex) {
+        if (isValidMotorIndex(motorIndex)) {
+            motorsLimits[motorIndex] = null;
+        }
+        return (T) this;
+    }
+
+    /**
+     * Gets the limits for a specific motor.
+     * 
+     * @param motorIndex Index of motor
+     * @return MotorLimits object or null if no limits set
+     */
+    public MotorLimits getMotorLimits(int motorIndex) {
+        if (isValidMotorIndex(motorIndex)) {
+            return motorsLimits[motorIndex];
+        }
+        return null;
+    }
+
+    /**
+     * Applies motor limits to current values array.
+     */
+    private void applyMotorLimits() {
+        if (values == null) return;
+        
+        for (int i = 0; i < values.length && i < motorsLimits.length; i++) {
+            if (motorsLimits[i] != null) {
+                values[i] = motorsLimits[i].clamp(values[i]);
+            }
+        }
+    }
+
+    /**
+     * Sets a calibration check function.
+     * 
+     * <p>Mechanism will only run if calibration supplier returns true.
+     * Useful for mechanisms that need zeroing before use.</p>
+     * 
+     * @param isCalibratedSupplier Supplier that returns calibration status
+     * @return this mechanism for chaining
+     */
+    @SuppressWarnings("unchecked")
+    public T withCalibrationValue(Supplier<Boolean> isCalibratedSupplier){
+        this.isCalibratedSupplier = isCalibratedSupplier;
+        LogManager.addEntry(name + "/is calibrated", isCalibratedSupplier);
+        return (T) this;
+    }
     
     /**
      * Creates a command that continuously runs this mechanism.
@@ -160,6 +372,10 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
     }
 
     private void runMechanism(){
+        if (!isCalibratedSupplier.get()) {
+            System.err.println("Mechanism " + name + " is not calibrated, cannot run");
+            return;
+        }
         if (consumer == null) {
             System.err.println("Consumer is null, cannot run mechanism");
             return;
@@ -169,6 +385,7 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
             return;
         }
 
+        applyMotorLimits();
         consumer.accept(motors, values);
     }
 
@@ -190,6 +407,17 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
     public void stop(int motorIndex){
         if (isValidMotorIndex(motorIndex)){
             motors[motorIndex].setDuty(0);
+        }
+    }
+
+    /**
+     * Sets power for all motors.
+     * 
+     * @param power Duty cycle (-1.0 to 1.0)
+     */
+    public void setAll(double power) {
+        for (int i = 0; i < motors.length; i++) {
+            values[i] = power;
         }
     }
 
@@ -217,17 +445,17 @@ public abstract class BaseMechanism<T extends BaseMechanism<T>> extends Subsyste
         }
     }
 
-    /**
-     * Checks electronics for all motors and sensors.
-     * 
-     * <p>Logs any faults to console and telemetry.</p>
-     */
     public void setNeutralMode(int motorIndex, boolean isBrake){
         if (isValidMotorIndex(motorIndex)){
             motors[motorIndex].setNeutralMode(isBrake);
         }
     }
 
+    /**
+     * Checks electronics for all motors and sensors.
+     * 
+     * <p>Logs any faults to console and telemetry.</p>
+     */
     public void checkElectronicsAll() {
         if (motors == null) return;
         for (MotorInterface motor : motors) {

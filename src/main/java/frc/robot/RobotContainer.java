@@ -9,9 +9,11 @@ import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Mechanisms.Arm;
 import frc.demacia.utils.Mechanisms.Intake;
+import frc.demacia.utils.Mechanisms.StateBasedMechanism;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Motors.TalonFXMotor;
 import frc.demacia.utils.Motors.TalonSRXMotor;
+import frc.demacia.utils.Sensors.DigitalEncoder;
 import frc.demacia.utils.Sensors.OpticalSensor;
 import frc.demacia.utils.Sensors.SensorInterface;
 import frc.demacia.utils.Sensors.UltraSonicSensor;
@@ -43,7 +45,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
 
-  Arm arm;
+  StateBasedMechanism<?> arm;
   Arm clibeb;
   Intake gripper;
 
@@ -82,15 +84,32 @@ public class RobotContainer {
 
   @SuppressWarnings("unused")
   private void setMechanism(){
-    arm = new Arm(ArmConstants.NAME, 
-      new MotorInterface[] {new TalonFXMotor(ArmAngleMotorConstants.CONFIG), new TalonFXMotor(GripperAngleMotorConstants.CONFIG)}, 
-      ArmConstants.ARM_STATES.class)
-      .withStartingOption(ARM_STATES.STARTING);
+    //armMechanism
+    TalonFXMotor armAngleMotor = new TalonFXMotor(ArmAngleMotorConstants.CONFIG);
+    TalonFXMotor gripperAngleMotor = new TalonFXMotor(GripperAngleMotorConstants.CONFIG);
+    DigitalEncoder AbEncoder = new DigitalEncoder(GripperAngleMotorConstants.DIGITAL_ENCODER_CONFIG);
+    arm = new StateBasedMechanism<>(
+    ArmConstants.NAME, 
+    new MotorInterface[] {
+        armAngleMotor,
+        gripperAngleMotor
+    }, 
+    new SensorInterface[] {
+      AbEncoder
+    },
+    ArmConstants.ARM_STATES.class, 
+    (motors, values) -> {
+      armAngleMotor.setAngle(values[0]);
+      gripperAngleMotor.setAngle(gripperAngleMotor.getCurrentPosition() + values[1] - (AbEncoder.get()) - GripperAngleMotorConstants.ENCODER_BASE_ANGLE);
+    })
+    .withStartingOption(ARM_STATES.STARTING);
 
+    //clibebMechanism
     clibeb = new Arm(ClimebConstants.NAME, 
     new MotorInterface[]{new TalonFXMotor(ClimebConstants.MOTOR_CONFIG)}, 
     CLIMB_STATES.class);
 
+    //gripperMechanism
     UltraSonicSensor upSensor = new UltraSonicSensor(SensorConstants.UP_CONFIG);
     OpticalSensor downSensor = new OpticalSensor(SensorConstants.DOWN_CONFOG);
     gripper = new Intake(GripperConstants.NAME, 

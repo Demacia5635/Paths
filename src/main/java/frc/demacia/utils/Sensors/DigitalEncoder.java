@@ -33,7 +33,7 @@ import frc.demacia.utils.Log.LogManager;
  * }
  * </pre>
  */
-public class DigitalEncoder extends DutyCycleEncoder implements SensorInterface{
+public class DigitalEncoder extends DutyCycleEncoder implements AnalogSensorInterface{
     DigitalEncoderConfig config;
     String name;
 
