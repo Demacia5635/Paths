@@ -10,9 +10,9 @@ import frc.demacia.utils.Sensors.PigeonConfig;
 import frc.demacia.utils.chassis.ChassisConfig;
 import frc.demacia.utils.chassis.SwerveModuleConfig;
 
-public class Robot1ChassisConstants {
+public class MK5nChassisConstants {
     
-  public static final String NAME = "robot1 chassis";
+  public static final String NAME = "MK5n chassis";
     public static final double CYCLE_DT = 0.02;
     public static final double MAX_DRIVE_VELOCITY = 3.6;
     public static final double MAX_ROTATIONAL_VELOCITY = Math.toRadians(360);
@@ -34,22 +34,22 @@ public class Robot1ChassisConstants {
     public static final int GYRO_ID = 14;
     public static final Canbus CAN_BUS = Canbus.CANIvore;
     public static final CANBus GYRO_CAN_BUS = new CANBus("rio");
-    public static final double STEER_GEAR_RATIO = 151.0/7.0;
-    public static final double DRIVE_GEAR_RATIO = 8.14;
+    public static final double STEER_GEAR_RATIO = 287.0/11.0;
+    public static final double DRIVE_GEAR_RATIO = 7.03;
     
     public static final double STEER_KP = 4.1;
-    public static final double STEER_KI = 0.9;
+    public static final double STEER_KI = 0;
     public static final double STEER_KD = 0;
-    public static final double STEER_KS = 0.19817640545050964;
-    public static final double STEER_KV = 0.3866402641515461;
-    public static final double STEER_KA = 0.05;
+    public static final double STEER_KS = 0.2;
+    public static final double STEER_KV = 0.42;
+    public static final double STEER_KA = 0;
 
-    public static final double DRIVE_KP = 19;
+    public static final double DRIVE_KP = 24;
     public static final double DRIVE_KI = 0;
     public static final double DRIVE_KD = 0;
-    public static final double DRIVE_KS = 0.14677232883614777;
-    public static final double DRIVE_KV = 2.947;
-    public static final double DRIVE_KA = 0.08058;
+    public static final double DRIVE_KS = 0.6;
+    public static final double DRIVE_KV = 2.2;
+    public static final double DRIVE_KA = 0;
 
     public static final double MOTION_MAGIC_VEL = 15 * 2 * Math.PI;
     public static final double MOTION_MAGIC_ACCEL = 8 * 2 * Math.PI;
@@ -119,25 +119,25 @@ public class Robot1ChassisConstants {
 
     public static final SwerveModuleConfigs FRONT_LEFT = new SwerveModuleConfigs(
         0,
-        -0.68569029575781545181333347012135,
+        0.4484*2*Math.PI,
         0.1
     );
 
     public static final SwerveModuleConfigs FRONT_RIGHT = new SwerveModuleConfigs(
         1,
-        -3.1139780541647389558965567479405 + Math.PI,
+        0.527 * 2 * Math.PI,
         0.1
     );
 
     public static final SwerveModuleConfigs BACK_LEFT = new SwerveModuleConfigs(
         2,
-        2.7795743657460270044216391356507,
+        0.235*2*Math.PI,
         0.1
     );
 
     public static final SwerveModuleConfigs BACK_RIGHT = new SwerveModuleConfigs(
         3,
-        -0.68875649018771909001407301006343,
+        -0.246*2*Math.PI,
         0.1
     );
 
