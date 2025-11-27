@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusSignal;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DataLog;
@@ -58,7 +57,7 @@ public class LogManager extends SubsystemBase {
   
   LogEntry<?>[] categoryLogEntries = new LogEntry<?>[16];
 
-  private Map<String, Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> entryLocationMap = new HashMap<>();
+  private Map<String, Integer[]> entryLocationMap = new HashMap<>();
 
   public LogManager() {
     logManager = this;
@@ -122,7 +121,7 @@ public class LogManager extends SubsystemBase {
         if (logManager.categoryLogEntries[i].logLevel == LogLevel.LOG_ONLY_NOT_IN_COMP) {
           logManager.categoryLogEntries[i] = null;
           int index = i;
-          logManager.entryLocationMap.entrySet().removeIf(entry -> entry.getValue().getFirst().getFirst() == index);
+          logManager.entryLocationMap.entrySet().removeIf(entry -> entry.getValue()[0] == index);
         }
       }
     }
@@ -169,13 +168,13 @@ public class LogManager extends SubsystemBase {
   public static LogEntry<?> findEntry(String name) {
     if (logManager == null) return null;
     
-    Pair< Pair<Integer, Integer>, Pair<Integer, Integer>> location = logManager.entryLocationMap.get(name);
+    Integer[] location = logManager.entryLocationMap.get(name);
     if (location == null) return null;
     
-    int categoryIndex = location.getFirst().getFirst();
+    int categoryIndex = location[0];
     
     if (categoryIndex == -1) {
-      int index = location.getFirst().getSecond();
+      int index = location[0];
       if (index >= 0 && index < logManager.individualLogEntries.size()) {
         return logManager.individualLogEntries.get(index);
       }
@@ -197,13 +196,13 @@ public class LogManager extends SubsystemBase {
   public static boolean removeEntry(String name) {
       if (logManager == null) return false;
       
-      Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> location = logManager.entryLocationMap.get(name);
+      Integer[] location = logManager.entryLocationMap.get(name);
       if (location == null) return false;
       
-      int categoryIndex = location.getFirst().getFirst();
+      int categoryIndex = location[0];
       
       if (categoryIndex == -1) {
-          int index = location.getFirst().getSecond();
+          int index = location[1];
           if (index >= 0 && index < logManager.individualLogEntries.size()) {
               logManager.individualLogEntries.remove(index);
               logManager.entryLocationMap.remove(name);
@@ -212,9 +211,9 @@ public class LogManager extends SubsystemBase {
               return true;
           }
       } else {
-          int subIndex = location.getFirst().getSecond();
-          int dataIndex = location.getSecond().getFirst();
-          int dataCount = location.getSecond().getSecond();
+          int subIndex = location[1];
+          int dataIndex = location[2];
+          int dataCount = location[3];
           
           logManager.entryLocationMap.remove(name);
           
@@ -229,7 +228,7 @@ public class LogManager extends SubsystemBase {
               logManager.categoryLogEntries[categoryIndex] = null;
               final int catIndex = categoryIndex;
               logManager.entryLocationMap.entrySet().removeIf(
-                  entry -> entry.getValue().getFirst().getFirst() == catIndex
+                  entry -> entry.getValue()[0] == catIndex
               );
           }
           
@@ -297,7 +296,7 @@ public class LogManager extends SubsystemBase {
       entry = new LogEntry<T>(name, data, logLevel, metaData);
       individualLogEntries.add(entry);
       int index = individualLogEntries.size() - 1;
-      entryLocationMap.put(name, new Pair<>(new Pair<>(-1, index), new Pair<>(null, null)));
+      entryLocationMap.put(name, new Integer[] {-1, index, null, null});
     } else{
       entry = addToEntryArray(categoryIndex, name, data);
     }
@@ -341,7 +340,7 @@ public class LogManager extends SubsystemBase {
     }
 
 
-    entryLocationMap.put(name, new Pair<>(new Pair<>(i, subIndex), new Pair<>(dataIndex, dataLength)));
+    entryLocationMap.put(name, new Integer[]{i, subIndex, dataIndex, dataLength});
     log("added:" + name + 
     " with: " + i + 
     " and: " + subIndex + 
@@ -371,45 +370,30 @@ public class LogManager extends SubsystemBase {
   }
 
   private void updateIndicesAfterRemoval(int removedIndex) {
-      for (Map.Entry<String, Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> entry : entryLocationMap.entrySet()) {
-          Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> location = entry.getValue();
-          if (location.getFirst().getFirst() == -1 && location.getFirst().getSecond() > removedIndex) {
-              entry.setValue(
-                  new Pair<>(
-                      new Pair<>(-1, location.getFirst().getSecond() - 1), 
-                      new Pair<>(location.getSecond().getFirst(), location.getSecond().getSecond())
-                  )
-              );
+      for (Map.Entry<String, Integer[]> entry : entryLocationMap.entrySet()) {
+          Integer[] location = entry.getValue();
+          if (location[0] == -1 && location[1] > removedIndex) {
+              entry.setValue(new Integer[]{-1, location[1] - 1, location[2], location[3]});
           }
       }
   }
 
   private void updateSubIndicesAfterRemoval(int categoryIndex, int removedSubIndex) {
-      for (Map.Entry<String, Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> entry : entryLocationMap.entrySet()) {
-          Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> location = entry.getValue();
-          if (location.getFirst().getFirst() == categoryIndex && location.getFirst().getSecond() > removedSubIndex) {
-              entry.setValue(
-                  new Pair<>(
-                      new Pair<>(categoryIndex, location.getFirst().getSecond() - 1),
-                      new Pair<>(location.getSecond().getFirst(), location.getSecond().getSecond())
-                  )
-              );
+      for (Map.Entry<String, Integer[]> entry : entryLocationMap.entrySet()) {
+        Integer[] location = entry.getValue();
+          if (location[0] == categoryIndex && location[2] > removedSubIndex) {
+              entry.setValue(new Integer[]{categoryIndex, location[1] - 1, location[2], location[3]});
           }
       }
   }
 
   private void updateDataIndicesAfterRemoval(int categoryIndex, int removedDataIndex, int removedCount) {
-      for (Map.Entry<String, Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> entry : entryLocationMap.entrySet()) {
-          Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> location = entry.getValue();
-          if (location.getFirst().getFirst() == categoryIndex && 
-              location.getSecond().getFirst() != null &&
-              location.getSecond().getFirst() >= removedDataIndex + removedCount) {
-              entry.setValue(
-                  new Pair<>(
-                      new Pair<>(location.getFirst().getFirst(), location.getFirst().getSecond()),
-                      new Pair<>(location.getSecond().getFirst() - removedCount, location.getSecond().getSecond())
-                  )
-              );
+      for (Map.Entry<String, Integer[]> entry : entryLocationMap.entrySet()) {
+          Integer[] location = entry.getValue();
+          if (location[0] == categoryIndex && 
+              location[2] != null &&
+              location[2] >= removedDataIndex + removedCount) {
+              entry.setValue(new Integer[] {location[0], location[1], location[2] - removedCount, location[3]});
           }
       }
   }
