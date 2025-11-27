@@ -102,7 +102,8 @@ public class RobotContainer {
       armAngleMotor.setAngle(values[0]);
       gripperAngleMotor.setAngle(gripperAngleMotor.getCurrentPosition() + values[1] - (AbEncoder.get()) - GripperAngleMotorConstants.ENCODER_BASE_ANGLE);
     })
-    .withStartingOption(ARM_STATES.STARTING);
+    .withStartingOption(ARM_STATES.STARTING)
+    .setMotorLimits(1, GripperAngleMotorConstants.BACK_LIMIT, GripperAngleMotorConstants.FWD_LIMIT);
 
     //clibebMechanism
     clibeb = new Arm(ClimebConstants.NAME, 
