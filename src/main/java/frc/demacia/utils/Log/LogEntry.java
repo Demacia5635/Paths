@@ -157,14 +157,6 @@ public class LogEntry<T> {
         } 
     }
 
-    public void setPrecision(double precision) {
-        data.setPrecision(Math.max(0, precision));
-    }
-
-    public double getPrecision() {
-        return data.getPrecision();
-    }
-
     public void setConsumer(BiConsumer<T[], Long> consumer) {
         this.consumer = consumer;
     }

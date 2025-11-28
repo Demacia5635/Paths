@@ -57,6 +57,7 @@ public class LogManager extends SubsystemBase {
   
   LogEntry<?>[] categoryLogEntries = new LogEntry<?>[16];
 
+  private Map<String, String[]> nameSplitCache = new HashMap<>();
   private Map<String, Integer[]> entryLocationMap = new HashMap<>();
 
   public LogManager() {
@@ -139,6 +140,7 @@ public class LogManager extends SubsystemBase {
         }
       }
       logManager.entryLocationMap.clear();
+      logManager.nameSplitCache.clear();
     }
   }
   
@@ -206,6 +208,7 @@ public class LogManager extends SubsystemBase {
           if (index >= 0 && index < logManager.individualLogEntries.size()) {
               logManager.individualLogEntries.remove(index);
               logManager.entryLocationMap.remove(name);
+              logManager.nameSplitCache.remove(name);
               
               logManager.updateIndicesAfterRemoval(index);
               return true;
@@ -216,20 +219,24 @@ public class LogManager extends SubsystemBase {
           int dataCount = location[3];
           
           logManager.entryLocationMap.remove(name);
+          logManager.nameSplitCache.remove(name);
           
-          logManager.categoryLogEntries[categoryIndex].removeData(subIndex, dataIndex, dataCount);
-          
-          logManager.updateSubIndicesAfterRemoval(categoryIndex, subIndex);
-          logManager.updateDataIndicesAfterRemoval(categoryIndex, dataIndex, dataCount);
-          
-          if (logManager.categoryLogEntries[categoryIndex].data == null || 
-              logManager.categoryLogEntries[categoryIndex].name == null || 
-              logManager.categoryLogEntries[categoryIndex].name.trim().isEmpty()) {
+          LogEntry<?> categoryEntry = logManager.categoryLogEntries[categoryIndex];
+          if (categoryEntry != null) {
+            categoryEntry.removeData(subIndex, dataIndex, dataCount);
+            
+            logManager.updateSubIndicesAfterRemoval(categoryIndex, subIndex);
+            logManager.updateDataIndicesAfterRemoval(categoryIndex, dataIndex, dataCount);
+            
+            if (categoryEntry.data == null || 
+              categoryEntry.name == null || 
+              categoryEntry.name.trim().isEmpty()) {
               logManager.categoryLogEntries[categoryIndex] = null;
               final int catIndex = categoryIndex;
               logManager.entryLocationMap.entrySet().removeIf(
                   entry -> entry.getValue()[0] == catIndex
               );
+            }
           }
           
           return true;
@@ -316,7 +323,7 @@ public class LogManager extends SubsystemBase {
         subIndex = 1;
         dataIndex = 0;
     } else {
-        String[] parts = categoryLogEntries[i].name.split(" \\| ");
+        String[] parts = getCachedSplit(categoryLogEntries[i].name);
         subIndex = parts.length + 1;
 
         if (categoryLogEntries[i].data.getSignals() != null) {
@@ -341,14 +348,14 @@ public class LogManager extends SubsystemBase {
 
 
     entryLocationMap.put(name, new Integer[]{i, subIndex, dataIndex, dataLength});
-    log("added:" + name + 
-    " with: " + i + 
-    " and: " + subIndex + 
-    " and: " + dataIndex + 
-    " and: " + dataLength);
     
     return (LogEntry<T>) categoryLogEntries[i];
-}
+  }
+
+  // Cache split results
+  private String[] getCachedSplit(String name) {
+    return nameSplitCache.computeIfAbsent(name, k -> k.split(" \\| "));
+  }
 
   private int getCategoryIndex(Data<?> data, LogLevel logLevel, String metaData) {
     boolean isSignal = data.getSignals() != null;
@@ -361,10 +368,21 @@ public class LogManager extends SubsystemBase {
     }
     
     int baseIndex = (isSignal ? 0 : 2) + (isDouble ? 0 : 1);
-    int levelOffset = logLevel == LogLevel.LOG_ONLY_NOT_IN_COMP? 0:
-    logLevel == LogLevel.LOG_ONLY? 4:
-    logLevel == LogLevel.LOG_AND_NT_NOT_IN_COMP?8 :
-    12;//logLevel == LogLevel.LOG_AND_NT
+    int levelOffset;
+    switch (logLevel) {
+      case LOG_ONLY_NOT_IN_COMP:
+        levelOffset = 0;
+        break;
+      case LOG_ONLY:
+        levelOffset = 4;
+        break;
+      case LOG_AND_NT_NOT_IN_COMP:
+        levelOffset = 8;
+        break;
+      default:
+        levelOffset = 12;
+        break;
+    }
     
     return baseIndex + levelOffset;
   }
