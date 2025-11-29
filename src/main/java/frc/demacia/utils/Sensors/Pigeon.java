@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Log.LogManager;
@@ -143,9 +144,10 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + "/yaw and pitch and x velocity and y velocity and z velocity", () -> new double[] {
+        LogManager.addEntry(name + " yaw, pitch, roll, x velocity, y velocity, z velocity, x acceleration, y acceleration, z acceleration, x angular acceleration, y angular acceleration, z angular acceleration", () -> new double[] {
             getCurrentYaw(),
             getCurrentPitch(),
+            getCurrentRoll(),
             getXVelocity(),
             getYVelocity(),
             getZVelocity(),
@@ -362,5 +364,22 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
                 configPigeon();
             }
         );
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("Gyro");
+        builder.addDoubleProperty("yaw", this::getCurrentYaw, null);
+        builder.addDoubleProperty("pitch", this::getCurrentPitch, null);
+        builder.addDoubleProperty("roll", this::getCurrentRoll, null);
+        builder.addDoubleProperty("x velocity", this::getXVelocity, null);
+        builder.addDoubleProperty("y velocity", this::getYVelocity, null);
+        builder.addDoubleProperty("z velocity", this::getZVelocity, null);
+        builder.addDoubleProperty("x acceleration", this::getXAcceleration, null);
+        builder.addDoubleProperty("y acceleration", this::getYAcceleration, null);
+        builder.addDoubleProperty("z acceleration", this::getZAcceleration, null);
+        builder.addDoubleProperty("x angular acceleration", this::getXAngularAcceleration, null);
+        builder.addDoubleProperty("y angular acceleration", this::getYAngularAcceleration, null);
+        builder.addDoubleProperty("z angular acceleration", this::getZAngularAcceleration, null);
     }
 }

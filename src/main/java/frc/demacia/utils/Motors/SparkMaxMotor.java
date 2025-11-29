@@ -75,7 +75,7 @@ public class SparkMaxMotor extends SparkMax implements Sendable, MotorInterface 
 
   @SuppressWarnings("unchecked")
   private void addLog() {
-    LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP", 
+    LogManager.addEntry(name + " Position, Velocity, Acceleration, Voltage, Current, CloseLoopError, CloseLoopSP", 
       () -> new double[] {
         getCurrentPosition(),
         getCurrentVelocity(),
@@ -364,16 +364,6 @@ public class SparkMaxMotor extends SparkMax implements Sendable, MotorInterface 
     return getOutputCurrent();
   }
 
-  /**
-   * override the sendable of the talonFX to our costum widget in elastic
-   * <br>
-   * </br>
-   * to activate put in the code:
-   * 
-   * <pre>
-   * SmartDashboard.putData("talonMotor name", talonMotor);
-   * </pre>
-   */
   @Override
   public void initSendable(SendableBuilder builder) {
     builder.setSmartDashboardType("Spark Motor");

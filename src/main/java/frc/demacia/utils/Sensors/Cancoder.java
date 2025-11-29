@@ -8,6 +8,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Log.LogManager;
@@ -108,13 +109,12 @@ public class Cancoder extends CANcoder implements AnalogSensorInterface{
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + "Position and Velocity",  () -> new double[] {
+        LogManager.addEntry(name + " abs Position, Position, Velocity, Acceleration",  () -> new double[] {
             getCurrentAbsPosition(),
             getCurrentPosition(),
             getCurrentVelocity(),
             getCurrentAcceleration()
         }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
-
     }
 
     /**
@@ -204,5 +204,14 @@ public class Cancoder extends CANcoder implements AnalogSensorInterface{
                 configCancoder();
             }
         );
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("CANcoder");
+        builder.addDoubleProperty("Abs Position", this::getCurrentAbsPosition, null);
+        builder.addDoubleProperty("Position", this::getCurrentPosition, null);
+        builder.addDoubleProperty("Velocity", this::getCurrentVelocity, null);
+        builder.addDoubleProperty("Acceleration", this::getCurrentAcceleration, null);
     }
 }

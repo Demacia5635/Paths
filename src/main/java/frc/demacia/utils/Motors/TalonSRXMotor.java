@@ -75,7 +75,7 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-      LogManager.addEntry(name + "/Position and Velocity and Acceleration and Voltage and Current and CloseLoopError and CloseLoopSP2", 
+      LogManager.addEntry(name + " position, Velocity, Acceleration, Voltage, Current, CloseLoopError, CloseLoopSP", 
         () -> new double[] {
           getCurrentPosition(),
           getCurrentVelocity(),

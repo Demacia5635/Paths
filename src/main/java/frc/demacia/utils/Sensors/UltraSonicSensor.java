@@ -117,6 +117,6 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
      */
     @Override
     public void initSendable(SendableBuilder builder) {
-        builder.addDoubleProperty("value", this::get, null);
+        builder.addDoubleProperty("range", this::get, null);
     }
 }

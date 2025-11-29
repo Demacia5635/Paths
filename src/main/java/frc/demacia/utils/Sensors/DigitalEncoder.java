@@ -1,5 +1,6 @@
 package frc.demacia.utils.Sensors;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.demacia.utils.UpdateArray;
@@ -133,5 +134,12 @@ public class DigitalEncoder extends DutyCycleEncoder implements AnalogSensorInte
                 configEncoder();
             }
         );
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("AbsoluteEncoder");
+        builder.addDoubleProperty("Position", this::get, null);
+        builder.addBooleanProperty("Is Connected", this::isConnected, null);
     }
 }

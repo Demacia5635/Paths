@@ -1,5 +1,7 @@
 package frc.demacia.utils.Sensors;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
 import com.revrobotics.ColorSensorV3;
@@ -26,7 +28,7 @@ import frc.demacia.utils.Log.LogManager;
  * @see ColorSensorV3
  * @see ColorSensorConfig
  */
-public class ColorSensor extends ColorSensorV3 implements ColorSensorInterface {
+public class ColorSensor extends ColorSensorV3 implements ColorSensorInterface, Sendable {
 
     private final ColorSensorConfig config;
     private final String name;
@@ -61,7 +63,7 @@ public class ColorSensor extends ColorSensorV3 implements ColorSensorInterface {
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + " Color and Proximity", () -> get()
+        LogManager.addEntry(name + " Color", () -> get()
         ).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
 
         LogManager.addEntry(name + " Proximity", this::getProximity)
@@ -180,5 +182,12 @@ public class ColorSensor extends ColorSensorV3 implements ColorSensorInterface {
     @Override
     public int getProximity() {
         return super.getProximity();
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("Color Sensor");
+        builder.addDoubleProperty("Proximity", this::getProximity, null);
+        builder.addStringProperty("Matched Color", this::getMatchedColorName, null);
     }
 }

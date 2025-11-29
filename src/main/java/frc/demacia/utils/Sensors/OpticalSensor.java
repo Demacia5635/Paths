@@ -1,6 +1,8 @@
 package frc.demacia.utils.Sensors;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.AnalogInput;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
+import frc.demacia.utils.Log.LogManager;
 
 /**
  * A wrapper for analog optical sensors that measure voltage levels.
@@ -22,6 +24,7 @@ import edu.wpi.first.wpilibj.AnalogInput;
  */
 public class OpticalSensor extends AnalogInput implements SensorInterface {
     private final OpticalSensorConfig config;
+    String name;
     
     /**
      * Creates a new OpticalSensor with the specified configuration.
@@ -31,6 +34,16 @@ public class OpticalSensor extends AnalogInput implements SensorInterface {
     public OpticalSensor(OpticalSensorConfig config) {
         super(config.channel);
         this.config = config;
+		name = config.name;
+        addLog();
+		LogManager.log(name + " Optical Sensor initialized");
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void addLog() {
+        LogManager.addEntry(name + " value",  () -> get())
+        .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
+
     }
     
     /**

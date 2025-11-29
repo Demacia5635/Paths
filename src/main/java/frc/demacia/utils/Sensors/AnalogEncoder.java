@@ -1,5 +1,6 @@
 package frc.demacia.utils.Sensors;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Log.LogManager;
@@ -57,7 +58,7 @@ public class AnalogEncoder extends edu.wpi.first.wpilibj.AnalogEncoder implement
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + "/Position", this::get)
+        LogManager.addEntry(name + " Position", this::get)
         .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
@@ -119,5 +120,11 @@ public class AnalogEncoder extends edu.wpi.first.wpilibj.AnalogEncoder implement
                 configEncoder();
             }
         );
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("AbsoluteEncoder");
+        builder.addDoubleProperty("Position", this::get, null);
     }
 }

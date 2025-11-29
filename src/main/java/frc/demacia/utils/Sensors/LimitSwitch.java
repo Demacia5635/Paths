@@ -1,5 +1,6 @@
 package frc.demacia.utils.Sensors;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
@@ -52,7 +53,7 @@ public class LimitSwitch extends DigitalInput implements DigitalSensorInterface{
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + "/isTriggered", this::get)
+        LogManager.addEntry(name + " isTriggered", this::get)
         .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
@@ -105,5 +106,11 @@ public class LimitSwitch extends DigitalInput implements DigitalSensorInterface{
                 configLimitSwitch();
             }
         );
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("Digital Input");
+        builder.addBooleanProperty("Value", this::get, null);
     }
 }

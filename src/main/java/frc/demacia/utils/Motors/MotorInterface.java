@@ -1,5 +1,7 @@
 package frc.demacia.utils.Motors;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
+
 /**
  * Unified interface for all motor controller types.
  * 
@@ -243,4 +245,5 @@ public interface MotorInterface {
     */
     void showConfigMotionVelocitiesCommand();
 
+    void initSendable(SendableBuilder builder);
 }

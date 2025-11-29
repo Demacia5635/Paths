@@ -1,5 +1,7 @@
 package frc.demacia.utils.Sensors;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
+
 /**
  * Base interface for all sensors.
  * 
@@ -21,4 +23,6 @@ public  interface SensorInterface{
      * Logs warnings or errors if sensor is disconnected, reporting faults, etc.</p>
      */
     public void checkElectronics();
+
+    void initSendable(SendableBuilder builder);
 }
