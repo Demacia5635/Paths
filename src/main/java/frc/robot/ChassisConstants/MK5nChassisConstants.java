@@ -106,7 +106,7 @@ public class MK5nChassisConstants {
                 .withBrake(true)
                 .withInvert(true)
                 .withMeterMotor(DRIVE_GEAR_RATIO, wheelDiameter * Math.PI);
-            CANCODER_CONFIG = new CancoderConfig(swerveId * 3 + 3, new CANBus("canivore"), NAME + " Cancoder");
+            CANCODER_CONFIG = new CancoderConfig(swerveId * 3 + 3, new CANBus("rio"), NAME + " Cancoder");
             POSITION = new Translation2d(
                 swerveId == 0 || swerveId == 1 ? 0.34 : -0.34,
                 swerveId == 0 || swerveId == 2 ? 0.29 : -0.29

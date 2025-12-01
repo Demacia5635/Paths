@@ -140,6 +140,7 @@ public class LogEntry<T> {
     }
 
     void log() {
+        data.refresh();
         if (!data.hasChanged()) {
             return;
         }

@@ -377,7 +377,6 @@ public class Data<T> {
      */
     public Double getDouble() {
         if (!isDouble || length == 0) {return null;}
-        refresh();
         if (signal != null){
             return (double)signal[0].getValueAsDouble();
         }
@@ -391,7 +390,6 @@ public class Data<T> {
      */
     public double[] getDoubleArray() {
         if (!isDouble || length == 0) return null;
-        refresh();
         
         if (signal != null){
             // Reuse cached array
@@ -413,7 +411,6 @@ public class Data<T> {
      */
     public Float getFloat() {
         if (!isDouble || length == 0) {return null;}
-        refresh();
         if (signal != null){
             return (float) signal[0].getValueAsDouble();
         }
@@ -428,7 +425,6 @@ public class Data<T> {
      */
     public float[] getFloatArray() {
         if (!isDouble || length == 0) return null;
-        refresh();
         
         if (signal != null){
             if (cachedFloatArray == null || cachedFloatArray.length != signal.length) {
@@ -449,7 +445,6 @@ public class Data<T> {
      */
     public Boolean getBoolean() {
         if (!isBoolean || length == 0) {return null;}
-        refresh();
         if (signal != null){
             return (Boolean) signal[0].getValue();
         }
@@ -463,7 +458,6 @@ public class Data<T> {
      */
     public boolean[] getBooleanArray() {
         if (!isBoolean || length == 0) return null;
-        refresh();
         
         if (signal != null){
             if (cachedBooleanArray == null || cachedBooleanArray.length != signal.length) {
@@ -484,7 +478,6 @@ public class Data<T> {
      */
     public String getString() {
         if (isDouble || isBoolean || length == 0) {return "";}
-        refresh();
         if (signal != null){
             return signal[0].getValue().toString();
         }
@@ -498,7 +491,6 @@ public class Data<T> {
      */
     public String[] getStringArray() {
         if (isDouble || isBoolean || length == 0) return null;
-        refresh();
         
         if (signal != null){
             if (cachedStringArray == null || cachedStringArray.length != signal.length) {
@@ -514,13 +506,11 @@ public class Data<T> {
 
     public T getValue() {
         if (length == 0) {return null;}
-        refresh();
         return currentValues[0];
     }
 
     public T[] getValueArray() {
         if (length == 0) {return null;}
-        refresh();
         return currentValues;
     }
 
@@ -591,7 +581,6 @@ public class Data<T> {
      * @return true if any value changed beyond precision threshold
      */ 
     public boolean hasChanged() {
-        refresh();
         return changed;
     }
 
