@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Controller.CommandController;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Sensors.AnalogSensorInterface;
@@ -103,8 +105,15 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     protected Supplier<Boolean> isCalibratedSupplier = () -> true;
     
     protected List<Trigger> triggers = new ArrayList<>();
+    protected List<Supplier<Boolean>> finishConditions = new ArrayList<>();
     protected MotorLimits[] motorsLimits;
     protected BiConsumer<MotorInterface[], double[]> consumer;
+    protected BiConsumer<MotorInterface[], double[]> endAction;
+    
+    protected boolean isControllerCommand = false;
+    protected int controlledMotorIndex;
+    protected double controllerMultiplier = 0.8;
+    protected CommandController controller;
 
     @SuppressWarnings("unchecked")
     public BaseMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, BiConsumer<MotorInterface[], double[]> consumer) {
@@ -177,12 +186,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         if (condition == null) {
             throw new IllegalArgumentException("Stop condition cannot be null");
         }
-        BiConsumer<MotorInterface[], double[]> stopConsumer = 
-        (motors, values) -> {
-            for (MotorInterface motor : motors) {
-                motor.setDuty(0);
-            }};
-        triggers.add(new Trigger(condition, stopConsumer));
+        finishConditions.add(condition);
         return (T) this;
     }
 
@@ -348,20 +352,73 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         LogManager.addEntry(name + "/is calibrated", isCalibratedSupplier);
         return (T) this;
     }
+
+    /**
+     * Sets custom end behavior when command finishes.
+     * Default: stops all motors.
+     */
+    @SuppressWarnings("unchecked")
+    public T withEndAction(BiConsumer<MotorInterface[], double[]> endAction) {
+        this.endAction = endAction;
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T withController(CommandController controller, int controlledMotorIndex) {
+        if (!isValidMotorIndex(controlledMotorIndex)) {
+            throw new IllegalArgumentException("Invalid controlled motor index: " + controlledMotorIndex);
+        }
+        if (controller == null) {
+            throw new IllegalArgumentException("Controller cannot be null");
+        }
+        this.controller = controller;
+        this.controlledMotorIndex = controlledMotorIndex;
+        
+        SendableChooser<Boolean> controllerCommandChooser = new SendableChooser<>();
+        controllerCommandChooser.setDefaultOption("TRUE", true);
+        controllerCommandChooser.addOption("FALSE", false);
+        controllerCommandChooser.onChange(value -> {
+            this.isControllerCommand = value;
+        });
+        SmartDashboard.putData(getName() + "/Is Controller Command", controllerCommandChooser);
+        
+        return (T) this;
+    }
     
     /**
-     * Creates a command that continuously runs this mechanism.
+     * Creates a command.
      * 
      * <p>The command checks triggers and applies the consumer each cycle.</p>
      * 
-     * @return RunCommand that requires this subsystem
+     * @return Command that requires this subsystem
      */
     public Command runMechanismCommand(){
-        return new RunCommand(() -> {
-            checkTriggers();
-            runMechanism();}
-            , this);
-    }
+        return new Command() {
+            @Override
+            public void execute() {
+                if (isControllerCommand){
+                    ControlerCommand();
+                } else{
+                    checkTriggers();
+                    runMechanism();
+                }
+            }
+
+            @Override
+            public boolean isFinished() {
+                return checkFinish();
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                if (endAction != null) {
+                    endAction.accept(motors, values);
+                } else {
+                    stopAll(); // default behavior
+                }
+            }
+        }.withName(name + " Command");
+    };
 
     private void checkTriggers() {
         for (Trigger trigger : triggers) {
@@ -369,6 +426,15 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
                 trigger.getConsumer().accept(motors, values);
             }
         }
+    }
+
+    private boolean checkFinish() {
+        for (Supplier<Boolean> finishCondition : finishConditions) {
+            if (finishCondition.get()){
+                return true;
+            }
+        }
+        return false;
     }
 
     private void runMechanism(){
@@ -387,6 +453,11 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
 
         applyMotorLimits();
         consumer.accept(motors, values);
+    }
+
+    private void ControlerCommand(){
+        double power = controller.getLeftY() * controllerMultiplier; //TODO
+        getMotor(controlledMotorIndex).setDuty(power);
     }
 
     /**

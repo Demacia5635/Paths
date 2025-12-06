@@ -5,28 +5,21 @@
 package frc.robot;
 
 import frc.demacia.utils.Controller.CommandController;
+import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Mechanisms.Arm;
 import frc.demacia.utils.Mechanisms.Intake;
 import frc.demacia.utils.Mechanisms.StateBasedMechanism;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Motors.TalonFXMotor;
-import frc.demacia.utils.Motors.TalonSRXMotor;
 import frc.demacia.utils.Sensors.DigitalEncoder;
-import frc.demacia.utils.Sensors.OpticalSensor;
 import frc.demacia.utils.Sensors.SensorInterface;
-import frc.demacia.utils.Sensors.UltraSonicSensor;
 import frc.demacia.utils.chassis.Chassis;
 import frc.robot.ChassisConstants.MK5nChassisConstants;
 import frc.robot.testMechanism.ArmConstants;
-import frc.robot.testMechanism.GripperConstants;
-import frc.robot.testMechanism.GripperConstants.GRIPPER_STATES;
-import frc.robot.testMechanism.GripperConstants.SensorConstants;
 import frc.robot.testMechanism.ArmConstants.ARM_STATES;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
 import frc.robot.testMechanism.ArmConstants.GripperAngleMotorConstants;
-
-import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -67,12 +60,12 @@ public class RobotContainer {
   public RobotContainer() {
     
     new LogManager();
-    // driverController = new CommandController(0, ControllerType.kXbox);
+    driverController = new CommandController(0, ControllerType.kXbox);
 
     chassis = new Chassis(MK5nChassisConstants.CHASSIS_CONFIG);
     // driveCommand = new DriveCommand(chassis, driverController);
 
-    // setMechanism();
+    setMechanism();
 
     // Configure the trigger bindings
     // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
@@ -100,7 +93,8 @@ public class RobotContainer {
       gripperAngleMotor.setAngle(gripperAngleMotor.getCurrentPosition() + values[1] - (AbEncoder.get()) - GripperAngleMotorConstants.ENCODER_BASE_ANGLE);
     })
     .withStartingOption(ARM_STATES.STARTING)
-    .setMotorLimits(1, GripperAngleMotorConstants.BACK_LIMIT, GripperAngleMotorConstants.FWD_LIMIT);
+    .setMotorLimits(1, GripperAngleMotorConstants.BACK_LIMIT, GripperAngleMotorConstants.FWD_LIMIT)
+    .withController(driverController, 0);
 
     //clibebMechanism
     // clibeb = new Arm(ClimebConstants.NAME, 
@@ -108,24 +102,24 @@ public class RobotContainer {
     // CLIMB_STATES.class);
 
     //gripperMechanism
-    UltraSonicSensor upSensor = new UltraSonicSensor(SensorConstants.UP_CONFIG);
-    OpticalSensor downSensor = new OpticalSensor(SensorConstants.DOWN_CONFOG);
-    gripper = new Intake(GripperConstants.NAME, 
-      new MotorInterface[]{
-      new TalonSRXMotor(GripperConstants.MotorConstants.CONFIG)}, 
-      new SensorInterface[] {
-        upSensor, 
-        downSensor}, 
-      GRIPPER_STATES.class);
-    Supplier<Boolean> isCoralUpSensor = () ->
-      upSensor.get() == 0? false: upSensor.get() > 1? true: upSensor.get() < SensorConstants.CORAL_IN_UP_SENSOR;
-    Supplier<Boolean> isCoralDownSensor = () ->
-      downSensor.get() < SensorConstants.CORAL_IN_DOWN_SENSOR;
-      Supplier<Boolean> isCoral = () -> isCoralUpSensor.get() && isCoralDownSensor.get();
-    gripper.addTrigger(isCoralDownSensor, GRIPPER_STATES.STOPED, GRIPPER_STATES.DROP)
-    .addTrigger(isCoralDownSensor, GRIPPER_STATES.STOPED, GRIPPER_STATES.GRAB)
-    .addTrigger(isCoral, GRIPPER_STATES.STOPED, GRIPPER_STATES.ALIGN_DOWN)
-    .addTrigger(isCoral, GRIPPER_STATES.STOPED, GRIPPER_STATES.ALIGN_UP);
+    // UltraSonicSensor upSensor = new UltraSonicSensor(SensorConstants.UP_CONFIG);
+    // OpticalSensor downSensor = new OpticalSensor(SensorConstants.DOWN_CONFOG);
+    // gripper = new Intake(GripperConstants.NAME, 
+    //   new MotorInterface[]{
+    //   new TalonSRXMotor(GripperConstants.MotorConstants.CONFIG)}, 
+    //   new SensorInterface[] {
+    //     upSensor, 
+    //     downSensor}, 
+    //   GRIPPER_STATES.class);
+    // Supplier<Boolean> isCoralUpSensor = () ->
+    //   upSensor.get() == 0? false: upSensor.get() > 1? true: upSensor.get() < SensorConstants.CORAL_IN_UP_SENSOR;
+    // Supplier<Boolean> isCoralDownSensor = () ->
+    //   downSensor.get() < SensorConstants.CORAL_IN_DOWN_SENSOR;
+    //   Supplier<Boolean> isCoral = () -> isCoralUpSensor.get() && isCoralDownSensor.get();
+    // gripper.addTrigger(isCoralDownSensor, GRIPPER_STATES.STOPED, GRIPPER_STATES.DROP)
+    // .addTrigger(isCoralDownSensor, GRIPPER_STATES.STOPED, GRIPPER_STATES.GRAB)
+    // .addTrigger(isCoral, GRIPPER_STATES.STOPED, GRIPPER_STATES.ALIGN_DOWN)
+    // .addTrigger(isCoral, GRIPPER_STATES.STOPED, GRIPPER_STATES.ALIGN_UP);
   }
 
   public static boolean isComp() {

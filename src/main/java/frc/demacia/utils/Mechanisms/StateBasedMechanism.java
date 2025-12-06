@@ -82,8 +82,13 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     }
 
     protected double[] testValues;
+    protected double[] idleValues;
+    protected double[] idleValues2;
 
     protected Enum<?> state;
+    protected Enum<?> testingState;
+    protected Enum<?> idleState;
+    protected Enum<?> idleState2;
 
     private List<StateTrigger> triggers = new ArrayList<>();
     
@@ -102,14 +107,22 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
 
         super.consumer = consumer;
         testValues = new double[motors.length];
+        idleValues = new double[motors.length];
+        idleValues2 = new double[motors.length];
+        for (int i = 0; i < motors.length; i++){
+            idleValues[i] = 0;//TODO
+            idleValues2[i] = 0;//TODO
+        }
         SmartDashboard.putData(this);
     }
 
-    public void addNT(Class<? extends Enum<? extends MechanismState>> enumClass) {
+    private void addNT(Class<? extends Enum<? extends MechanismState>> enumClass) {
         for (Enum<?> state : enumClass.getEnumConstants()) {
             stateChooser.addOption(state.name(), state);
         }
-        stateChooser.addOption("TESTING", null);
+        stateChooser.addOption("TESTING", testingState);
+        stateChooser.addOption("IDLE", idleState);
+        stateChooser.addOption("IDLE2", idleState2);
 
         stateChooser.onChange(state -> this.state = state);
 
@@ -139,6 +152,7 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
             throw new IllegalArgumentException("Starting state must implement MechanismState");
         }
 
+        stateChooser.setDefaultOption(state.name(), state);
         this.state = state;
         return (T) this;
     }
@@ -213,10 +227,18 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     }
 
     private void setState(){
-        if (state == null) {
+        if (state == testingState) {
             values = testValues;
             return;
-        };
+        }
+        if (state == idleState) {
+            values = idleValues;
+            return;
+        }
+        if (state == idleState2) {
+            values = idleValues2;
+            return;
+        }
         values = ((MechanismState) state).getValues();
     }
 
