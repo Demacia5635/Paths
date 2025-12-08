@@ -201,8 +201,31 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
      * 
      * @return Current state enum
      */
+    public void setState(Enum<?> state) {
+        this.state = state;
+    }
+
+    /**
+     * Gets the current state.
+     * 
+     * @return Current state enum
+     */
     public Enum<?> getState() {
         return state;
+    }
+
+    /**
+     * Creates a command that runs the state machine.
+     * 
+     * <p>Checks state triggers and updates mechanism each cycle.</p>
+     * 
+     * @return Command that runs this state machine
+     */
+    public Command runStateMechanismCommand(Enum<?> state){
+        setState(state);
+        checkStateTriggers();
+        setState();
+        return runMechanismCommand();
     }
 
     /**

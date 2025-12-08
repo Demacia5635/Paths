@@ -363,6 +363,59 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         return (T) this;
     }
 
+    /**
+     * Configures controller-based manual control for a specific motor.
+     * 
+     * <p>Enables direct joystick control of a motor, bypassing the mechanism's
+     * normal state machine or command logic. Useful for testing, tuning, and
+     * manual calibration procedures.</p>
+     * 
+     * <p><b>Features:</b></p>
+     * <ul>
+     *   <li>Manual control via controller left Y axis</li>
+     *   <li>Toggle between normal and controller mode via SmartDashboard</li>
+     *   <li>Default power scaling of 0.8 (configurable via controllerMultiplier field)</li>
+     *   <li>Active while mechanism command is running</li>
+     * </ul>
+     * 
+     * <p><b>Dashboard Control:</b></p>
+     * After calling this method, a chooser appears in SmartDashboard/Shuffleboard at:
+     * <pre>"MechanismName/Is Controller Command"</pre>
+     * Toggle between TRUE (controller mode) and FALSE (normal mode) during runtime.
+     * Default selection is TRUE.
+     * 
+     * <p><b>Behavior:</b></p>
+     * <ul>
+     *   <li>When TRUE: Motor responds to controller.getLeftY() * controllerMultiplier (default 0.8)</li>
+     *   <li>When FALSE: Mechanism operates normally (states/triggers/values)</li>
+     *   <li>State persists across enable/disable cycles</li>
+     * </ul>
+     * 
+     * @param controller The controller to use for manual control
+     * @param controlledMotorIndex Index of the motor to control (0-based)
+     * @return this mechanism for chaining
+     * @throws IllegalArgumentException if controller is null or motor index is invalid
+     * 
+     * @example
+     * <pre>
+     * // Basic setup - control motor 0 with test controller
+     * mechanism.withController(testController, 0);
+     * 
+     * // In SmartDashboard:
+     * // "Intake/Is Controller Command" → Select TRUE (default)
+     * // Now left stick Y controls motor 0
+     * 
+     * // Multiple motors example:
+     * leftArm.withController(testController, 0);   // Left stick controls left arm
+     * rightArm.withController(testController, 0);  // Same controller, different mechanism
+     * 
+     * // To customize power scaling:
+     * mechanism.withController(testController, 0);
+     * mechanism.controllerMultiplier = 0.5; // 50% max power
+     * </pre>
+     * 
+     * @see #runMechanismCommand() for command execution behavior
+     */
     @SuppressWarnings("unchecked")
     public T withController(CommandController controller, int controlledMotorIndex) {
         if (!isValidMotorIndex(controlledMotorIndex)) {
