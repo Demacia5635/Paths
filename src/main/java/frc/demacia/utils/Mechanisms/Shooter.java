@@ -2,7 +2,7 @@ package frc.demacia.utils.Mechanisms;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.demacia.utils.LookUpTable;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Sensors.SensorInterface;
@@ -30,7 +30,7 @@ public class Shooter extends BaseMechanism<Shooter>{
     }
 
     @Override
-    public Command mechanismCommand(){
+    public RunCommand mechanismCommand(){
         setValues(lookUpTable.get(posSupplier.get()));
         return super.mechanismCommand();
     }
