@@ -30,8 +30,8 @@ public class Shooter extends BaseMechanism<Shooter>{
     }
 
     @Override
-    public Command runMechanismCommand(){
+    public Command mechanismCommand(){
         setValues(lookUpTable.get(posSupplier.get()));
-        return super.runMechanismCommand();
+        return super.mechanismCommand();
     }
 }

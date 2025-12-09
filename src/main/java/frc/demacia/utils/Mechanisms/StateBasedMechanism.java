@@ -221,11 +221,11 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
      * 
      * @return Command that runs this state machine
      */
-    public Command runStateMechanismCommand(Enum<?> state){
+    public Command StateMechanismCommand(Enum<?> state){
         setState(state);
         checkStateTriggers();
         setState();
-        return runMechanismCommand();
+        return mechanismCommand();
     }
 
     /**
@@ -238,7 +238,7 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     public Command runStateMechanismCommand(){
         checkStateTriggers();
         setState();
-        return runMechanismCommand();
+        return mechanismCommand();
     }
 
     private void checkStateTriggers() {

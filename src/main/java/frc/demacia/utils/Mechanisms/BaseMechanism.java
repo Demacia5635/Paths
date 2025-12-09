@@ -8,13 +8,12 @@ import java.util.function.Supplier;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Controller.CommandController;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.Motors.MotorInterface;
-import frc.demacia.utils.Sensors.AnalogSensorInterface;
-import frc.demacia.utils.Sensors.DigitalSensorInterface;
 import frc.demacia.utils.Sensors.SensorInterface;
 
 /**
@@ -105,15 +104,15 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     protected Supplier<Boolean> isCalibratedSupplier = () -> true;
     
     protected List<Trigger> triggers = new ArrayList<>();
-    protected List<Supplier<Boolean>> finishConditions = new ArrayList<>();
     protected MotorLimits[] motorsLimits;
     protected BiConsumer<MotorInterface[], double[]> consumer;
-    protected BiConsumer<MotorInterface[], double[]> endAction;
     
     protected boolean isControllerCommand = false;
     protected int controlledMotorIndex;
     protected double controllerMultiplier = 0.8;
     protected CommandController controller;
+
+    protected List<Command> commands;
 
     @SuppressWarnings("unchecked")
     public BaseMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, BiConsumer<MotorInterface[], double[]> consumer) {
@@ -171,89 +170,6 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         }
         triggers.add(new Trigger(condition, consumer));
         return (T) this;
-    }
-
-    /**
-     * Adds a stop trigger that sets all motors to zero when condition is true.
-     * 
-     * <p>Convenient shortcut for safety stops.</p>
-     * 
-     * @param condition Supplier that returns true when mechanism should stop
-     * @return this mechanism for chaining
-     */
-    @SuppressWarnings("unchecked")
-    public T addStop(Supplier<Boolean> condition) {
-        if (condition == null) {
-            throw new IllegalArgumentException("Stop condition cannot be null");
-        }
-        finishConditions.add(condition);
-        return (T) this;
-    }
-
-    /**
-     * Adds a stop trigger that activates when a digital sensor reaches the target state.
-     *
-     * <p>This is a convenience method for common cases such as:
-     * <ul>
-     *   <li>Stop when a limit switch is pressed</li>
-     *   <li>Stop when a beam break is triggered</li>
-     * </ul>
-     * </p>
-     *
-     * @param index Index of the sensor in the mechanism
-     * @param targetState The boolean state required to trigger the stop
-     * @return this mechanism for chaining
-     * @throws IllegalArgumentException if index is invalid or sensor is not DigitalSensorInterface
-     */
-    public T addStopWhenSensor(int index, boolean targetState) {
-        if (!isValidSensorIndex(index)) {
-            throw new IllegalArgumentException(
-                "addStopWhenSensor (digital): invalid sensor index " + index
-            );
-        }
-
-        if (!(sensors[index] instanceof DigitalSensorInterface)) {
-            throw new IllegalArgumentException(
-                "addStopWhenSensor (digital): sensor at index " + index +
-                " is not a DigitalSensorInterface"
-            );
-        }
-
-        DigitalSensorInterface digital = (DigitalSensorInterface) sensors[index];
-        return (T) addStop(() -> digital.get() == targetState);
-    }
-
-    /**
-     * Adds a stop trigger that activates when an analog sensor reads a given value.
-     *
-     * <p>Useful for mechanisms that stop at specific analog positions such as:
-     * <ul>
-     *   <li>Potentiometers</li>
-     *   <li>Analog range/limit sensors</li>
-     * </ul>
-     * </p>
-     *
-     * @param index Index of the sensor in the mechanism
-     * @param targetState The analog value at which the stop should activate
-     * @return this mechanism for chaining
-     * @throws IllegalArgumentException if index is invalid or sensor is not AnalogSensorInterface
-     */
-    public T addStopWhenSensor(int index, double targetState) {
-        if (!isValidSensorIndex(index)) {
-            throw new IllegalArgumentException(
-                "addStopWhenSensor (analog): invalid sensor index " + index
-            );
-        }
-
-        if (!(sensors[index] instanceof AnalogSensorInterface)) {
-            throw new IllegalArgumentException(
-                "addStopWhenSensor (analog): sensor at index " + index +
-                " is not an AnalogSensorInterface"
-            );
-        }
-
-        AnalogSensorInterface analog = (AnalogSensorInterface) sensors[index];
-        return (T) addStop(() -> analog.get() == targetState);
     }
 
     /**
@@ -354,16 +270,6 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     }
 
     /**
-     * Sets custom end behavior when command finishes.
-     * Default: stops all motors.
-     */
-    @SuppressWarnings("unchecked")
-    public T withEndAction(BiConsumer<MotorInterface[], double[]> endAction) {
-        this.endAction = endAction;
-        return (T) this;
-    }
-
-    /**
      * Configures controller-based manual control for a specific motor.
      * 
      * <p>Enables direct joystick control of a motor, bypassing the mechanism's
@@ -414,7 +320,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
      * mechanism.controllerMultiplier = 0.5; // 50% max power
      * </pre>
      * 
-     * @see #runMechanismCommand() for command execution behavior
+     * @see #mechanismCommand() for command execution behavior
      */
     @SuppressWarnings("unchecked")
     public T withController(CommandController controller, int controlledMotorIndex) {
@@ -437,6 +343,31 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         
         return (T) this;
     }
+
+    public Command withCommand(BiConsumer<MotorInterface[], double[]> executeAction, Supplier<Boolean> finishCondition, BiConsumer<MotorInterface[], double[]> endAction){
+        Command command = new Command() {
+            @Override
+            public void execute() {
+                executeAction.accept(motors, values);
+            }
+
+            @Override
+            public boolean isFinished() {
+                return finishCondition.get();
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                endAction.accept(motors, values);
+            }
+        };
+        commands.add(command);
+        return command;
+    }
+
+    public Command getCommand(int index){
+        return commands.get(index);
+    }
     
     /**
      * Creates a command.
@@ -445,33 +376,16 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
      * 
      * @return Command that requires this subsystem
      */
-    public Command runMechanismCommand(){
-        return new Command() {
-            @Override
-            public void execute() {
-                if (isControllerCommand){
-                    ControlerCommand();
-                } else{
-                    checkTriggers();
-                    runMechanism();
-                }
+    public RunCommand mechanismCommand(){
+        return new RunCommand(() -> {
+            if (isControllerCommand){
+                ControlerCommand();
+            } else{
+                checkTriggers();
+                runMechanism();
             }
-
-            @Override
-            public boolean isFinished() {
-                return checkFinish();
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                if (endAction != null) {
-                    endAction.accept(motors, values);
-                } else {
-                    stopAll(); // default behavior
-                }
-            }
-        }.withName(name + " Command");
-    };
+        },this);
+    }
 
     private void checkTriggers() {
         for (Trigger trigger : triggers) {
@@ -479,15 +393,6 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
                 trigger.getConsumer().accept(motors, values);
             }
         }
-    }
-
-    private boolean checkFinish() {
-        for (Supplier<Boolean> finishCondition : finishConditions) {
-            if (finishCondition.get()){
-                return true;
-            }
-        }
-        return false;
     }
 
     private void runMechanism(){
