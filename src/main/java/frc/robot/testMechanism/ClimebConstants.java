@@ -25,6 +25,7 @@ public class ClimebConstants {
     public static class ClimbConstants {
         public static final double STALL_CURRENT = 35;
         public static final double CLIMB_RATIO = 600;
+        public static double prepareClimbPower = -0.8;
     }
     public static final int LIMIT_SWITCH_CHANNEL = 4;
 

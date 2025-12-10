@@ -1,8 +1,5 @@
 package frc.demacia.utils.Mechanisms;
 
-import frc.demacia.utils.Motors.MotorInterface;
-import frc.demacia.utils.Sensors.SensorInterface;
-
 /**
  * State-based elevator mechanism.
  * 
@@ -24,8 +21,9 @@ import frc.demacia.utils.Sensors.SensorInterface;
  */
 public class Elevator extends StateBasedMechanism<Elevator>{
 
-    public Elevator(String name, MotorInterface[] motors, Class<? extends Enum<? extends MechanismState>> enumClass) {
-        super(name, motors, new SensorInterface[0], enumClass, 
+    public Elevator(String name) {
+        super(name);
+        withConsumer(
         (motor, values) -> {
             for (int i = 0; i < motor.length && i < values.length; i++) {
                 motor[i].setMotion(values[i]);

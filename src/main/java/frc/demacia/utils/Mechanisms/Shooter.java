@@ -2,10 +2,7 @@ package frc.demacia.utils.Mechanisms;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.demacia.utils.LookUpTable;
-import frc.demacia.utils.Motors.MotorInterface;
-import frc.demacia.utils.Sensors.SensorInterface;
 
 /**
  * State-based shooter mechanism.
@@ -19,19 +16,14 @@ public class Shooter extends BaseMechanism<Shooter>{
     private LookUpTable lookUpTable;
     private Supplier<Double> posSupplier;
 
-    public Shooter(String name, MotorInterface[] motors, LookUpTable lookUpTable, Supplier<Double> posSupplier) {
-        super(name, motors, new SensorInterface[0],
+    public Shooter(String name, LookUpTable lookUpTable, Supplier<Double> posSupplier) {
+        super(name);
+        withConsumer(
         (motor, values) -> {
             for (int i = 0; i < motor.length && i < values.length; i++) {
                 motor[i].setVelocity(values[i]);
             }});
         this.lookUpTable = lookUpTable;
         this.posSupplier = posSupplier;
-    }
-
-    @Override
-    public RunCommand mechanismCommand(){
-        setValues(lookUpTable.get(posSupplier.get()));
-        return super.mechanismCommand();
     }
 }

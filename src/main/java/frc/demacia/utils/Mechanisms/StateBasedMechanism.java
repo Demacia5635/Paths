@@ -1,16 +1,16 @@
 package frc.demacia.utils.Mechanisms;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.demacia.utils.Motors.MotorInterface;
-import frc.demacia.utils.Sensors.SensorInterface;
 
 /**
  * State machine-based mechanism controller.
@@ -51,82 +51,151 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
         double[] getValues();
     }
 
-    public static class StateTrigger {
-        private final Supplier<Boolean> condition;
-        private final Enum<?> state;
-        private final Enum<?> when;
+    public class State {
+        private String name;
+        private double[] values;
+        private List<BiConsumer<MotorInterface[], double[]>> motorAndValuesInitializes;
+        private List<Consumer<MotorInterface[]>> motorInitializes;
+        private List<Supplier<Boolean>> finishes;
+        private List<BiConsumer<MotorInterface[], double[]>> motorAndValuesEnds;
+        private List<Consumer<MotorInterface[]>> motorEnds;
 
-        public StateTrigger(Supplier<Boolean> condition, Enum<?> state) {
-            this.condition = condition;
-            this.state = state;
-            when = null;
+        public State(String name, double[] values){
+            this.name = name;
+            this.values = values;
         }
 
-        public StateTrigger(Supplier<Boolean> condition, Enum<?> state, Enum<?> when) {
-            this.condition = condition;
-            this.state = state;
-            this.when = when;
+        public State withInitialize(BiConsumer<MotorInterface[], double[]> consumer){
+            motorAndValuesInitializes.add(consumer);
+            return this;
         }
 
-        public boolean check() {
-            return condition.get();
+        public State withInitialize(Consumer<MotorInterface[]> consumer){
+            motorInitializes.add(consumer);
+            return this;
         }
 
-        public Enum<?> getState() {
-            return state;
+        public State withFinish(Supplier<Boolean> finish){
+            finishes.add(finish);
+            return this;
         }
 
-        public Enum<?> getWhen() {
-            return when;
+        public State withEnd(BiConsumer<MotorInterface[], double[]> consumer){
+            motorAndValuesEnds.add(consumer);
+            return this;
+        }
+
+        public State withEnd(Consumer<MotorInterface[]> consumer){
+            motorEnds.add(consumer);
+            return this;
+        }
+
+        public String getName(){
+            return name;
+        }
+
+        public void setValues(double[] values){
+            this.values = values;
+        }
+
+        public double[] getValues(){
+            return values;
+        }
+
+        public List<BiConsumer<MotorInterface[], double[]>> getMotorAndValuesInitializes(){
+            return motorAndValuesInitializes;
+        }
+
+        public List<Consumer<MotorInterface[]>> getMotorInitializes(){
+            return motorInitializes;
+        }
+
+        public List<Supplier<Boolean>> getFinishes(){
+            return finishes;
+        }
+
+        public List<BiConsumer<MotorInterface[], double[]>> getMotorAndValuesEnd(){
+            return motorAndValuesEnds;
+        }
+
+        public List<Consumer<MotorInterface[]>> getMotorEnds(){
+            return motorEnds;
         }
     }
 
-    protected double[] testValues;
-    protected double[] idleValues;
-    protected double[] idleValues2;
+    public String name;
 
-    protected Enum<?> state;
-    protected Enum<?> testingState;
-    protected Enum<?> idleState;
-    protected Enum<?> idleState2;
+    SendableChooser<State> stateChooser = new SendableChooser<>();
+    public State state;
+    protected State testingState;
+    protected State idleState;
+    protected State idleState2;
 
-    private List<StateTrigger> triggers = new ArrayList<>();
-    
-    SendableChooser<Enum<?>> stateChooser = new SendableChooser<>();
-
-    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends Enum<? extends MechanismState>> enumClass, BiConsumer<MotorInterface[], double[]> consumer) {
-        super(name, motors, sensors, consumer);
-        this.addNT(enumClass);
-        if (enumClass == null) {
-            throw new IllegalArgumentException("Enum class cannot be null for mechanism: " + name);
-        }
-        Enum<?>[] enumConstants = enumClass.getEnumConstants();
-        if (enumConstants == null || enumConstants.length == 0) {
-            throw new IllegalArgumentException("Enum class must have at least one constant for mechanism: " + name);
-        }
-
-        super.consumer = consumer;
-        testValues = new double[motors.length];
-        idleValues = new double[motors.length];
-        idleValues2 = new double[motors.length];
-        for (int i = 0; i < motors.length; i++){
-            idleValues[i] = 0;//TODO
-            idleValues2[i] = 0;//TODO
-        }
-        SmartDashboard.putData(this);
+    public StateBasedMechanism(String name){
+        super(name);
     }
 
-    private void addNT(Class<? extends Enum<? extends MechanismState>> enumClass) {
-        for (Enum<?> state : enumClass.getEnumConstants()) {
-            stateChooser.addOption(state.name(), state);
-        }
+    @SuppressWarnings("unchecked")
+    public T withState(State state){
+        stateChooser.addOption(state.getName(), state);
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T bindButton(Trigger button, State state){
+        button.onTrue(new Command() {
+            @Override
+            public void initialize() {
+                for (BiConsumer<MotorInterface[], double[]> motorAndValuesInitialize : state.getMotorAndValuesInitializes()){
+                    motorAndValuesInitialize.accept(motors, values);
+                }
+                for (Consumer<MotorInterface[]> motorInitialize : state.getMotorInitializes()){
+                    motorInitialize.accept(motors);
+                }
+            }
+
+            @Override
+            public void execute() {
+                consumer.accept(motors, values);
+            }
+
+            @Override
+            public boolean isFinished() {
+                for (Supplier<Boolean> finish : state.getFinishes()){
+                    if (finish.get()){
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                stopAll();
+                for (BiConsumer<MotorInterface[], double[]> motorAndValuesEnd : state.getMotorAndValuesEnd()){
+                    motorAndValuesEnd.accept(motors, values);
+                }
+                for (Consumer<MotorInterface[]> motorEnd : state.getMotorEnds()){
+                    motorEnd.accept(motors);
+                }
+            }
+        });
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T build(){
+        super.build();
+        double[] idleValues = new double[motors.length];
+        testingState = new State(name, idleValues);
+        idleState  = new State(name, idleValues);
+        idleState2 = new State(name, idleValues);
         stateChooser.addOption("TESTING", testingState);
         stateChooser.addOption("IDLE", idleState);
         stateChooser.addOption("IDLE2", idleState2);
-
         stateChooser.onChange(state -> this.state = state);
-
         SmartDashboard.putData(getName() + "/State Chooser", stateChooser);
+        return (T) this;
     }
 
     @Override
@@ -143,7 +212,7 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
      * @throws IllegalArgumentException if state doesn't implement MechanismState
      */
     @SuppressWarnings("unchecked")
-    public T withStartingOption(Enum<?> state){
+    public T withStartingOption(State state){
         if (state == null) {
             throw new IllegalArgumentException("Starting state cannot be null");
         }
@@ -152,47 +221,8 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
             throw new IllegalArgumentException("Starting state must implement MechanismState");
         }
 
-        stateChooser.setDefaultOption(state.name(), state);
+        stateChooser.setDefaultOption(state.getName(), state);
         this.state = state;
-        return (T) this;
-    }
-
-    /**
-     * Adds a state transition trigger.
-     * 
-     * <p>When condition becomes true, mechanism transitions to target state.</p>
-     * 
-     * @param condition When to transition
-     * @param state Target state
-     * @return this mechanism for chaining
-     */
-    @SuppressWarnings("unchecked")
-    public T addTrigger(Supplier<Boolean> condition, Enum<?> state) {
-        if (!(state instanceof MechanismState)) {
-            throw new IllegalArgumentException("Target state must implement MechanismState");
-        }
-        
-        triggers.add(new StateTrigger(condition, state));
-        return (T) this;
-    }
-
-    /**
-     * Adds a conditional state transition trigger.
-     * 
-     * <p>Transition only occurs if currently in the specified state.</p>
-     * 
-     * @param condition When to transition
-     * @param state Target state
-     * @param atState Only transition when in this state
-     * @return this mechanism for chaining
-     */
-    @SuppressWarnings("unchecked")
-    public T addTrigger(Supplier<Boolean> condition, Enum<?> state, Enum<?> atState) {
-        if (!(state instanceof MechanismState)) {
-            throw new IllegalArgumentException("Target state must implement MechanismState");
-        }
-        
-        triggers.add(new StateTrigger(condition, state, atState));
         return (T) this;
     }
 
@@ -201,7 +231,7 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
      * 
      * @return Current state enum
      */
-    public void setState(Enum<?> state) {
+    public void setState(State state) {
         this.state = state;
     }
 
@@ -210,66 +240,15 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
      * 
      * @return Current state enum
      */
-    public Enum<?> getState() {
+    public State getState() {
         return state;
     }
 
-    /**
-     * Creates a command that runs the state machine.
-     * 
-     * <p>Checks state triggers and updates mechanism each cycle.</p>
-     * 
-     * @return Command that runs this state machine
-     */
-    public Command StateMechanismCommand(Enum<?> state){
-        setState(state);
-        checkStateTriggers();
-        setState();
-        return mechanismCommand();
+    public double[] getTestValues(){
+        return testingState.getValues();
     }
 
-    /**
-     * Creates a command that runs the state machine.
-     * 
-     * <p>Checks state triggers and updates mechanism each cycle.</p>
-     * 
-     * @return Command that runs this state machine
-     */
-    public Command runStateMechanismCommand(){
-        checkStateTriggers();
-        setState();
-        return mechanismCommand();
-    }
-
-    private void checkStateTriggers() {
-        for (StateTrigger trigger : triggers) {
-            if (trigger.check() && (state == trigger.getWhen() || trigger.getWhen() == null)) {
-                state = trigger.getState();
-            }
-        }
-    }
-
-    private void setState(){
-        if (state == testingState) {
-            values = testValues;
-            return;
-        }
-        if (state == idleState) {
-            values = idleValues;
-            return;
-        }
-        if (state == idleState2) {
-            values = idleValues2;
-            return;
-        }
-        values = ((MechanismState) state).getValues();
-    }
-
-    private double[] getTestValues(){
-        return testValues;
-    }
-
-    private void setTestValues(double[] testValues){
-        this.testValues = testValues;
+    public void setTestValues(double[] testValues){
+        testingState.setValues(testValues);
     }
 }

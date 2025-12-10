@@ -25,6 +25,7 @@ import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
 import frc.robot.testMechanism.ArmConstants.GripperAngleMotorConstants;
 import frc.robot.testMechanism.ClimebConstants;
 import frc.robot.testMechanism.ClimebConstants.CLIMB_STATES;
+import frc.robot.testMechanism.ClimebConstants.ClimbConstants;
 import frc.robot.testMechanism.GripperConstants;
 import frc.robot.testMechanism.GripperConstants.GRIPPER_STATES;
 import frc.robot.testMechanism.GripperConstants.SensorConstants;
@@ -32,6 +33,7 @@ import frc.robot.testMechanism.GripperConstants.SensorConstants;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -84,79 +86,7 @@ public class RobotContainer {
 
   @SuppressWarnings("unused")
   private void setMechanism(){
-    // Arm Mechanism
-    TalonFXMotor armAngleMotor = new TalonFXMotor(ArmAngleMotorConstants.CONFIG);
-    TalonFXMotor gripperAngleMotor = new TalonFXMotor(GripperAngleMotorConstants.CONFIG);
-    DigitalEncoder AbEncoder = new DigitalEncoder(GripperAngleMotorConstants.DIGITAL_ENCODER_CONFIG);
     
-    arm = new StateBasedMechanism<>(
-        ArmConstants.NAME, 
-        new MotorInterface[] {
-            armAngleMotor,
-            gripperAngleMotor
-        }, 
-        new SensorInterface[] {
-            AbEncoder
-        },
-        ArmConstants.ARM_STATES.class, 
-        (motors, values) -> {
-            // Set arm angle directly
-            motors[0].setAngle(values[0]);
-            // Set gripper angle with encoder compensation
-            motors[1].setAngle(
-                motors[1].getCurrentPosition() + 
-                values[1] - 
-                AbEncoder.get() - 
-                GripperAngleMotorConstants.ENCODER_BASE_ANGLE
-            );
-        })
-        .withStartingOption(ARM_STATES.STARTING)
-        .setMotorLimits(1, 
-            GripperAngleMotorConstants.BACK_LIMIT, 
-            GripperAngleMotorConstants.FWD_LIMIT)
-        .withController(driverController, 0);
-
-    // Climb Mechanism
-    TalonFXMotor climbMotor = new TalonFXMotor(ClimebConstants.MOTOR_CONFIG);
-    
-    clibeb = new Arm(
-        ClimebConstants.NAME, 
-        new MotorInterface[]{climbMotor}, 
-        CLIMB_STATES.class);
-
-    // Gripper Mechanism
-    UltraSonicSensor upSensor = new UltraSonicSensor(SensorConstants.UP_CONFIG);
-    OpticalSensor downSensor = new OpticalSensor(SensorConstants.DOWN_CONFOG);
-    TalonSRXMotor gripperMotor = new TalonSRXMotor(GripperConstants.MotorConstants.CONFIG);
-    
-    gripper = new Intake(
-        GripperConstants.NAME, 
-        new MotorInterface[]{gripperMotor}, 
-        new SensorInterface[] {
-            upSensor, 
-            downSensor
-        }, 
-        GRIPPER_STATES.class);
-    
-    // Sensor conditions for gripper
-    Supplier<Boolean> isCoralUpSensor = () -> {
-        double upValue = upSensor.get();
-        if (upValue == 0) return false;
-        if (upValue > 1) return true;
-        return upValue < SensorConstants.CORAL_IN_UP_SENSOR;
-    };
-    
-    Supplier<Boolean> isCoralDownSensor = () -> 
-        downSensor.get() < SensorConstants.CORAL_IN_DOWN_SENSOR;
-    
-    Supplier<Boolean> isCoral = () -> 
-        isCoralUpSensor.get() && isCoralDownSensor.get();
-    
-    // Add conditional state transitions for gripper
-    gripper.addTrigger(isCoralDownSensor, GRIPPER_STATES.STOPED, GRIPPER_STATES.DROP)
-           .addTrigger(isCoralDownSensor, GRIPPER_STATES.STOPED, GRIPPER_STATES.GRAB)
-           .addTrigger(isCoral, GRIPPER_STATES.STOPED, GRIPPER_STATES.ALIGN_DOWN)
-           .addTrigger(isCoral, GRIPPER_STATES.STOPED, GRIPPER_STATES.ALIGN_UP);
   }
 
   public static boolean isComp() {
@@ -181,7 +111,6 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    arm.setDefaultCommand(arm.runStateMechanismCommand());
   }
 
   /**
