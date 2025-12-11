@@ -13,9 +13,6 @@ import frc.demacia.utils.LookUpTable;
  */
 public class Shooter extends BaseMechanism<Shooter>{
 
-    private LookUpTable lookUpTable;
-    private Supplier<Double> posSupplier;
-
     public Shooter(String name, LookUpTable lookUpTable, Supplier<Double> posSupplier) {
         super(name);
         withConsumer(
@@ -23,7 +20,6 @@ public class Shooter extends BaseMechanism<Shooter>{
             for (int i = 0; i < motor.length && i < values.length; i++) {
                 motor[i].setVelocity(values[i]);
             }});
-        this.lookUpTable = lookUpTable;
-        this.posSupplier = posSupplier;
+        withLookUpTable(lookUpTable, posSupplier);
     }
 }

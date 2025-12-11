@@ -2,7 +2,6 @@ package frc.robot.testMechanism;
 
 import edu.wpi.first.math.Pair;
 import frc.demacia.utils.Motors.TalonSRXConfig;
-import frc.demacia.utils.Mechanisms.StateBasedMechanism.MechanismState;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 import frc.demacia.utils.Sensors.OpticalSensorConfig;
 import frc.demacia.utils.Sensors.UltraSonicSensorConfig;
@@ -54,7 +53,7 @@ public class GripperConstants {
         public static final double DROP_POWER = 0.80;
     }
 
-    public static enum GRIPPER_STATES implements MechanismState{
+    public static enum GRIPPER_STATES{
         GRAB(0.6), 
         DROP(0.8), 
         ALIGN_DOWN(0.255), 

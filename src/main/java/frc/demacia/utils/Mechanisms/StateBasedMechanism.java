@@ -1,16 +1,8 @@
 package frc.demacia.utils.Mechanisms;
 
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.demacia.utils.Motors.MotorInterface;
 
 /**
  * State machine-based mechanism controller.
@@ -47,47 +39,27 @@ import frc.demacia.utils.Motors.MotorInterface;
  */
 public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseMechanism<T> {
 
-    public interface MechanismState {
-        double[] getValues();
+    public static class StateAction extends MechanismAction{
+
+        public StateAction(String name, double[] values){
+            super(name, () -> values);
+        }
+
+        public void setValues(double[] values){
+            super.valuesChanger = () -> values;
+        }
     }
 
-    public class State {
+    public static class State {
         private String name;
         private double[] values;
-        private List<BiConsumer<MotorInterface[], double[]>> motorAndValuesInitializes;
-        private List<Consumer<MotorInterface[]>> motorInitializes;
-        private List<Supplier<Boolean>> finishes;
-        private List<BiConsumer<MotorInterface[], double[]>> motorAndValuesEnds;
-        private List<Consumer<MotorInterface[]>> motorEnds;
 
         public State(String name, double[] values){
+            if (values == null) {
+                throw new NullPointerException("Values cannot be null");
+            }
             this.name = name;
             this.values = values;
-        }
-
-        public State withInitialize(BiConsumer<MotorInterface[], double[]> consumer){
-            motorAndValuesInitializes.add(consumer);
-            return this;
-        }
-
-        public State withInitialize(Consumer<MotorInterface[]> consumer){
-            motorInitializes.add(consumer);
-            return this;
-        }
-
-        public State withFinish(Supplier<Boolean> finish){
-            finishes.add(finish);
-            return this;
-        }
-
-        public State withEnd(BiConsumer<MotorInterface[], double[]> consumer){
-            motorAndValuesEnds.add(consumer);
-            return this;
-        }
-
-        public State withEnd(Consumer<MotorInterface[]> consumer){
-            motorEnds.add(consumer);
-            return this;
         }
 
         public String getName(){
@@ -100,26 +72,6 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
 
         public double[] getValues(){
             return values;
-        }
-
-        public List<BiConsumer<MotorInterface[], double[]>> getMotorAndValuesInitializes(){
-            return motorAndValuesInitializes;
-        }
-
-        public List<Consumer<MotorInterface[]>> getMotorInitializes(){
-            return motorInitializes;
-        }
-
-        public List<Supplier<Boolean>> getFinishes(){
-            return finishes;
-        }
-
-        public List<BiConsumer<MotorInterface[], double[]>> getMotorAndValuesEnd(){
-            return motorAndValuesEnds;
-        }
-
-        public List<Consumer<MotorInterface[]>> getMotorEnds(){
-            return motorEnds;
         }
     }
 
@@ -142,44 +94,15 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     }
 
     @SuppressWarnings("unchecked")
-    public T bindButton(Trigger button, State state){
-        button.onTrue(new Command() {
-            @Override
-            public void initialize() {
-                for (BiConsumer<MotorInterface[], double[]> motorAndValuesInitialize : state.getMotorAndValuesInitializes()){
-                    motorAndValuesInitialize.accept(motors, values);
-                }
-                for (Consumer<MotorInterface[]> motorInitialize : state.getMotorInitializes()){
-                    motorInitialize.accept(motors);
-                }
-            }
-
-            @Override
-            public void execute() {
-                consumer.accept(motors, values);
-            }
-
-            @Override
-            public boolean isFinished() {
-                for (Supplier<Boolean> finish : state.getFinishes()){
-                    if (finish.get()){
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                stopAll();
-                for (BiConsumer<MotorInterface[], double[]> motorAndValuesEnd : state.getMotorAndValuesEnd()){
-                    motorAndValuesEnd.accept(motors, values);
-                }
-                for (Consumer<MotorInterface[]> motorEnd : state.getMotorEnds()){
-                    motorEnd.accept(motors);
-                }
-            }
-        });
+    @Override
+    public T setDefaultCommand(){
+        if (motors == null) {
+            throw new IllegalStateException("Motors must be configured before setting default command");
+        }
+        if (consumer == null) {
+            throw new IllegalStateException("Consumer must be configured before setting default command");
+        }
+        this.setDefaultCommand(actionCommand(new MechanismAction(name, () -> getState().getValues())));
         return (T) this;
     }
 
@@ -215,10 +138,6 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     public T withStartingOption(State state){
         if (state == null) {
             throw new IllegalArgumentException("Starting state cannot be null");
-        }
-        
-        if (!(state instanceof MechanismState)) {
-            throw new IllegalArgumentException("Starting state must implement MechanismState");
         }
 
         stateChooser.setDefaultOption(state.getName(), state);

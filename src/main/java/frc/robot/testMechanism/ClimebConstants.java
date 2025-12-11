@@ -1,7 +1,6 @@
 package frc.robot.testMechanism;
 
 import frc.demacia.utils.Motors.TalonFXConfig;
-import frc.demacia.utils.Mechanisms.StateBasedMechanism.MechanismState;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 
 /** Add your docs here. */
@@ -29,7 +28,7 @@ public class ClimebConstants {
     }
     public static final int LIMIT_SWITCH_CHANNEL = 4;
 
-    public static enum CLIMB_STATES implements MechanismState{
+    public static enum CLIMB_STATES{
         UP(-0.3),
         DOWN(0.3);
 
