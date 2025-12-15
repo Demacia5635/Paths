@@ -39,17 +39,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseMechanism<T> {
 
-    public static class StateAction extends MechanismAction{
-
-        public StateAction(String name, double[] values){
-            super(name, () -> values);
-        }
-
-        public void setValues(double[] values){
-            super.valuesChanger = () -> values;
-        }
-    }
-
     public static class State {
         private String name;
         private double[] values;
@@ -96,12 +85,6 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     @SuppressWarnings("unchecked")
     @Override
     public T setDefaultCommand(){
-        if (motors == null) {
-            throw new IllegalStateException("Motors must be configured before setting default command");
-        }
-        if (consumer == null) {
-            throw new IllegalStateException("Consumer must be configured before setting default command");
-        }
         this.setDefaultCommand(actionCommand(new MechanismAction(name, () -> getState().getValues())));
         return (T) this;
     }

@@ -1,6 +1,7 @@
 package frc.demacia.utils.Mechanisms;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -79,6 +80,10 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
             this.finishes = new ArrayList<>();
             this.motorAndValuesEnds = new ArrayList<>();
             this.motorEnds = new ArrayList<>();
+        }
+        
+        public MechanismAction(String name, double[] values){
+            this(name, () -> values);
         }
 
         public String getName(){
@@ -259,6 +264,10 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     protected MotorLimits[] motorsLimits;
     protected BiConsumer<MotorInterface[], double[]> consumer = (m, v) -> {};
     protected Supplier<double[]> valuesChanger;
+    protected Supplier<Double>[] valueModifiers;
+    protected double[] lastCalculatedValues;
+
+    protected HashMap<String, MechanismAction> actions = new HashMap<>();
 
     public BaseMechanism(String name) {
         this.name = name;
@@ -279,6 +288,13 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
             }
         }
         this.motors = motors;
+        this.valueModifiers = new Supplier[motors.length];
+        this.motorsLimits = new MotorLimits[motors.length];
+        this.lastCalculatedValues = new double[motors.length];
+        this.values = new double[motors.length];
+        for (int i = 0; i < motors.length; i++) {
+            valueModifiers[i] = () -> 0.0;
+        }
         return (T) this;
     }
 
@@ -314,6 +330,16 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         return (T) this;
     }
 
+    /**
+     * Adds a dynamic modifier (like arm gravity compensation) to a specific motor.
+     */
+    @SuppressWarnings("unchecked")
+    public T withModifier(int index, Supplier<Double> modifier) {
+        if (!isValidMotorIndex(index)) throw new IllegalArgumentException("Index out of bounds");
+        this.valueModifiers[index] = modifier;
+        return (T) this;
+    }
+
     @SuppressWarnings("unchecked")
     public T withLookUpTable(LookUpTable lookUpTable, Supplier<Double> posSupplier){
         if (lookUpTable == null) {
@@ -326,63 +352,16 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         return (T) this;
     }
 
-    public Command actionCommand(MechanismAction action){
-        if (action == null) {
-            throw new NullPointerException("Action cannot be null");
-        }
-        if (motors == null) {
-            throw new IllegalStateException("Motors must be configured before creating action command");
-        }
-        if (consumer == null) {
-            throw new IllegalStateException("Consumer must be configured before creating action command");
-        }
-        return new Command() {
-            @Override
-            public void initialize() {
-                for (BiConsumer<MotorInterface[], double[]> motorAndValuesInitialize : action.getMotorAndValuesInitializes()){
-                    motorAndValuesInitialize.accept(motors, values);
-                }
-                for (Consumer<MotorInterface[]> motorInitialize : action.getMotorInitializes()){
-                    motorInitialize.accept(motors);
-                }
-            }
+    @SuppressWarnings("unchecked")
+    public T add(MechanismAction action){
+        actions.put(action.getName(), action);
+        return (T) this;
+    }
 
-            @Override
-            public void execute() {
-                double[] actionValues = action.getValues();
-                if (actionValues != null) {
-                    setValues(actionValues);
-                }
-                consumer.accept(motors, values);
-                for (BiConsumer<MotorInterface[], double[]> motorAndValuesExecute : action.getMotorAndValuesExecutes()){
-                    motorAndValuesExecute.accept(motors, values);
-                }
-                for (Consumer<MotorInterface[]> motorExecute : action.getMotorExecutes()){
-                    motorExecute.accept(motors);
-                }
-            }
-
-            @Override
-            public boolean isFinished() {
-                for (Supplier<Boolean> finish : action.getFinishes()){
-                    if (finish.get()){
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                stopAll();
-                for (BiConsumer<MotorInterface[], double[]> motorAndValuesEnd : action.getMotorAndValuesEnd()){
-                    motorAndValuesEnd.accept(motors, values);
-                }
-                for (Consumer<MotorInterface[]> motorEnd : action.getMotorEnds()){
-                    motorEnd.accept(motors);
-                }
-            }
-        }.withName(action.getName());
+    @SuppressWarnings("unchecked")
+    public T bindButton(Trigger button, String actionName){
+        bindButton(button, actionName);
+        return (T) this;
     }
 
     @SuppressWarnings("unchecked")
@@ -427,7 +406,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         }
         this.setDefaultCommand(actionCommand(
             new MechanismAction(name + "DefaultCommand", valuesChanger)
-            .withExecute(() -> applyMotorLimits())));
+        ));
         return (T) this;
     }
 
@@ -436,16 +415,90 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         if (motors == null) {
             throw new IllegalStateException("Motors must be configured before building");
         }
-        motorsLimits = new MotorLimits[motors.length];
-        values = new double[motors.length];
-        valuesChanger = () -> new double[motors.length];
+        
+        if (motorsLimits == null) motorsLimits = new MotorLimits[motors.length];
+
+        if (this.valuesChanger == null) {
+            this.valuesChanger = () -> new double[motors.length];
+        }
         LogManager.addEntry(name + " values", () -> values)
-        .withLogLevel(LogLevel.LOG_AND_NT_NOT_IN_COMP).build();
+            .withLogLevel(LogLevel.LOG_AND_NT_NOT_IN_COMP).build();
         return (T) this;
     }
 
     public String getName(){
         return name;
+    }
+
+    
+
+    public Command actionCommand(String actionName){
+        return actionCommand(actions.get(actionName));
+    }
+
+    public Command actionCommand(MechanismAction action){
+        if (action == null) {
+            throw new NullPointerException("Action cannot be null");
+        }
+        if (motors == null) {
+            throw new IllegalStateException("Motors must be configured before creating action command");
+        }
+        if (consumer == null) {
+            throw new IllegalStateException("Consumer must be configured before creating action command");
+        }
+        return new Command() {
+            @Override
+            public void initialize() {
+                for (BiConsumer<MotorInterface[], double[]> motorAndValuesInitialize : action.getMotorAndValuesInitializes()){
+                    motorAndValuesInitialize.accept(motors, values);
+                }
+                for (Consumer<MotorInterface[]> motorInitialize : action.getMotorInitializes()){
+                    motorInitialize.accept(motors);
+                }
+                for (Runnable motorInitialize : action.getRunnableInitializes()){
+                    motorInitialize.run();
+                }
+            }
+
+            @Override
+            public void execute() {
+                double[] currentValues = process(action.getValues());
+                consumer.accept(motors, currentValues);
+                for (BiConsumer<MotorInterface[], double[]> motorAndValuesExecute : action.getMotorAndValuesExecutes()){
+                    motorAndValuesExecute.accept(motors, currentValues);
+                }
+                for (Consumer<MotorInterface[]> motorExecute : action.getMotorExecutes()){
+                    motorExecute.accept(motors);
+                }
+                for (Runnable motorExecute : action.getRunnableExecutes()){
+                    motorExecute.run();
+                }
+            }
+
+            @Override
+            public boolean isFinished() {
+                for (Supplier<Boolean> finish : action.getFinishes()){
+                    if (finish.get()){
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                stopAll();
+                for (BiConsumer<MotorInterface[], double[]> motorAndValuesEnd : action.getMotorAndValuesEnd()){
+                    motorAndValuesEnd.accept(motors, values);
+                }
+                for (Consumer<MotorInterface[]> motorEnd : action.getMotorEnds()){
+                    motorEnd.accept(motors);
+                }
+                for (Runnable motorEnd : action.getRunnableEnds()){
+                    motorEnd.run();
+                }
+            }
+        }.withName(action.getName());
     }
 
     /**
@@ -520,6 +573,24 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         }
         return null;
     }
+
+    /**
+     * Processes base values through modifiers and limits.
+     * @return A fresh array with processed values.
+     */
+    protected double[] process(double[] base) {
+        double[] processed = new double[motors.length];
+        for (int i = 0; i < motors.length; i++) {
+            double val = (base != null && i < base.length) ? base[i] : 0;
+            val += valueModifiers[i].get();
+            if (motorsLimits[i] != null) {
+                val = motorsLimits[i].clamp(val);
+            }
+            processed[i] = val;
+        }
+        lastCalculatedValues = processed;
+        return processed;
+}
 
     /**
      * Applies motor limits to current values array.
@@ -668,7 +739,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     }
 
     protected boolean isValidMotorIndex(int index) {
-        return (sensors != null) && (index >= 0 && index < motors.length);
+        return (motors != null) && (index >= 0 && index < motors.length);
     }
 
     protected boolean isValidSensorIndex(int index) {
