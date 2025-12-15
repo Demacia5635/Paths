@@ -32,7 +32,7 @@ public class OpticalSensor extends AnalogInput implements SensorInterface {
      * @param config the configuration containing the sensor name and analog channel
      */
     public OpticalSensor(OpticalSensorConfig config) {
-        super(config.channel);
+        super(config.echoChannel);
         this.config = config;
 		name = config.name;
         addLog();

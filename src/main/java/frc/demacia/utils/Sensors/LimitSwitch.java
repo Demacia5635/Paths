@@ -39,7 +39,7 @@ public class LimitSwitch extends DigitalInput implements DigitalSensorInterface{
      * @param config Configuration containing DIO port and settings
      */
     public LimitSwitch(LimitSwitchConfig config){
-        super(config.channel);
+        super(config.echoChannel);
         this.config = config;
 		name = config.name;
         configLimitSwitch();

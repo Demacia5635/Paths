@@ -1,4 +1,7 @@
 package frc.demacia.utils.Sensors;
+import java.util.ArrayDeque;
+import java.util.Queue;
+
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
@@ -56,7 +59,7 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
      * @param config Configuration with ping and echo channels
      */
     public UltraSonicSensor(UltraSonicSensorConfig config) {
-        super(config.pingChannel, config.channel);
+        super(config.pingChannel, config.echoChannel);
         this.config = config;
         name = config.name;
         setAutomaticMode(true);
@@ -110,6 +113,21 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
         return getRangeMM() / 1000d;
     }
 
+        private static final int average_Window = 5;
+    private final Queue<Double> samples = new ArrayDeque<>();
+    private double sum = 0;
+
+    public double getAverage() {
+        double current = getRangeMeters();
+        samples.add(current);
+        sum += current;
+
+        if (samples.size() > average_Window) {
+            sum -= samples.remove();
+        }
+
+        return sum / samples.size();
+    }
     /**
      * Initializes dashboard display.
      * 
