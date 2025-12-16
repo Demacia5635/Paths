@@ -14,6 +14,7 @@ import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Motors.TalonFXMotor;
 import frc.demacia.utils.Motors.TalonSRXMotor;
 import frc.demacia.utils.Sensors.DigitalEncoder;
+import frc.demacia.utils.Sensors.LimitSwitch;
 import frc.demacia.utils.Sensors.OpticalSensor;
 import frc.demacia.utils.Sensors.SensorInterface;
 import frc.demacia.utils.Sensors.UltraSonicSensor;
@@ -84,9 +85,33 @@ public class RobotContainer {
     configureBindings();
   }
 
-  @SuppressWarnings("unused")
   private void setMechanism(){
-    
+    arm = new Arm("robot1 arm")
+      .withMotors(new TalonFXMotor(ArmAngleMotorConstants.CONFIG), 
+        new TalonFXMotor(GripperAngleMotorConstants.CONFIG))
+      .withSensors(new LimitSwitch(ArmAngleMotorConstants.ARM_ANGlE_LIMIT), 
+        new DigitalEncoder(GripperAngleMotorConstants.DIGITAL_ENCODER_CONFIG))
+      .withState(Arm.creatState("L1", ARM_STATES.L1.getValues()))
+      .withState(Arm.creatState("L2", ARM_STATES.L2.getValues()))
+      .withState(Arm.creatState("L3", ARM_STATES.L3.getValues()))
+      .withState(Arm.creatState("Coral Station", ARM_STATES.CORAL_STATION.getValues()))
+      .withState(Arm.creatState("Starting", ARM_STATES.STARTING.getValues()))
+      .withState(Arm.creatState("Climb", ARM_STATES.CLIMB.getValues()))
+      .withState(Arm.creatState("PRE ALGAE BOTTOM", ARM_STATES.PRE_ALGAE_BOTTOM.getValues()))
+      .withState(Arm.creatState("PRE ALGAE TOP", ARM_STATES.PRE_ALGAE_TOP.getValues()))
+      .withState(Arm.creatState("AFTER ALGAE BOTTOM", ARM_STATES.AFTER_ALGAE_BOTTOM.getValues()))
+      .withState(Arm.creatState("AFTER ALGAE TOP", ARM_STATES.AFTER_ALGAE_TOP.getValues()))
+      .bindButton(driverController.leftStick(), "L1")
+      .bindButton(driverController.upButton(), "Starting")
+      .bindButton(driverController.povUp(), "L3")
+      .bindButton(driverController.povDown(), "L2")
+      .bindButton(driverController.rightSetting(), "Coral Station")
+      .bindButton(driverController.povLeft(), "")
+      .withModifier(1, () -> (arm.getMotor(1).getCurrentPosition() - ((((DigitalEncoder) arm.getSensor(1)).get() * 2 * Math.PI) - GripperAngleMotorConstants.ENCODER_BASE_ANGLE)))
+      .withDefaultCommand()
+      .driveMotor(0, driverController.leftStick(), () -> driverController.getLeftY(), -0.8)
+      .driveMotor(1, driverController.leftStick(), () -> driverController.getRightY(), -0.4)
+      .build();
   }
 
   public static boolean isComp() {

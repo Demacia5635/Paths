@@ -1,8 +1,13 @@
 package frc.demacia.utils.Mechanisms;
 
+import java.util.HashMap;
+import java.util.function.Supplier;
+
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * State machine-based mechanism controller.
@@ -64,6 +69,10 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
         }
     }
 
+    public static State creatState(String name, double[] values){
+        return new State(name, values);
+    }
+
     public String name;
 
     SendableChooser<State> stateChooser = new SendableChooser<>();
@@ -72,19 +81,41 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     protected State idleState;
     protected State idleState2;
 
+    protected HashMap<String, State> states = new HashMap<>();
+
     public StateBasedMechanism(String name){
         super(name);
+    }
+
+    public T withState(String stateName){
+        return withState(states.get(stateName));
     }
 
     @SuppressWarnings("unchecked")
     public T withState(State state){
         stateChooser.addOption(state.getName(), state);
+        states.put(state.getName(), state);
+        return (T) this;
+    }
+
+    public T bindButton(Trigger button, String StateName){
+        return bindButton(button, states.get(StateName));
+    }
+
+    @SuppressWarnings("unchecked")
+    public T bindButton(Trigger button, State state){
+        if (button == null) {
+            throw new NullPointerException("Button trigger cannot be null");
+        }
+        if (state == null) {
+            throw new NullPointerException("Action cannot be null");
+        }
+        button.onTrue(new InstantCommand(() -> setState(state)).ignoringDisable(true));
         return (T) this;
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public T setDefaultCommand(){
+    public T withDefaultCommand(){
         this.setDefaultCommand(actionCommand(new MechanismAction(name, () -> getState().getValues())));
         return (T) this;
     }

@@ -3,6 +3,7 @@ package frc.robot.testMechanism;
 import frc.demacia.utils.Motors.TalonFXConfig;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 import frc.demacia.utils.Sensors.DigitalEncoderConfig;
+import frc.demacia.utils.Sensors.LimitSwitchConfig;
 
 public class ArmConstants {
     
@@ -29,6 +30,7 @@ public class ArmConstants {
 
         /* the channel of the limit switch of the arm angle motor */
         public static final int LIMIT_SWITCH_CHANNEL = 0;
+        public static final LimitSwitchConfig ARM_ANGlE_LIMIT = new LimitSwitchConfig(LIMIT_SWITCH_CHANNEL, "armAngleLimit ");
 
         /* the basic configues of the motor */
         public static final boolean IS_BRAKE = true;
@@ -121,8 +123,7 @@ public class ArmConstants {
         AFTER_ALGAE_TOP(2.5, 4.6),
         CORAL_STATION(1.6, 5.3),
         CLIMB(2.766 ,5.4),
-        STARTING(Math.toRadians(33.7), 3.64),
-        IDLE(0,0);
+        STARTING(Math.toRadians(33.7), 3.64);
 
         public final double[] angles;
 

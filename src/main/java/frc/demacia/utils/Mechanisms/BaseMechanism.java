@@ -254,6 +254,14 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         }
     }
 
+    public static MechanismAction creatAction(String name, Supplier<double[]> valuesChanger){
+        return new MechanismAction(name, valuesChanger);
+    }
+
+    public static MechanismAction creatAction(String name, double[] values){
+        return new MechanismAction(name, values);
+    }
+
     protected String name;
     protected MotorInterface[] motors;
     protected SensorInterface[] sensors;
@@ -275,7 +283,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     }
 
     @SuppressWarnings("unchecked")
-    public T withMotors(MotorInterface[] motors){
+    public T withMotors(MotorInterface ... motors){
         if (motors == null) {
             throw new NullPointerException("Motors array cannot be null");
         }
@@ -299,7 +307,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     }
 
     @SuppressWarnings("unchecked")
-    public T withSensors(SensorInterface[] sensors){
+    public T withSensors(SensorInterface ... sensors){
         if (sensors == null) {
             throw new NullPointerException("Sensors array cannot be null");
         }
@@ -353,15 +361,13 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     }
 
     @SuppressWarnings("unchecked")
-    public T add(MechanismAction action){
+    public T withAction(MechanismAction action){
         actions.put(action.getName(), action);
         return (T) this;
     }
 
-    @SuppressWarnings("unchecked")
     public T bindButton(Trigger button, String actionName){
-        bindButton(button, actionName);
-        return (T) this;
+        return bindButton(button, actions.get(actionName));
     }
 
     @SuppressWarnings("unchecked")
@@ -377,7 +383,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     }
 
     @SuppressWarnings("unchecked")
-    public T driveMotor(Trigger trigger, Supplier<Double> joystick, int motorIndex, double controllerMultiplier){
+    public T driveMotor(int motorIndex, Trigger trigger, Supplier<Double> joystick, double controllerMultiplier){
         if (trigger == null) {
             throw new NullPointerException("Trigger cannot be null");
         }
@@ -429,8 +435,6 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     public String getName(){
         return name;
     }
-
-    
 
     public Command actionCommand(String actionName){
         return actionCommand(actions.get(actionName));
