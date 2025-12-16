@@ -626,25 +626,27 @@ public class Data<T> {
     private double[] toDoubleArray(T[] value){
         if (value == null) return null;
 
-        if (isArray){
-            int arrayLength = java.lang.reflect.Array.getLength(value[0]);
-            if (cachedDoubleArray == null || cachedDoubleArray.length != arrayLength) {
-                cachedDoubleArray = new double[arrayLength];
+        int currentLength = (isArray && value[0] != null) ? java.lang.reflect.Array.getLength(value[0]) : length;
+
+        if (cachedDoubleArray == null || cachedDoubleArray.length != currentLength) {
+            cachedDoubleArray = new double[currentLength];
+        }
+
+        if (!isArray) {
+            for (int i = 0; i < length; i++) {
+                if (value[i] instanceof Number) {
+                    cachedDoubleArray[i] = ((Number) value[i]).doubleValue();
+                } else {
+                     cachedDoubleArray[i] = 0.0;
+                }
             }
-            for (int i = 0; i < arrayLength; i++) {
+        }else {
+            for (int i = 0; i < currentLength; i++) {
                 Object elem = java.lang.reflect.Array.get(value[0], i);
                 cachedDoubleArray[i] = (elem != null) ? ((Number) elem).doubleValue() : 0.0;
             }
-            return cachedDoubleArray;
-        } else {
-            if (cachedDoubleArray == null || cachedDoubleArray.length != length) {
-                cachedDoubleArray = new double[length];
-            }
-            for (int i = 0; i < length; i++) {
-                cachedDoubleArray[i] = (value[i] != null) ? ((Number) value[i]).doubleValue() : 0.0;
-            }
-            return cachedDoubleArray;
         }
+        return cachedDoubleArray;
     }
 
     private Double toDouble(T value){

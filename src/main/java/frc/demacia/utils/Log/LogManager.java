@@ -294,10 +294,10 @@ public class LogManager extends SubsystemBase {
     }
   }
 
-  public <T> LogEntry<T> add(String name, Data<T> data, LogLevel logLevel, String metaData, boolean isSepereted) {
+  public <T> LogEntry<T> add(String name, Data<T> data, LogLevel logLevel, String metaData, boolean isSeparated) {
     LogEntry<T> entry = null;
 
-    int categoryIndex = getCategoryIndex(data, logLevel, metaData);
+    int categoryIndex = getCategoryIndex(data, logLevel, isSeparated);
 
     if (categoryIndex == -1){
       entry = new LogEntry<T>(name, data, logLevel, metaData);
@@ -305,21 +305,35 @@ public class LogManager extends SubsystemBase {
       int index = individualLogEntries.size() - 1;
       entryLocationMap.put(name, new Integer[] {-1, index, null, null});
     } else{
-      entry = addToEntryArray(categoryIndex, name, data, isSepereted);
+      entry = addToEntryArray(categoryIndex, name, data, metaData);
     }
 
     return entry;
   }
 
   @SuppressWarnings("unchecked")
-  private <T> LogEntry<T> addToEntryArray(int i, String name, Data<T> data, boolean isSepereted) {
+  private <T> LogEntry<T> addToEntryArray(int i, String name, Data<T> data, String metaData) {
+    if (categoryLogEntries[i] != null && categoryLogEntries[i].data != null) {
+      boolean groupIsSignal = categoryLogEntries[i].data.getSignals() != null;
+      boolean newIsSignal = data.getSignals() != null;
+
+      if (groupIsSignal != newIsSignal) {
+          LogManager.log("Log Type Mismatch: Cannot merge Signal and Supplier in '" + name + "'. Creating separate entry.", AlertType.kWarning);
+          
+          // Fallback: Create a standard individual entry instead
+          return add(name, data, LogLevel.LOG_ONLY, metaData, false);
+      }
+    }
+  
     int subIndex;
     int dataIndex = 0;
     
-    if (categoryLogEntries[i] == null || categoryLogEntries[i].data == null || isSepereted == true) {
+    if (categoryLogEntries[i] == null || categoryLogEntries[i].data == null) {
         categoryLogEntries[i] = new LogEntry<>(name, data, 
-        i <= 3? LogLevel.LOG_ONLY_NOT_IN_COMP: i <= 7? LogLevel.LOG_ONLY: i <= 11? LogLevel.LOG_AND_NT_NOT_IN_COMP: LogLevel.LOG_AND_NT
-        , "");
+        i <= 3? LogLevel.LOG_ONLY_NOT_IN_COMP: 
+        i <= 7? LogLevel.LOG_ONLY: 
+        i <= 11? LogLevel.LOG_AND_NT_NOT_IN_COMP: LogLevel.LOG_AND_NT
+        , metaData);
         subIndex = 1;
         dataIndex = 0;
     } else {
@@ -333,7 +347,7 @@ public class LogManager extends SubsystemBase {
         }
 
         try {
-            ((LogEntry<T>) categoryLogEntries[i]).addData(name, data);
+            ((LogEntry<T>) categoryLogEntries[i]).addData(name, data, metaData);
         } catch (Exception e) {
             LogManager.log("Error combining log entries: " + e.getMessage(), AlertType.kError);
         }
@@ -357,13 +371,13 @@ public class LogManager extends SubsystemBase {
     return nameSplitCache.computeIfAbsent(name, k -> k.split(" \\| "));
   }
 
-  private int getCategoryIndex(Data<?> data, LogLevel logLevel, String metaData) {
+  private int getCategoryIndex(Data<?> data, LogLevel logLevel, Boolean isSeperated) {
     boolean isSignal = data.getSignals() != null;
     boolean isSupplier = data.getSuppliers() != null;
     boolean isDouble = data.isDouble();
     boolean isBoolean = data.isBoolean();
     
-    if (!(isDouble || isBoolean) || !(isSignal || isSupplier) || metaData != "") {
+    if (!(isDouble || isBoolean) || !(isSignal || isSupplier) || isSeperated) {
       return -1;
     }
     

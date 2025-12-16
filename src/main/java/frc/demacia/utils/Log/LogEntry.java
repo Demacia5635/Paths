@@ -69,8 +69,9 @@ public class LogEntry<T> {
         }
     }
 
-    public void addData(String name, Data<T> data){
+    public void addData(String name, Data<T> data, String metaData){
         this.name = this.name + " | " + name;
+        this.metaData = this.metaData + " | " + metaData;
         if (this.data.getSignals() != null){
             this.data.expandWithSignals(data.getSignals());
         } else {

@@ -30,7 +30,7 @@ public class LogEntryBuilder<T> {
     private String metadata = "";
     private BiConsumer<T[], Long> consumer = null;
 
-    private boolean isSepereted = false;
+    private boolean isSeparated = false;
 
     private Data<T> data;
     
@@ -104,8 +104,8 @@ public class LogEntryBuilder<T> {
         return this;
     }
 
-    public LogEntryBuilder<T> WithIsSepereted(boolean isSepereted) {
-        this.isSepereted = isSepereted;
+    public LogEntryBuilder<T> WithIsSeparated(boolean isSeparated) {
+        this.isSeparated = isSeparated;
         return this;
     }
     
@@ -129,7 +129,7 @@ public class LogEntryBuilder<T> {
         if (logLevel == null) {
             throw new IllegalArgumentException("Log level cant be null: ");
         }
-        LogEntry<T> entry = LogManager.logManager.add(name, data, logLevel, metadata, isSepereted);
+        LogEntry<T> entry = LogManager.logManager.add(name, data, logLevel, metadata, isSeparated);
         if (consumer != null) {
             entry.setConsumer(consumer);
         }

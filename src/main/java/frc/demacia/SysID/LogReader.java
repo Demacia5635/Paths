@@ -16,7 +16,7 @@ import org.ejml.simple.SimpleMatrix;
 
 public class LogReader {
 
-    private static Map<Integer, EntryDescription> entries;
+    private static Map<Integer,List<EntryDescription>> entries;
     private static double minPowerToMove = Double.MAX_VALUE;
 
     private static class EntryDescription {
@@ -131,18 +131,46 @@ public class LogReader {
         if (recordId == 0) {
             addEntryFromControlRecord(dataInputStream, payloadSize);
         } else {
-            EntryDescription entry = entries.get(recordId);
-            if (entry != null && "float[]".equals(entry.type)) {
-                if (payloadSize % 4 == 0) {
-                    int count = payloadSize / 4;
-                    double[] value = new double[count];
-                    for (int i = 0; i < count; i++) {
-                        int raw = Integer.reverseBytes(dataInputStream.readInt());
-                        value[i] = (double) Float.intBitsToFloat(raw);
+            List<EntryDescription> entryList = entries.get(recordId);
+            if (entryList != null && !entryList.isEmpty()) {
+                // Check type of the first one (they are all the same type since they share an ID)
+                String type = entryList.get(0).type;
+
+                if ("float[]".equals(type) || "double[]".equals(type)) {
+                    double[] value = null;
+
+                    if ("float[]".equals(type)) {
+                        if (payloadSize % 4 == 0) {
+                            int count = payloadSize / 4;
+                            value = new double[count];
+                            for (int i = 0; i < count; i++) {
+                                int raw = Integer.reverseBytes(dataInputStream.readInt());
+                                value[i] = (double) Float.intBitsToFloat(raw);
+                            }
+                        } else {
+                            dataInputStream.skipBytes(payloadSize);
+                        }
+                    } else if ("double[]".equals(type)) {
+                         if (payloadSize % 8 == 0) {
+                            int count = payloadSize / 8;
+                            value = new double[count];
+                            for (int i = 0; i < count; i++) {
+                                long raw = Long.reverseBytes(dataInputStream.readLong());
+                                value[i] = Double.longBitsToDouble(raw);
+                            }
+                        } else {
+                            dataInputStream.skipBytes(payloadSize);
+                        }
                     }
-                    entry.data.add(new DataPoint(timestamp, value));
+
+                    if (value != null) {
+                        // Distribute this data point to ALL logical entries associated with this ID
+                        for (EntryDescription entry : entryList) {
+                            entry.data.add(new DataPoint(timestamp, value));
+                        }
+                    }
+
                 } else {
-                    System.err.println("Invalid payload size for float[] entry: " + entry.name);
                     dataInputStream.skipBytes(payloadSize);
                 }
             } else {
@@ -167,9 +195,18 @@ public class LogReader {
 
             System.out.println("Found entry: " + name + " (type: " + type + ", metadata: " + metadata + ")");
 
-            if ("motor".equals(metadata)) {
-                entries.put(entryId, new EntryDescription(name, type));
-                System.out.println("Added motor entry: " + name);
+            String[] names = name.split(" \\| ");
+            String[] metas = metadata.split(" \\| ");
+            
+            for (int i = 0; i < names.length; i++) {
+                String currentName = names[i].trim();
+                String currentMeta = (i < metas.length) ? metas[i].trim() : "";
+
+                if (currentMeta.contains("motor")) {
+                    entries.putIfAbsent(entryId, new ArrayList<>());
+                    entries.get(entryId).add(new EntryDescription(currentName, type));
+                    System.out.println("Added motor entry: " + currentName + " [ID: " + entryId + "]");
+                }
             }
         } else {
             dataInputStream.skipBytes(payloadSize - 1);
@@ -218,10 +255,11 @@ public class LogReader {
 
     private static Set<String> findGroups() {
         Set<String> groups = new HashSet<>();
-        for (EntryDescription entry : entries.values()) {
-            String name = entry.name;
-            groups.add(name);
-            System.out.println("Added group: " + name);
+        for (List<EntryDescription> list : entries.values()) {
+            for (EntryDescription entry : list) {
+                groups.add(entry.name);
+                System.out.println("Added group: " + entry.name);
+            }
         }
         return groups;
     }
@@ -245,8 +283,10 @@ public class LogReader {
     }
 
     private static EntryDescription findEntry(String name) {
-        for (EntryDescription entry : entries.values()) {
-            if (entry.name.equals(name)) return entry;
+        for (List<EntryDescription> list : entries.values()) {
+            for (EntryDescription entry : list) {
+                if (entry.name.equals(name)) return entry;
+            }
         }
         return null;
     }
