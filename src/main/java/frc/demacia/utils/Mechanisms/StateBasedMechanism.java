@@ -1,7 +1,6 @@
 package frc.demacia.utils.Mechanisms;
 
 import java.util.HashMap;
-import java.util.function.Supplier;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -81,6 +80,8 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     protected State idleState;
     protected State idleState2;
 
+    protected double[] testValues;
+
     protected HashMap<String, State> states = new HashMap<>();
 
     public StateBasedMechanism(String name){
@@ -123,22 +124,27 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     @SuppressWarnings("unchecked")
     public T build(){
         super.build();
+        testValues = new double[motors.length];
         double[] idleValues = new double[motors.length];
-        testingState = new State(name, idleValues);
-        idleState  = new State(name, idleValues);
-        idleState2 = new State(name, idleValues);
-        stateChooser.addOption("TESTING", testingState);
-        stateChooser.addOption("IDLE", idleState);
-        stateChooser.addOption("IDLE2", idleState2);
+        testingState = new State("TESTING", testValues);
+        idleState  = new State("IDLE", idleValues);
+        idleState2 = new State("IDLE2", idleValues);
+        stateChooser.addOption(testingState.getName(), testingState);
+        stateChooser.addOption(idleState.getName(), idleState);
+        stateChooser.addOption(idleState2.getName(), idleState2);
         stateChooser.onChange(state -> this.state = state);
         SmartDashboard.putData(getName() + "/State Chooser", stateChooser);
+        SmartDashboard.putData(this);
         return (T) this;
     }
 
     @Override
     public void initSendable(SendableBuilder builder) {
-        super.initSendable(builder);
         builder.addDoubleArrayProperty(getName() + "/Test Values", () -> getTestValues(), testValues -> setTestValues(testValues));
+    }
+
+    public T withStartingOption(String stateName){
+        return withStartingOption(states.get(stateName));
     }
 
     /**
@@ -178,10 +184,11 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     }
 
     public double[] getTestValues(){
-        return testingState.getValues();
+        return testValues;
     }
 
     public void setTestValues(double[] testValues){
         testingState.setValues(testValues);
+        this.testValues = testValues;
     }
 }

@@ -10,31 +10,13 @@ import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Mechanisms.Arm;
 import frc.demacia.utils.Mechanisms.Intake;
 import frc.demacia.utils.Mechanisms.StateBasedMechanism;
-import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Motors.TalonFXMotor;
-import frc.demacia.utils.Motors.TalonSRXMotor;
-import frc.demacia.utils.Sensors.DigitalEncoder;
 import frc.demacia.utils.Sensors.LimitSwitch;
-import frc.demacia.utils.Sensors.OpticalSensor;
-import frc.demacia.utils.Sensors.SensorInterface;
-import frc.demacia.utils.Sensors.UltraSonicSensor;
 import frc.demacia.utils.chassis.Chassis;
-import frc.robot.ChassisConstants.MK5nChassisConstants;
-import frc.robot.testMechanism.ArmConstants;
 import frc.robot.testMechanism.ArmConstants.ARM_STATES;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
-import frc.robot.testMechanism.ArmConstants.GripperAngleMotorConstants;
-import frc.robot.testMechanism.ClimebConstants;
-import frc.robot.testMechanism.ClimebConstants.CLIMB_STATES;
-import frc.robot.testMechanism.ClimebConstants.ClimbConstants;
-import frc.robot.testMechanism.GripperConstants;
-import frc.robot.testMechanism.GripperConstants.GRIPPER_STATES;
-import frc.robot.testMechanism.GripperConstants.SensorConstants;
-
-import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -75,7 +57,7 @@ public class RobotContainer {
     new LogManager();
     driverController = new CommandController(0, ControllerType.kXbox);
 
-    chassis = new Chassis(MK5nChassisConstants.CHASSIS_CONFIG);
+    // chassis = new Chassis(MK5nChassisConstants.CHASSIS_CONFIG);
     // driveCommand = new DriveCommand(chassis, driverController);
 
     setMechanism();
@@ -87,10 +69,8 @@ public class RobotContainer {
 
   private void setMechanism(){
     arm = new Arm("robot1 arm")
-      .withMotors(new TalonFXMotor(ArmAngleMotorConstants.CONFIG), 
-        new TalonFXMotor(GripperAngleMotorConstants.CONFIG))
-      .withSensors(new LimitSwitch(ArmAngleMotorConstants.ARM_ANGlE_LIMIT), 
-        new DigitalEncoder(GripperAngleMotorConstants.DIGITAL_ENCODER_CONFIG))
+      .withMotors(new TalonFXMotor(ArmAngleMotorConstants.CONFIG))
+      .withSensors(new LimitSwitch(ArmAngleMotorConstants.ARM_ANGlE_LIMIT))
       .withState(Arm.creatState("L1", ARM_STATES.L1.getValues()))
       .withState(Arm.creatState("L2", ARM_STATES.L2.getValues()))
       .withState(Arm.creatState("L3", ARM_STATES.L3.getValues()))
@@ -101,20 +81,18 @@ public class RobotContainer {
       .withState(Arm.creatState("PRE ALGAE TOP", ARM_STATES.PRE_ALGAE_TOP.getValues()))
       .withState(Arm.creatState("AFTER ALGAE BOTTOM", ARM_STATES.AFTER_ALGAE_BOTTOM.getValues()))
       .withState(Arm.creatState("AFTER ALGAE TOP", ARM_STATES.AFTER_ALGAE_TOP.getValues()))
-      .bindButton(driverController.leftStick(), "L1")
+      .withStartingOption("Starting")
+      .bindButton(driverController.povRight(), "L1")
       .bindButton(driverController.upButton(), "Starting")
       .bindButton(driverController.povUp(), "L3")
       .bindButton(driverController.povDown(), "L2")
       .bindButton(driverController.rightSetting(), "Coral Station")
-      .bindButton(driverController.povLeft(), "")
-      .withModifier(1, () -> (arm.getMotor(1).getCurrentPosition() - ((((DigitalEncoder) arm.getSensor(1)).get() * 2 * Math.PI) - GripperAngleMotorConstants.ENCODER_BASE_ANGLE)))
-      .withMotorLimits(0, ArmAngleMotorConstants.BACK_LIMIT, ArmAngleMotorConstants.FWD_LIMIT)
-      .withMotorLimits(1, GripperAngleMotorConstants.BACK_LIMIT, GripperAngleMotorConstants.FWD_LIMIT)
+      .driveMotor(0, driverController.povLeft(), () -> driverController.getLeftY(), -0.8)
       .withDefaultCommand()
-      .driveMotor(0, driverController.leftStick(), () -> driverController.getLeftY(), -0.8)
-      .driveMotor(1, driverController.leftStick(), () -> driverController.getRightY(), -0.4)
+      .withMotorLimits(0, ArmAngleMotorConstants.BACK_LIMIT, ArmAngleMotorConstants.FWD_LIMIT)
       .withStop(() -> driverController.leftBumper().getAsBoolean())
-      .build();
+      .build()
+      ;
   }
 
   public static boolean isComp() {

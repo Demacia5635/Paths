@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.demacia.utils.Log.LogManager;
@@ -77,9 +78,11 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
             this.runnableInitializes = new ArrayList<>();
             this.motorAndValuesExecutes = new ArrayList<>();
             this.motorExecutes = new ArrayList<>();
+            this.runnableExecutes = new ArrayList<>();
             this.finishes = new ArrayList<>();
             this.motorAndValuesEnds = new ArrayList<>();
             this.motorEnds = new ArrayList<>();
+            this.runnableEnds = new ArrayList<>();
         }
         
         public MechanismAction(String name, double[] values){
@@ -280,7 +283,6 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
 
     public BaseMechanism(String name) {
         this.name = name;
-        SmartDashboard.putData(this);
     }
 
     @SuppressWarnings("unchecked")
@@ -451,6 +453,19 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         if (this.valuesChanger == null) {
             this.valuesChanger = () -> new double[motors.length];
         }
+        
+        for (int i = 0; i < motors.length; i++) {
+            final int index = i;
+            SmartDashboard.putData(getName() + "/" + getMotor(i).name() + "/set brake", 
+                new InstantCommand(() -> setNeutralMode(index, true)).ignoringDisable(true));
+        }
+        
+        for (int i = 0; i < motors.length; i++) {
+            final int index = i;
+            SmartDashboard.putData(getName() + "/" + getMotor(i).name() + "/set coast", 
+                new InstantCommand(() -> setNeutralMode(index, false)).ignoringDisable(true));
+        }
+
         LogManager.addEntry(name + " values", () -> values)
             .withLogLevel(LogLevel.LOG_AND_NT_NOT_IN_COMP).build();
         return (T) this;
@@ -475,6 +490,9 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
             throw new IllegalStateException("Consumer must be configured before creating action command");
         }
         return new Command() {
+            {
+                addRequirements(BaseMechanism.this);
+            }
             @Override
             public void initialize() {
                 for (BiConsumer<MotorInterface[], double[]> motorAndValuesInitialize : action.getMotorAndValuesInitializes()){
