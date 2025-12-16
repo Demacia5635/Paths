@@ -1,7 +1,7 @@
 package frc.robot.testSensors.piegon;
 
+import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 import frc.demacia.utils.Sensors.PigeonConfig;
-import com.ctre.phoenix6.CANBus;
 
 public class Constants {
     public static final boolean INVERTED= false;
@@ -14,8 +14,8 @@ public class Constants {
     public static final boolean COMPASS = false;
     public static final boolean temperatureCompensation = false;
     public static final boolean noMotionCalibration = false;
-    public static final int ID=14;
-    public static final CANBus CANBUS= new CANBus("rio");
+    public static final int ID = 14;
+    public static final Canbus CANBUS = Canbus.Rio;
     public static final String PIZZAPIZZAPIZZA_PIGEON_NAME="PIZZA PIGEON";
     public static final PigeonConfig PIGEON_CONFIG= new PigeonConfig(ID, CANBUS, PIZZAPIZZAPIZZA_PIGEON_NAME)
     .withPitchOffset(PICH_OFFSET)

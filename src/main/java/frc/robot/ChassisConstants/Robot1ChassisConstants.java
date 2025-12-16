@@ -1,7 +1,5 @@
 package frc.robot.ChassisConstants;
 
-import com.ctre.phoenix6.CANBus;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 import frc.demacia.utils.Motors.TalonFXConfig;
@@ -33,7 +31,7 @@ public class Robot1ChassisConstants {
     
     public static final int GYRO_ID = 14;
     public static final Canbus CAN_BUS = Canbus.CANIvore;
-    public static final CANBus GYRO_CAN_BUS = new CANBus("rio");
+    public static final Canbus GYRO_CAN_BUS = Canbus.Rio;
     public static final double STEER_GEAR_RATIO = 151.0/7.0;
     public static final double DRIVE_GEAR_RATIO = 8.14;
     
@@ -106,7 +104,7 @@ public class Robot1ChassisConstants {
                 .withBrake(true)
                 .withInvert(true)
                 .withMeterMotor(DRIVE_GEAR_RATIO, wheelDiameter * Math.PI);
-            CANCODER_CONFIG = new CancoderConfig(swerveId * 3 + 3, new CANBus("canivore"), NAME + " Cancoder");
+            CANCODER_CONFIG = new CancoderConfig(swerveId * 3 + 3, Canbus.CANIvore, NAME + " Cancoder");
             POSITION = new Translation2d(
                 swerveId == 0 || swerveId == 1 ? 0.34 : -0.34,
                 swerveId == 0 || swerveId == 2 ? 0.29 : -0.29
