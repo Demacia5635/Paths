@@ -30,6 +30,8 @@ public class LogEntryBuilder<T> {
     private String metadata = "";
     private BiConsumer<T[], Long> consumer = null;
 
+    private boolean isSepereted = false;
+
     private Data<T> data;
     
     @SuppressWarnings("unchecked")
@@ -84,7 +86,7 @@ public class LogEntryBuilder<T> {
      * @return this builder for chaining
      */
     public LogEntryBuilder<T> WithIsMotor() {
-        this.metadata = "motor";
+        metadata = "motor";
         return this;
     }
     
@@ -99,6 +101,11 @@ public class LogEntryBuilder<T> {
      */
     public LogEntryBuilder<T> WithConsumer(BiConsumer<T[], Long> consumer) {
         this.consumer = consumer;
+        return this;
+    }
+
+    public LogEntryBuilder<T> WithIsSepereted(boolean isSepereted) {
+        this.isSepereted = isSepereted;
         return this;
     }
     
@@ -122,7 +129,7 @@ public class LogEntryBuilder<T> {
         if (logLevel == null) {
             throw new IllegalArgumentException("Log level cant be null: ");
         }
-        LogEntry<T> entry = LogManager.logManager.add(name, data, logLevel, metadata);
+        LogEntry<T> entry = LogManager.logManager.add(name, data, logLevel, metadata, isSepereted);
         if (consumer != null) {
             entry.setConsumer(consumer);
         }

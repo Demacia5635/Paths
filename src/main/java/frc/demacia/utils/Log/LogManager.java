@@ -294,7 +294,7 @@ public class LogManager extends SubsystemBase {
     }
   }
 
-  public <T> LogEntry<T> add(String name, Data<T> data, LogLevel logLevel, String metaData) {
+  public <T> LogEntry<T> add(String name, Data<T> data, LogLevel logLevel, String metaData, boolean isSepereted) {
     LogEntry<T> entry = null;
 
     int categoryIndex = getCategoryIndex(data, logLevel, metaData);
@@ -305,18 +305,18 @@ public class LogManager extends SubsystemBase {
       int index = individualLogEntries.size() - 1;
       entryLocationMap.put(name, new Integer[] {-1, index, null, null});
     } else{
-      entry = addToEntryArray(categoryIndex, name, data);
+      entry = addToEntryArray(categoryIndex, name, data, isSepereted);
     }
 
     return entry;
   }
 
   @SuppressWarnings("unchecked")
-  private <T> LogEntry<T> addToEntryArray(int i, String name, Data<T> data) {
+  private <T> LogEntry<T> addToEntryArray(int i, String name, Data<T> data, boolean isSepereted) {
     int subIndex;
     int dataIndex = 0;
     
-    if (categoryLogEntries[i] == null || categoryLogEntries[i].data == null) {
+    if (categoryLogEntries[i] == null || categoryLogEntries[i].data == null || isSepereted == true) {
         categoryLogEntries[i] = new LogEntry<>(name, data, 
         i <= 3? LogLevel.LOG_ONLY_NOT_IN_COMP: i <= 7? LogLevel.LOG_ONLY: i <= 11? LogLevel.LOG_AND_NT_NOT_IN_COMP: LogLevel.LOG_AND_NT
         , "");

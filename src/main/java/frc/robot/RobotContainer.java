@@ -13,6 +13,7 @@ import frc.demacia.utils.Mechanisms.StateBasedMechanism;
 import frc.demacia.utils.Motors.TalonFXMotor;
 import frc.demacia.utils.Sensors.LimitSwitch;
 import frc.demacia.utils.chassis.Chassis;
+import frc.robot.ChassisConstants.MK5nChassisConstants;
 import frc.robot.testMechanism.ArmConstants.ARM_STATES;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
 
@@ -57,7 +58,7 @@ public class RobotContainer {
     new LogManager();
     driverController = new CommandController(0, ControllerType.kXbox);
 
-    // chassis = new Chassis(MK5nChassisConstants.CHASSIS_CONFIG);
+    chassis = new Chassis(MK5nChassisConstants.CHASSIS_CONFIG);
     // driveCommand = new DriveCommand(chassis, driverController);
 
     setMechanism();
