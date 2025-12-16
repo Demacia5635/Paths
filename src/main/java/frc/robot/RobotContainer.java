@@ -108,9 +108,12 @@ public class RobotContainer {
       .bindButton(driverController.rightSetting(), "Coral Station")
       .bindButton(driverController.povLeft(), "")
       .withModifier(1, () -> (arm.getMotor(1).getCurrentPosition() - ((((DigitalEncoder) arm.getSensor(1)).get() * 2 * Math.PI) - GripperAngleMotorConstants.ENCODER_BASE_ANGLE)))
+      .withMotorLimits(0, ArmAngleMotorConstants.BACK_LIMIT, ArmAngleMotorConstants.FWD_LIMIT)
+      .withMotorLimits(1, GripperAngleMotorConstants.BACK_LIMIT, GripperAngleMotorConstants.FWD_LIMIT)
       .withDefaultCommand()
       .driveMotor(0, driverController.leftStick(), () -> driverController.getLeftY(), -0.8)
       .driveMotor(1, driverController.leftStick(), () -> driverController.getRightY(), -0.4)
+      .withStop(() -> driverController.leftBumper().getAsBoolean())
       .build();
   }
 

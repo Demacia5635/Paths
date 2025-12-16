@@ -268,6 +268,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     protected double[] values;
 
     protected Supplier<Boolean> isCalibratedSupplier = () -> true;
+    protected Supplier<Boolean> stopSupplier = () -> false;
 
     protected MotorLimits[] motorsLimits;
     protected BiConsumer<MotorInterface[], double[]> consumer = (m, v) -> {};
@@ -349,6 +350,23 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     }
 
     @SuppressWarnings("unchecked")
+    public T withMotorLimits(int motorIndex, double min, double max) {
+        if (!isValidMotorIndex(motorIndex)) {
+            throw new IllegalArgumentException("Invalid motor index: " + motorIndex);
+        }
+        motorsLimits[motorIndex] = new MotorLimits(min, max);
+        return (T) this;
+    }
+
+    public T withMotorMinLimit(int motorIndex, double min) {
+        return withMotorLimits(motorIndex, min, Double.POSITIVE_INFINITY);
+    }
+
+    public T withMotorMaxLimit(int motorIndex, double max) {
+        return withMotorLimits(motorIndex, Double.NEGATIVE_INFINITY, max);
+    }
+
+    @SuppressWarnings("unchecked")
     public T withLookUpTable(LookUpTable lookUpTable, Supplier<Double> posSupplier){
         if (lookUpTable == null) {
             throw new NullPointerException("Lookup table cannot be null");
@@ -357,6 +375,12 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
             throw new NullPointerException("Position supplier cannot be null");
         }
         this.valuesChanger = () -> lookUpTable.get(posSupplier.get());
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T withStop(Supplier<Boolean> stopSupplier){
+        this.stopSupplier = stopSupplier;
         return (T) this;
     }
 
@@ -466,6 +490,10 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
 
             @Override
             public void execute() {
+                if (stopSupplier.get()) {
+                    stopAll();
+                    return; 
+                }
                 double[] currentValues = process(action.getValues());
                 consumer.accept(motors, currentValues);
                 for (BiConsumer<MotorInterface[], double[]> motorAndValuesExecute : action.getMotorAndValuesExecutes()){
@@ -529,40 +557,6 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
      */
     public double[] getValues(){
         return values;
-    }
-
-    // public Supplier<Boolean> whenSensor(int index, boolean invert){
-    //     return () -> !((DigitalSensorInterface) getSensor(index)).get();
-    // }
-
-    /**
-     * Sets limits for a specific motor.
-     * 
-     * <p>Values will be clamped to [min, max] range before being sent to the motor.</p>
-     * 
-     * @param motorIndex Index of motor
-     * @param min Minimum allowed value
-     * @param max Maximum allowed value
-     * @return this mechanism for chaining
-     */
-    @SuppressWarnings("unchecked")
-    public T setMotorLimits(int motorIndex, double min, double max) {
-        if (!isValidMotorIndex(motorIndex)) {
-            throw new IllegalArgumentException("Invalid motor index: " + motorIndex);
-        }
-        motorsLimits[motorIndex] = new MotorLimits(min, max);
-        return (T) this;
-    }
-
-    /**
-     * Sets only a minimum limit for a specific motor.
-     * 
-     * @param motorIndex Index of motor
-     * @param min Minimum allowed value
-     * @return this mechanism for chaining
-     */
-    public T setMotorMinLimit(int motorIndex, double min) {
-        return setMotorLimits(motorIndex, min, Double.POSITIVE_INFINITY);
     }
 
     /**
@@ -748,5 +742,13 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
 
     protected boolean isValidSensorIndex(int index) {
         return (sensors != null) && (index >= 0 && index < sensors.length);
+    }
+
+    
+    @Override
+    public void periodic(){
+        if (stopSupplier.get()){
+            stopAll();
+        }
     }
 }
