@@ -115,6 +115,8 @@ public class RobotContainer {
         moveLittileMoreTimer.reset();}))
     .withAction(BaseMechanism.creatAction("climb", CLIMB_STATES.CLIMB_POWER.getValues())
       .withFinish(() -> (climb.getMotor(0).getCurrentPosition() > ClimebConstants.ClimbConstants.HAS_CLIMED_ANGLE)))
+    .withButton(driverController.downButton(), "open climb")
+    .withButton(driverController.leftButton(), "climb")
     .withDriveMotor(0, driverController.povLeft(), () -> -driverController.getRightY())
     .withStop(() -> driverController.leftBumper().getAsBoolean())
     ;

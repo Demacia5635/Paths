@@ -114,7 +114,11 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
         return (T) this;
     }
 
+    @Override
     public T withButton(Trigger button, String StateName){
+        if (!states.containsKey(StateName)){
+            return super.withButton(button, StateName);
+        }
         return withButton(button, states.get(StateName));
     }
 
@@ -124,7 +128,7 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
             throw new NullPointerException("Button trigger cannot be null");
         }
         if (state == null) {
-            throw new NullPointerException("Action cannot be null");
+            throw new NullPointerException("state cannot be null");
         }
         button.onTrue(new InstantCommand(() -> setState(state)).ignoringDisable(true));
         return (T) this;
