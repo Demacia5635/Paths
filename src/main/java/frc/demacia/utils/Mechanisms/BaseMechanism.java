@@ -268,7 +268,6 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     protected String name;
     protected MotorInterface[] motors;
     protected SensorInterface[] sensors;
-    protected double[] values;
 
     protected Supplier<Boolean> isCalibratedSupplier = () -> true;
     protected Supplier<Boolean> stopSupplier = () -> false;
@@ -283,6 +282,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
 
     public BaseMechanism(String name) {
         this.name = name;
+        SmartDashboard.putData(this);
     }
 
     @SuppressWarnings("unchecked")
@@ -299,12 +299,23 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
             }
         }
         this.motors = motors;
-        this.valueModifiers = new Supplier[motors.length];
-        this.motorsLimits = new MotorLimits[motors.length];
-        this.lastCalculatedValues = new double[motors.length];
-        this.values = new double[motors.length];
+        valueModifiers = new Supplier[motors.length];
+        motorsLimits = new MotorLimits[motors.length];
+        lastCalculatedValues = new double[motors.length];
         for (int i = 0; i < motors.length; i++) {
             valueModifiers[i] = () -> 0.0;
+        }
+        motorsLimits = new MotorLimits[motors.length];
+        valuesChanger = () -> new double[motors.length];
+        for (int i = 0; i < motors.length; i++) {
+            final int index = i;
+            SmartDashboard.putData(getName() + "/" + getMotor(i).name() + "/set brake", 
+                new InstantCommand(() -> setNeutralMode(index, true)).ignoringDisable(true));
+        }
+        for (int i = 0; i < motors.length; i++) {
+            final int index = i;
+            SmartDashboard.putData(getName() + "/" + getMotor(i).name() + "/set coast", 
+                new InstantCommand(() -> setNeutralMode(index, false)).ignoringDisable(true));
         }
         return (T) this;
     }
@@ -338,6 +349,8 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
             throw new NullPointerException("Values changer cannot be null");
         }
         this.valuesChanger = valuesChanger;
+        LogManager.addEntry(name + " values", valuesChanger)
+            .withLogLevel(LogLevel.LOG_AND_NT_NOT_IN_COMP).build();
         return (T) this;
     }
 
@@ -392,12 +405,12 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         return (T) this;
     }
 
-    public T bindButton(Trigger button, String actionName){
-        return bindButton(button, actions.get(actionName));
+    public T withButton(Trigger button, String actionName){
+        return withButton(button, actions.get(actionName));
     }
 
     @SuppressWarnings("unchecked")
-    public T bindButton(Trigger button, MechanismAction action){
+    public T withButton(Trigger button, MechanismAction action){
         if (button == null) {
             throw new NullPointerException("Button trigger cannot be null");
         }
@@ -409,7 +422,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     }
 
     @SuppressWarnings("unchecked")
-    public T driveMotor(int motorIndex, Trigger trigger, Supplier<Double> joystick, double controllerMultiplier){
+    public T withDriveMotor(int motorIndex, Trigger trigger, Supplier<Double> joystick){
         if (trigger == null) {
             throw new NullPointerException("Trigger cannot be null");
         }
@@ -422,14 +435,14 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         trigger.onTrue(new Command() {
             @Override
             public void execute() {
-                getMotor(motorIndex).setDuty(joystick.get() * controllerMultiplier);
+                getMotor(motorIndex).setDuty(joystick.get());
             }
         });
         return (T) this;
     }
 
     @SuppressWarnings("unchecked")
-    public T setDefaultCommand(){
+    public T withDefaultCommand(){
         if (motors == null) {
             throw new IllegalStateException("Motors must be configured before setting default command");
         }
@@ -439,35 +452,6 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         this.setDefaultCommand(actionCommand(
             new MechanismAction(name + "DefaultCommand", valuesChanger)
         ));
-        return (T) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public T build(){
-        if (motors == null) {
-            throw new IllegalStateException("Motors must be configured before building");
-        }
-        
-        if (motorsLimits == null) motorsLimits = new MotorLimits[motors.length];
-
-        if (this.valuesChanger == null) {
-            this.valuesChanger = () -> new double[motors.length];
-        }
-        
-        for (int i = 0; i < motors.length; i++) {
-            final int index = i;
-            SmartDashboard.putData(getName() + "/" + getMotor(i).name() + "/set brake", 
-                new InstantCommand(() -> setNeutralMode(index, true)).ignoringDisable(true));
-        }
-        
-        for (int i = 0; i < motors.length; i++) {
-            final int index = i;
-            SmartDashboard.putData(getName() + "/" + getMotor(i).name() + "/set coast", 
-                new InstantCommand(() -> setNeutralMode(index, false)).ignoringDisable(true));
-        }
-
-        LogManager.addEntry(name + " values", () -> values)
-            .withLogLevel(LogLevel.LOG_AND_NT_NOT_IN_COMP).build();
         return (T) this;
     }
 
@@ -489,14 +473,15 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         if (consumer == null) {
             throw new IllegalStateException("Consumer must be configured before creating action command");
         }
-        return new Command() {
+        Command command = new Command() {
             {
                 addRequirements(BaseMechanism.this);
             }
             @Override
             public void initialize() {
+                double[] currentValues = process(action.getValues());
                 for (BiConsumer<MotorInterface[], double[]> motorAndValuesInitialize : action.getMotorAndValuesInitializes()){
-                    motorAndValuesInitialize.accept(motors, values);
+                    motorAndValuesInitialize.accept(motors, currentValues);
                 }
                 for (Consumer<MotorInterface[]> motorInitialize : action.getMotorInitializes()){
                     motorInitialize.accept(motors);
@@ -538,8 +523,9 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
             @Override
             public void end(boolean interrupted) {
                 stopAll();
+                double[] currentValues = process(action.getValues());
                 for (BiConsumer<MotorInterface[], double[]> motorAndValuesEnd : action.getMotorAndValuesEnd()){
-                    motorAndValuesEnd.accept(motors, values);
+                    motorAndValuesEnd.accept(motors, currentValues);
                 }
                 for (Consumer<MotorInterface[]> motorEnd : action.getMotorEnds()){
                     motorEnd.accept(motors);
@@ -549,23 +535,8 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
                 }
             }
         }.withName(action.getName());
-    }
-
-    /**
-     * Sets the values to be used by the mechanism consumer.
-     * 
-     * <p>These values are typically motor powers, positions, angles, or velocities.</p>
-     * 
-     * @param values Array of values (interpretation depends on consumer)
-     */
-    public void setValues(double[] values){
-        if (values == null) {
-            throw new NullPointerException("Values array cannot be null");
-        }
-        if (values.length != motors.length) {
-            throw new IllegalArgumentException("Values size must match motor count");
-        }
-        this.values = values != null ? values : new double[motors.length];
+        SmartDashboard.putData(getName() + "/" + action.getName(), command);
+        return command;
     }
 
     /**
@@ -574,7 +545,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
      * <p>These values are typically motor powers, positions, angles, or velocities.</p>
      */
     public double[] getValues(){
-        return values;
+        return valuesChanger.get();
     }
 
     /**
@@ -606,19 +577,6 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
         }
         lastCalculatedValues = processed;
         return processed;
-}
-
-    /**
-     * Applies motor limits to current values array.
-     */
-    protected void applyMotorLimits() {
-        if (values == null) return;
-        
-        for (int i = 0; i < values.length && i < motorsLimits.length; i++) {
-            if (motorsLimits[i] != null) {
-                values[i] = motorsLimits[i].clamp(values[i]);
-            }
-        }
     }
 
     /**
@@ -666,9 +624,10 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
      * 
      * @param power Duty cycle (-1.0 to 1.0)
      */
-    public void setAll(double power) {
-        for (int i = 0; i < motors.length; i++) {
-            values[i] = power;
+    public void setPowerAll(double power) {
+        if (motors == null) return;
+        for (MotorInterface motor : motors){
+            motor.setDuty(power);
         }
     }
 

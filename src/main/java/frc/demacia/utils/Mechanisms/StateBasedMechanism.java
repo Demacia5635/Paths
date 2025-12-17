@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.demacia.utils.Motors.MotorInterface;
 
 /**
  * State machine-based mechanism controller.
@@ -86,44 +87,13 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
 
     public StateBasedMechanism(String name){
         super(name);
+        withValueChanger(() -> getState() != null ? getState().getValues() : new double[0]);
     }
 
-    public T withState(String stateName){
-        return withState(states.get(stateName));
-    }
-
+    @Override
     @SuppressWarnings("unchecked")
-    public T withState(State state){
-        stateChooser.addOption(state.getName(), state);
-        states.put(state.getName(), state);
-        return (T) this;
-    }
-
-    public T bindButton(Trigger button, String StateName){
-        return bindButton(button, states.get(StateName));
-    }
-
-    @SuppressWarnings("unchecked")
-    public T bindButton(Trigger button, State state){
-        if (button == null) {
-            throw new NullPointerException("Button trigger cannot be null");
-        }
-        if (state == null) {
-            throw new NullPointerException("Action cannot be null");
-        }
-        button.onTrue(new InstantCommand(() -> setState(state)).ignoringDisable(true));
-        return (T) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public T withDefaultCommand(){
-        this.setDefaultCommand(actionCommand(new MechanismAction(name, () -> getState().getValues())));
-        return (T) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public T build(){
-        super.build();
+    public T withMotors(MotorInterface ... motors){
+        super.withMotors(motors);
         testValues = new double[motors.length];
         double[] idleValues = new double[motors.length];
         testingState = new State("TESTING", testValues);
@@ -134,13 +104,30 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
         stateChooser.addOption(idleState2.getName(), idleState2);
         stateChooser.onChange(state -> this.state = state);
         SmartDashboard.putData(getName() + "/State Chooser", stateChooser);
-        SmartDashboard.putData(this);
         return (T) this;
     }
 
-    @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.addDoubleArrayProperty(getName() + "/Test Values", () -> getTestValues(), testValues -> setTestValues(testValues));
+    @SuppressWarnings("unchecked")
+    public T withState(State state){
+        stateChooser.addOption(state.getName(), state);
+        states.put(state.getName(), state);
+        return (T) this;
+    }
+
+    public T withButton(Trigger button, String StateName){
+        return withButton(button, states.get(StateName));
+    }
+
+    @SuppressWarnings("unchecked")
+    public T withButton(Trigger button, State state){
+        if (button == null) {
+            throw new NullPointerException("Button trigger cannot be null");
+        }
+        if (state == null) {
+            throw new NullPointerException("Action cannot be null");
+        }
+        button.onTrue(new InstantCommand(() -> setState(state)).ignoringDisable(true));
+        return (T) this;
     }
 
     public T withStartingOption(String stateName){
@@ -165,6 +152,11 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
         return (T) this;
     }
 
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addDoubleArrayProperty(getName() + "/Test Values", () -> getTestValues(), testValues -> setTestValues(testValues));
+    }
+
     /**
      * Gets the current state.
      * 
@@ -184,10 +176,11 @@ public class StateBasedMechanism<T extends StateBasedMechanism<T>> extends BaseM
     }
 
     public double[] getTestValues(){
-        return testValues;
+        return testValues != null? testValues : new double[0];
     }
 
     public void setTestValues(double[] testValues){
+        if (testingState == null) return;
         testingState.setValues(testValues);
         this.testValues = testValues;
     }

@@ -13,7 +13,7 @@ import frc.demacia.utils.Mechanisms.StateBasedMechanism;
 import frc.demacia.utils.Motors.TalonFXMotor;
 import frc.demacia.utils.Sensors.LimitSwitch;
 import frc.demacia.utils.chassis.Chassis;
-import frc.robot.ChassisConstants.MK5nChassisConstants;
+import frc.robot.ChassisConstants.Robot1ChassisConstants;
 import frc.robot.testMechanism.ArmConstants.ARM_STATES;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
 
@@ -58,13 +58,12 @@ public class RobotContainer {
     new LogManager();
     driverController = new CommandController(0, ControllerType.kXbox);
 
-    chassis = new Chassis(MK5nChassisConstants.CHASSIS_CONFIG);
+    chassis = new Chassis(Robot1ChassisConstants.CHASSIS_CONFIG);
     // driveCommand = new DriveCommand(chassis, driverController);
 
     setMechanism();
 
     // Configure the trigger bindings
-    // testMotor.setDefaultCommand(new TestMotorCommand(testMotor,5););
     configureBindings();
   }
 
@@ -83,16 +82,15 @@ public class RobotContainer {
       .withState(Arm.creatState("AFTER ALGAE BOTTOM", ARM_STATES.AFTER_ALGAE_BOTTOM.getValues()))
       .withState(Arm.creatState("AFTER ALGAE TOP", ARM_STATES.AFTER_ALGAE_TOP.getValues()))
       .withStartingOption("Starting")
-      .bindButton(driverController.povRight(), "L1")
-      .bindButton(driverController.upButton(), "Starting")
-      .bindButton(driverController.povUp(), "L3")
-      .bindButton(driverController.povDown(), "L2")
-      .bindButton(driverController.rightSetting(), "Coral Station")
-      .driveMotor(0, driverController.povLeft(), () -> driverController.getLeftY(), -0.8)
+      .withButton(driverController.povRight(), "L1")
+      .withButton(driverController.upButton(), "Starting")
+      .withButton(driverController.povUp(), "L3")
+      .withButton(driverController.povDown(), "L2")
+      .withButton(driverController.rightSetting(), "Coral Station")
+      .withDriveMotor(0, driverController.povLeft(), () -> driverController.getLeftY() * -0.8)
       .withDefaultCommand()
       .withMotorLimits(0, ArmAngleMotorConstants.BACK_LIMIT, ArmAngleMotorConstants.FWD_LIMIT)
       .withStop(() -> driverController.leftBumper().getAsBoolean())
-      .build()
       ;
   }
 
