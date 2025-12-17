@@ -2,6 +2,7 @@ package frc.robot.testMechanism;
 
 import frc.demacia.utils.Motors.TalonFXConfig;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.Sensors.LimitSwitchConfig;
 
 /** Add your docs here. */
 public class ClimebConstants {
@@ -24,13 +25,16 @@ public class ClimebConstants {
     public static class ClimbConstants {
         public static final double STALL_CURRENT = 35;
         public static final double CLIMB_RATIO = 600;
-        public static double prepareClimbPower = -0.8;
+        public static final double HAS_CLIMED_ANGLE = -1.4;
+
     }
     public static final int LIMIT_SWITCH_CHANNEL = 4;
+    public static final LimitSwitchConfig LIMIT_SWITCH_CONFIG = new LimitSwitchConfig(LIMIT_SWITCH_CHANNEL, NAME + "limit switch");
 
     public static enum CLIMB_STATES{
-        UP(-0.3),
-        DOWN(0.3);
+        OPEN(-0.8),
+        CLIMB_POWER(-0.3),
+        CLIMB_UNTIL_SENSOR_POWER(1);
 
         public final double[] angles;
 

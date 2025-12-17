@@ -279,6 +279,7 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     protected double[] lastCalculatedValues;
 
     protected HashMap<String, MechanismAction> actions = new HashMap<>();
+    protected HashMap<String, Command> actionCommands = new HashMap<>();
 
     public BaseMechanism(String name) {
         this.name = name;
@@ -402,22 +403,16 @@ public class BaseMechanism<T extends BaseMechanism<T>> extends SubsystemBase{
     @SuppressWarnings("unchecked")
     public T withAction(MechanismAction action){
         actions.put(action.getName(), action);
+        actionCommands.put(action.getName(), actionCommand(action.getName()));
         return (T) this;
     }
 
-    public T withButton(Trigger button, String actionName){
-        return withButton(button, actions.get(actionName));
-    }
-
     @SuppressWarnings("unchecked")
-    public T withButton(Trigger button, MechanismAction action){
+    public T withButton(Trigger button, String actionName){
         if (button == null) {
             throw new NullPointerException("Button trigger cannot be null");
         }
-        if (action == null) {
-            throw new NullPointerException("Action cannot be null");
-        }
-        button.onTrue(actionCommand(action));
+        button.onTrue(actionCommands.get(actionName));
         return (T) this;
     }
 
