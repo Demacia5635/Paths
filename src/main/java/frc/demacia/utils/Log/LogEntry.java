@@ -5,6 +5,9 @@
 package frc.demacia.utils.Log;
 
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
+
+import com.ctre.phoenix6.StatusSignal;
 
 import edu.wpi.first.networktables.BooleanArrayPublisher;
 import edu.wpi.first.networktables.BooleanPublisher;
@@ -86,6 +89,98 @@ public class LogEntry<T> {
             ntPublisher = createPublisher(logManager.table, this.name);
         } else {
             ntPublisher = null;
+        }
+    }
+
+    /**
+     * Retrieves the signals that would be removed by removeData with the given parameters.
+     * Only works if the data contains signals (not suppliers).
+     * 
+     * @param nameIndex The index in the name (1-based, matching removeData)
+     * @param dataIndex The starting index in the data array
+     * @param count The number of signals to retrieve
+     * @return Array of signals that would be removed, or null if signals don't exist or indices are invalid
+     */
+    @SuppressWarnings("unchecked")
+    public StatusSignal<?>[] getSignals(int nameIndex, int dataIndex, int count) {
+        if (data == null || data.getSignals() == null) {
+            LogManager.log("getSignals: data has no signals", AlertType.kWarning);
+            return null;
+        }
+
+        int actualNameIndex = nameIndex - 1;
+        String[] parts = name.split(" \\| ");
+
+        if (actualNameIndex >= parts.length || actualNameIndex < 0) {
+            LogManager.log("getSignals: nameIndex out of range: " + nameIndex + " (parts length: " + parts.length + ")", AlertType.kWarning);
+            return null;
+        }
+
+        try {
+            StatusSignal<T>[] signals = data.getSignals();
+            
+            if (dataIndex < 0 || dataIndex >= signals.length) {
+                LogManager.log("getSignals: dataIndex out of range: " + dataIndex + " (signals length: " + signals.length + ")", AlertType.kWarning);
+                return null;
+            }
+
+            if (dataIndex + count > signals.length) {
+                LogManager.log("getSignals: count exceeds available signals: dataIndex=" + dataIndex + ", count=" + count + ", signals.length=" + signals.length, AlertType.kWarning);
+                return null;
+            }
+
+            StatusSignal<T>[] result = new StatusSignal[count];
+            System.arraycopy(signals, dataIndex, result, 0, count);
+            return result;
+        } catch (Exception e) {
+            LogManager.log("getSignals: failed to retrieve signals: " + e.getMessage(), AlertType.kError);
+            return null;
+        }
+    }
+
+    /**
+     * Retrieves the suppliers that would be removed by removeData with the given parameters.
+     * Only works if the data contains suppliers (not signals).
+     * 
+     * @param nameIndex The index in the name (1-based, matching removeData)
+     * @param dataIndex The starting index in the data array
+     * @param count The number of suppliers to retrieve
+     * @return Array of suppliers that would be removed, or null if suppliers don't exist or indices are invalid
+     */
+    @SuppressWarnings("unchecked")
+    public Supplier<T>[] getSuppliers(int nameIndex, int dataIndex, int count) {
+        if (data == null || data.getSuppliers() == null) {
+            LogManager.log("getSuppliers: data has no suppliers", AlertType.kWarning);
+            return null;
+        }
+
+        int actualNameIndex = nameIndex - 1;
+        String[] parts = name.split(" \\| ");
+
+        if (actualNameIndex >= parts.length || actualNameIndex < 0) {
+            LogManager.log("getSuppliers: nameIndex out of range: " + nameIndex + " (parts length: " + parts.length + ")", AlertType.kWarning);
+            return null;
+        }
+
+        try {
+            Supplier<T>[] suppliers = data.getSuppliers();
+            
+            if (dataIndex < 0 || dataIndex >= suppliers.length) {
+                LogManager.log("getSuppliers: dataIndex out of range: " + dataIndex + " (suppliers length: " + suppliers.length + ")", AlertType.kWarning);
+                return null;
+            }
+
+            if (dataIndex + count > suppliers.length) {
+                LogManager.log("getSuppliers: count exceeds available suppliers: dataIndex=" + dataIndex + ", count=" + count + ", suppliers.length=" + suppliers.length, AlertType.kWarning);
+                return null;
+            }
+
+            Supplier<T>[] result = new Supplier[count];
+            System.arraycopy(suppliers, dataIndex, result, 0, count);
+            return result;
+        } catch (Exception e) {
+            LogManager.log("getSuppliers: failed to retrieve suppliers: " + e.getMessage(), AlertType.kError);
+            return null;
         }
     }
 
