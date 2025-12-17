@@ -178,11 +178,19 @@ public class Data<T> {
         if (length > 1){
             isArray = true;
             this.oldSupplier = Arrays.copyOf(supplier, supplier.length);
-            T[] valueArray = (T[]) new Object[length];
-            for (int i = 0; i < length; i++){
-                valueArray[i] = supplier[i].get();
-            }
-            this.supplier = new Supplier[] {() -> valueArray};
+            
+            this.supplier = new Supplier[] {
+                () -> {
+                    T[] freshValues = (T[]) new Object[this.oldSupplier.length];
+                    
+                    for (int i = 0; i < this.oldSupplier.length; i++){
+                        freshValues[i] = this.oldSupplier[i].get();
+                    }
+                    
+                    return freshValues;
+                }
+            };
+
             length = 1;
         }
     }

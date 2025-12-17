@@ -66,7 +66,6 @@ public class LogReader {
         try {
             System.out.println("Reading log file: " + fileName);
             wpilogReader(fileName);
-            System.out.println("Found " + entries.size() + " motor entries");
             return performAnalysis();
         } catch (IOException e) {
             System.err.println("Error reading log file: " + e.getMessage());
@@ -99,26 +98,38 @@ public class LogReader {
         short version = Short.reverseBytes(dataInputStream.readShort());
         int extraLength = Integer.reverseBytes(dataInputStream.readInt());
         System.out.println("WPILOG version: " + version + ", extra header length: " + extraLength);
-        dataInputStream.skipBytes(extraLength);
+        if(extraLength > 0) {
+            dataInputStream.skipBytes(extraLength);
+        }
     }
 
     private static void readRecords(DataInputStream dataInputStream) throws IOException {
         int recordCount = 0;
-        while (dataInputStream.available() > 0) {
+        int dataRecordsProcessed = 0;
+        
+        // FIXED: Infinite loop that breaks only on EOFException. 
+        // available() is unreliable for files and causes early exit.
+        while (true) {
             try {
-                readRecord(dataInputStream);
+                if (readRecord(dataInputStream)) {
+                    dataRecordsProcessed++;
+                }
                 recordCount++;
-                if (recordCount % 1000 == 0) {
-                    System.out.println("Processed " + recordCount + " records");
+                if (recordCount % 10000 == 0) {
+                    System.out.println("Processed " + recordCount + " records...");
                 }
             } catch (EOFException e) {
+                // Expected end of file
                 break;
             }
         }
-        System.out.println("Total records processed: " + recordCount);
+        System.out.println("Total records scanned: " + recordCount);
+        System.out.println("Valid data records stored: " + dataRecordsProcessed);
     }
 
-    private static void readRecord(DataInputStream dataInputStream) throws IOException {
+    // Returns true if data was added
+    private static boolean readRecord(DataInputStream dataInputStream) throws IOException {
+        // These reads will throw EOFException if file ends, which is caught in readRecords
         int headerByte = dataInputStream.readUnsignedByte();
         int idLength = (headerByte & 0x3) + 1;
         int payloadLength = (headerByte >> 2 & 0x3) + 1;
@@ -130,16 +141,20 @@ public class LogReader {
 
         if (recordId == 0) {
             addEntryFromControlRecord(dataInputStream, payloadSize);
+            return false;
         } else {
             List<EntryDescription> entryList = entries.get(recordId);
             if (entryList != null && !entryList.isEmpty()) {
-                // Check type of the first one (they are all the same type since they share an ID)
-                String type = entryList.get(0).type;
+                // Check type of the first one
+                String type = entryList.get(0).type.trim();
 
-                if ("float[]".equals(type) || "double[]".equals(type)) {
+                boolean isFloat = type.equals("float") || type.equals("float[]");
+                boolean isDouble = type.equals("double") || type.equals("double[]");
+
+                if (isFloat || isDouble) {
                     double[] value = null;
 
-                    if ("float[]".equals(type)) {
+                    if (isFloat) {
                         if (payloadSize % 4 == 0) {
                             int count = payloadSize / 4;
                             value = new double[count];
@@ -150,7 +165,7 @@ public class LogReader {
                         } else {
                             dataInputStream.skipBytes(payloadSize);
                         }
-                    } else if ("double[]".equals(type)) {
+                    } else if (isDouble) {
                          if (payloadSize % 8 == 0) {
                             int count = payloadSize / 8;
                             value = new double[count];
@@ -164,24 +179,40 @@ public class LogReader {
                     }
 
                     if (value != null) {
-                        // Distribute this data point to ALL logical entries associated with this ID
-                        for (EntryDescription entry : entryList) {
-                            entry.data.add(new DataPoint(timestamp, value));
+                        // FIXED: Handle merged entries (e.g. FrontLeft | FrontRight sharing one ID)
+                        // If we have 4 motors mapped to this ID, we split the value array into 4 chunks.
+                        int numEntries = entryList.size();
+                        if (numEntries > 1 && value.length % numEntries == 0) {
+                            int chunkSize = value.length / numEntries;
+                            for (int i = 0; i < numEntries; i++) {
+                                // Slice the array for this specific motor
+                                double[] slice = Arrays.copyOfRange(value, i * chunkSize, (i + 1) * chunkSize);
+                                entryList.get(i).data.add(new DataPoint(timestamp, slice));
+                            }
+                        } else {
+                            // Standard 1-to-1 mapping
+                            for (EntryDescription entry : entryList) {
+                                entry.data.add(new DataPoint(timestamp, value));
+                            }
                         }
+                        return true;
                     }
 
                 } else {
+                    // Skip types we don't handle (boolean, string, etc)
                     dataInputStream.skipBytes(payloadSize);
                 }
             } else {
+                // Unknown ID
                 dataInputStream.skipBytes(payloadSize);
             }
         }
+        return false;
     }
 
     private static void addEntryFromControlRecord(DataInputStream dataInputStream, int payloadSize) throws IOException {
         int recordType = dataInputStream.readUnsignedByte();
-        if (recordType == 0) {
+        if (recordType == 0) { // Start Record
             int entryId = Integer.reverseBytes(dataInputStream.readInt());
 
             int nameLength = Integer.reverseBytes(dataInputStream.readInt());
@@ -193,8 +224,6 @@ public class LogReader {
             int metaLength = Integer.reverseBytes(dataInputStream.readInt());
             String metadata = readString(dataInputStream, metaLength);
 
-            System.out.println("Found entry: " + name + " (type: " + type + ", metadata: " + metadata + ")");
-
             String[] names = name.split(" \\| ");
             String[] metas = metadata.split(" \\| ");
             
@@ -205,11 +234,14 @@ public class LogReader {
                 if (currentMeta.contains("motor")) {
                     entries.putIfAbsent(entryId, new ArrayList<>());
                     entries.get(entryId).add(new EntryDescription(currentName, type));
-                    System.out.println("Added motor entry: " + currentName + " [ID: " + entryId + "]");
                 }
             }
         } else {
-            dataInputStream.skipBytes(payloadSize - 1);
+            // Skip other control records (Finish, SetMetadata, etc.)
+            // We already read 1 byte (recordType), so skip the rest
+            if (payloadSize > 1) {
+                dataInputStream.skipBytes(payloadSize - 1);
+            }
         }
     }
 
@@ -238,16 +270,15 @@ public class LogReader {
     private static Map<String, SysIDResults> performAnalysis() {
         Map<String, SysIDResults> results = new HashMap<>();
         Set<String> groups = findGroups();
-        System.out.println("Found " + groups.size() + " motor groups");
+        System.out.println("Found " + groups.size() + " unique motor names to analyze.");
         
         for (String group : groups) {
-            System.out.println("Analyzing group: " + group);
             SysIDResults result = analyzeGroup(group);
             if (result != null) {
                 results.put(group, result);
-                System.out.println("Group " + group + ": " + result);
+                // System.out.println("SUCCESS: Analyzed " + group);
             } else {
-                System.out.println("No valid data for group: " + group);
+                System.out.println("WARNING: No valid data for " + group);
             }
         }
         return results;
@@ -258,37 +289,30 @@ public class LogReader {
         for (List<EntryDescription> list : entries.values()) {
             for (EntryDescription entry : list) {
                 groups.add(entry.name);
-                System.out.println("Added group: " + entry.name);
             }
         }
         return groups;
     }
 
     private static SysIDResults analyzeGroup(String name) {
-        EntryDescription entry = findEntry(name);
-        if (entry != null) {
-            System.out.println("Found entry with name: " + name);
+        List<DataPoint> allData = new ArrayList<>();
+
+        for (List<EntryDescription> list : entries.values()) {
+            for (EntryDescription entry : list) {
+                if (entry.name.equals(name)) {
+                    allData.addAll(entry.data);
+                }
+            }
         }
 
-        if (entry == null || entry.data.isEmpty()) {
-            System.out.println("No entry found for group: " + name);
+        if (allData.isEmpty()) {
             return null;
         }
 
-        System.out.println("Entry has " + entry.data.size() + " data points");
-        List<SyncedDataPoint> syncedData = synchronizeData(entry.data);
-        System.out.println("Synchronized data has " + syncedData.size() + " points");
+        allData.sort((p1, p2) -> Long.compare(p1.timestamp, p2.timestamp));
 
+        List<SyncedDataPoint> syncedData = synchronizeData(allData);
         return performSysIdLikeAnalysis(syncedData);
-    }
-
-    private static EntryDescription findEntry(String name) {
-        for (List<EntryDescription> list : entries.values()) {
-            for (EntryDescription entry : list) {
-                if (entry.name.equals(name)) return entry;
-            }
-        }
-        return null;
     }
 
     public static class SyncedDataPoint {
@@ -308,7 +332,9 @@ public class LogReader {
     private static List<SyncedDataPoint> synchronizeData(List<DataPoint> dataPoints) {
         List<SyncedDataPoint> result = new ArrayList<>();
         for (DataPoint dp : dataPoints) {
+            // Validate array length before accessing indices
             if (dp.value.length >= 4) {
+                // Assumption: [Position, Velocity, Acceleration, Voltage] are indices 0,1,2,3
                 result.add(new SyncedDataPoint(dp.value[1], dp.value[0], dp.value[2], dp.value[3], dp.timestamp));
             }
         }
@@ -379,8 +405,6 @@ public class LogReader {
             else if (r == 1) mid.add(d);
             else if (r == 2) high.add(d);
         }
-
-        System.out.println("Data distribution - Slow: " + slow.size() + ", Mid: " + mid.size() + ", High: " + high.size());
 
         BucketResult slowR = solveBucket(slow);
         BucketResult midR = solveBucket(mid);
