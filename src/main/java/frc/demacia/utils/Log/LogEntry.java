@@ -83,7 +83,9 @@ public class LogEntry<T> {
         this.isArray = this.data.isArray();
         if (ntPublisher != null) ntPublisher.close();
         
-        entry = createLogEntry(logManager.log, this.name, metaData);
+        if (entry != null) entry.finish();
+
+        entry = createLogEntry(logManager.log, this.name, this.metaData);
 
         if (logLevel == LogLevel.LOG_AND_NT || (logLevel == LogLevel.LOG_AND_NT_NOT_IN_COMP && !RobotContainer.isComp())) {
             ntPublisher = createPublisher(logManager.table, this.name);
