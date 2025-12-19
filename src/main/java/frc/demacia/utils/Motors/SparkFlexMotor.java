@@ -12,11 +12,11 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.demacia.utils.GlobalContext;
 import frc.demacia.utils.UpdateArray;
 import frc.demacia.utils.Utilities;
 import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
-import frc.robot.RobotContainer;
 
 public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterface {
 
@@ -31,7 +31,6 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
   private double lastVelocity;
   private double lastAcceleration;
   private double setPoint = 0;
-  private int lastCycleNum = 0;
   private double lastTime = 0;
 
   public SparkFlexMotor(frc.demacia.utils.Motors.SparkFlexConfig config) {
@@ -52,8 +51,12 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
     cfg.inverted(config.inverted);
     cfg.idleMode(config.brake ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
     cfg.voltageCompensation(config.maxVolt);
-    cfg.encoder.positionConversionFactor(config.motorRatio);
-    cfg.encoder.velocityConversionFactor(config.motorRatio / 60);
+    if (config.motorRatio != 0) {
+      double positionFactor = 1.0 / config.motorRatio;
+      double velocityFactor = positionFactor / 60.0;
+      cfg.encoder.positionConversionFactor(positionFactor);
+      cfg.encoder.velocityConversionFactor(velocityFactor);
+  }
     updatePID(false);
     if (config.maxVelocity != 0) {
       cfg.closedLoop.maxMotion.maxVelocity(config.maxVelocity).maxAcceleration(config.maxAcceleration);
@@ -75,25 +78,28 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
 
   @SuppressWarnings("unchecked")
   private void addLog() {
-    LogManager.addEntry(name + " Position, Velocity, Acceleration, Voltage, Current, CloseLoopError, CloseLoopSP", 
-      () -> new double[] {
-        getCurrentPosition(),
-        getCurrentVelocity(),
-        getCurrentAcceleration(),
-        getCurrentVoltage(),
-        getCurrentCurrent(),
-        getCurrentClosedLoopError(),
-        getCurrentClosedLoopSP(),
-      }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP)
-      .WithIsMotor().build();
+    LogManager.addEntry(name + ": Position, Velocity, Acceleration, Voltage, Current, CloseLoopError, CloseLoopSP", 
+        () -> getCurrentPosition(),
+        () -> getCurrentVelocity(),
+        () -> getCurrentAcceleration(),
+        () -> getCurrentVoltage(),
+        () -> getCurrentCurrent(),
+        () -> getCurrentClosedLoopError(),
+        () -> getCurrentClosedLoopSP()
+      ).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP)
+      .withIsMotor()
+      .build();
   }
 
   public void checkElectronics() {
     Faults faults = getFaults();
-    if (faults != null) {
-        LogManager.log(name + " have fault num: " + faults.toString(), AlertType.kError);
+    boolean hasFault = faults.other || faults.motorType || faults.sensor || 
+      faults.can || faults.temperature;
+
+    if (hasFault) {
+        LogManager.log(name + " Fault Detected: " + faults.toString(), AlertType.kError);
     }
-}
+  }
 
   /**
    * change the slot of the pid and feed forward.
@@ -344,12 +350,12 @@ public class SparkFlexMotor extends SparkFlex implements Sendable, MotorInterfac
 
   public double getCurrentVelocity() {
     double velocity = getEncoder().getVelocity();
-    if (lastCycleNum != RobotContainer.N_CYCLE) {
-      lastCycleNum = RobotContainer.N_CYCLE;
-      double time = Timer.getFPGATimestamp();
-      lastAcceleration = (velocity - lastVelocity) / (time - lastTime);
-      lastTime = time;
-      lastVelocity = velocity;
+    double time = Timer.getFPGATimestamp();
+    double dt = time - lastTime;
+    if (dt  >=  GlobalContext.getCycleTime()) {
+        lastAcceleration = (velocity - lastVelocity) / dt;
+        lastTime = time;
+        lastVelocity = velocity;
     }
     return velocity;
   }

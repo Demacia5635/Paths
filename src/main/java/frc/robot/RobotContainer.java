@@ -17,6 +17,7 @@ import frc.demacia.utils.Sensors.DigitalSensorInterface;
 import frc.demacia.utils.Sensors.LimitSwitch;
 import frc.demacia.utils.chassis.Chassis;
 import frc.robot.testMechanism.ClimebConstants;
+import frc.robot.ChassisConstants.Robot1ChassisConstants;
 import frc.robot.testMechanism.ArmConstants.ARM_STATES;
 import frc.robot.testMechanism.ArmConstants.ArmAngleMotorConstants;
 import frc.robot.testMechanism.ArmConstants.CalibrationConstants;
@@ -63,7 +64,7 @@ public class RobotContainer {
     new LogManager();
     driverController = new CommandController(0, ControllerType.kXbox);
 
-    // chassis = new Chassis(Robot1ChassisConstants.CHASSIS_CONFIG);
+    chassis = new Chassis(Robot1ChassisConstants.CHASSIS_CONFIG);
     // driveCommand = new DriveCommand(chassis, driverController);
 
     setMechanism();

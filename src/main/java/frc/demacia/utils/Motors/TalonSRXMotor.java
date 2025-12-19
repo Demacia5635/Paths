@@ -21,6 +21,8 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
     int slot = 0;
 
     String lastControlMode="";
+    
+    private static final double CPR = 4096.0;
 
     public TalonSRXMotor(TalonSRXConfig config) {
         super(config.id);
@@ -44,7 +46,6 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
         setNeutralMode(config.brake ? NeutralMode.Brake : NeutralMode.Coast);
         configPeakOutputForward(config.maxVolt / 12.0);
         configPeakOutputReverse(config.minVolt / 12.0);
-        // cfg.Feedback.SensorToMechanismRatio = config.motorRatio * unitMultiplier;
         updatePID();
         configVoltageCompSaturation(config.maxVolt);
         enableVoltageCompensation(true);
@@ -54,18 +55,22 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
     private void updatePID() {
         System.out.println("update PID");
     
-        config_kP(0, config.pid[0].kp());
-        config_kI(0, config.pid[0].ki());
-        config_kD(0, config.pid[0].kd());
-        config_kF(0, config.pid[0].kv()*(1023.0 / 12.0));
-        config_kP(1, config.pid[1].kp());
-        config_kI(1, config.pid[1].ki());
-        config_kD(1, config.pid[1].kd());
-        config_kF(1, config.pid[1].kv()*(1023.0 / 12.0));
-        config_kP(2, config.pid[2].kp());
-        config_kI(2, config.pid[2].ki());
-        config_kD(2, config.pid[2].kd());
-        config_kF(2, config.pid[2].kv()*(1023.0 / 12.0));
+        double scale = (1023.0 / 12.0) / (CPR * config.motorRatio);
+
+        config_kP(0, config.pid[0].kp() * scale);
+        config_kI(0, config.pid[0].ki() * scale);
+        config_kD(0, config.pid[0].kd() * scale);
+        config_kF(0, config.pid[0].kv() * scale * 10.0);
+
+        config_kP(1, config.pid[1].kp() * scale);
+        config_kI(1, config.pid[1].ki() * scale);
+        config_kD(1, config.pid[1].kd() * scale);
+        config_kF(1, config.pid[1].kv() * scale * 10.0);
+
+        config_kP(2, config.pid[2].kp() * scale);
+        config_kI(2, config.pid[2].ki() * scale);
+        config_kD(2, config.pid[2].kd() * scale);
+        config_kF(2, config.pid[2].kv() * scale * 10.0);
     }
 
     private void configureMotionMagic() {
@@ -75,17 +80,16 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-      LogManager.addEntry(name + " position, Velocity, Acceleration, Voltage, Current, CloseLoopError, CloseLoopSP", 
-        () -> new double[] {
-          getCurrentPosition(),
-          getCurrentVelocity(),
-          getCurrentAcceleration(),
-          getCurrentVoltage(),
-          getCurrentCurrent(),
-          getCurrentClosedLoopError(),
-          getCurrentClosedLoopSP(),
-        }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP)
-        .WithIsMotor().build();
+      LogManager.addEntry(name + ": position, Velocity, Acceleration, Voltage, Current, CloseLoopError, CloseLoopSP", 
+        () -> getCurrentPosition(),
+        () -> getCurrentVelocity(),
+        () -> getCurrentAcceleration(),
+        () -> getCurrentVoltage(),
+        () -> getCurrentCurrent(),
+        () -> getCurrentClosedLoopError(),
+        () -> getCurrentClosedLoopSP()
+        ).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP)
+        .withIsMotor().build();
     }
 
     public void checkElectronics() {
@@ -120,7 +124,9 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
 
     public void setVelocity(double velocity, double feedForward){
         selectProfileSlot(slot, 0);
-        set(ControlMode.Velocity, velocity / config.motorRatio, DemandType.ArbitraryFeedForward, feedForward / 12.0);
+        double targetTicksPer100ms = (velocity * config.motorRatio * CPR) / 10.0;
+    
+        set(ControlMode.Velocity, targetTicksPer100ms, DemandType.ArbitraryFeedForward, feedForward / 12.0);
         lastControlMode = "Velocity";
     }
 
@@ -130,7 +136,9 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
 
     public void setMotion(double position, double feedForward){
         selectProfileSlot(slot, 0);
-        set(ControlMode.MotionMagic, position / config.motorRatio, DemandType.ArbitraryFeedForward, feedForward / 12.0);
+        double targetTicks = position * config.motorRatio * CPR; 
+        
+        set(ControlMode.MotionMagic, targetTicks, DemandType.ArbitraryFeedForward, feedForward / 12.0);
         lastControlMode = "Position";
     }
 
@@ -179,17 +187,17 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
         return lastControlMode;
     }@Override
     public double getCurrentClosedLoopSP() {
-        return getClosedLoopTarget(0) * config.motorRatio;
+        return getClosedLoopTarget(0) / (CPR * config.motorRatio);
     }
 
     @Override
     public double getCurrentClosedLoopError() {
-        return getClosedLoopError(0) * config.motorRatio;
+        return getClosedLoopError(0) / (CPR * config.motorRatio);
     }
 
     @Override
     public double getCurrentPosition() {
-        return getSelectedSensorPosition() * config.motorRatio;
+        return getSelectedSensorPosition() / (CPR * config.motorRatio);
     }
 
     @Override
@@ -204,7 +212,7 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
 
     @Override
     public double getCurrentVelocity() {
-        return getSelectedSensorVelocity() * config.motorRatio * 10;
+        return (getSelectedSensorVelocity() * 10.0) / (CPR * config.motorRatio);
     }
 
     @Override
@@ -224,7 +232,7 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface,Sendable {
 
     @Override
     public void setEncoderPosition(double position) {
-        setSelectedSensorPosition(position / config.motorRatio);
+        setSelectedSensorPosition(position * config.motorRatio * CPR);
     }
 
     /**
