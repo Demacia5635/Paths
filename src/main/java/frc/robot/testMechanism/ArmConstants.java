@@ -113,6 +113,12 @@ public class ArmConstants {
                 .withRampTime(RAMP_TIME);
     }
 
+    public static class CalibrationConstants {
+        public static final double ARM_ANGLE_POWER = -0.3;
+        public static final double ARM_ANGLE_START_POWER = 0.3;
+        public static final double TIME_TO_CHANGE_POWER = 0.75;
+    }
+
     public static enum ARM_STATES{
         L1(Math.toRadians(37.3)/*, 4.6*/),
         L2(1.8/*, 4.4*/),
