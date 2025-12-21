@@ -414,6 +414,14 @@ public class Chassis extends SubsystemBase {
 
     }
 
+    public double getMaxDriveVelocity(){
+        return chassisConfig.maxDriveVelocity;
+    }
+
+    public double getMaxRotationalVelocity(){
+        return chassisConfig.maxRotationalVelocity;
+    }
+
     /**
      * Stops all swerve modules immediately.
      */
