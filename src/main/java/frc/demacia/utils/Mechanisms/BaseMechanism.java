@@ -37,6 +37,7 @@ public class BaseMechanism extends SubsystemBase{
                 new InstantCommand(() -> setNeutralModeAll(false)).ignoringDisable(true));
         SmartDashboard.putData(getName() + "/set brake all", 
                 new InstantCommand(() -> setNeutralModeAll(true)).ignoringDisable(true));
+        SmartDashboard.putData(name, this);
     }
 
     public String getName(){

@@ -42,13 +42,13 @@ public class StateBasedMechanism extends BaseMechanism {
 
     protected double[] testValues;
 
-    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<MechanismState> enumClass){
+    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends MechanismState> enumClass){
         super(name, motors, sensors);
         testValues = new double[motors.length];
         addNT(enumClass);
     }
 
-    private void addNT(Class<MechanismState> enumClass) {
+    private void addNT(Class<? extends MechanismState> enumClass) {
         stateChooser.addOption("TESTING", TESTING_STATE);
         stateChooser.addOption("IDLE", IDLE_STATE);
         stateChooser.addOption("IDLE2", IDLE_STATE);
