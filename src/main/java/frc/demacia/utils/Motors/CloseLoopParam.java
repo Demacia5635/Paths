@@ -69,31 +69,60 @@ class CloseLoopParam {
     public double[] toArray() {
         return parameters;
     }
+
     public double kp() {
         return parameters[0];
+    }
+    
+    public void setKp(double kp) {
+        parameters[0] = kp;
     }
 
     public double ki() {
         return parameters[1];
     }
+    
+    public void setKi(double ki) {
+        parameters[1] = ki;
+    }
 
     public double kd() {
         return parameters[2];
+    }
+    
+    public void setKd(double kd) {
+        parameters[2] = kd;
     }
 
     public double ks() {
         return parameters[3];
     }
+    
+    public void setKs(double ks) {
+        parameters[3] = ks;
+    }
 
     public double kv() {
         return parameters[4];
+    }
+    
+    public void setKv(double kv) {
+        parameters[4] = kv;
     }
 
     public double ka() {
         return parameters[5];
     }
+    
+    public void setKa(double ka) {
+        parameters[5] = ka;
+    }
 
     public double kg() {
         return parameters[6];
+    }
+    
+    public void setKg(double kg) {
+        parameters[6] = kg;
     }
 }

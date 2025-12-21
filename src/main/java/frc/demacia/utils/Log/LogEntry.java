@@ -24,12 +24,10 @@ import edu.wpi.first.util.datalog.StringArrayLogEntry;
 import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.demacia.utils.Data;
+import frc.demacia.utils.DemaciaUtils;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 
 public class LogEntry<T> {
-
-    private final LogManager logManager;
-
     private DataLogEntry entry;
     private Data<T> data;
     private BiConsumer<T[], Long> consumer = null;
@@ -45,9 +43,6 @@ public class LogEntry<T> {
         * Constructor with the suppliers and boolean if add to network table
     */
     LogEntry(String name, Data<T> data, LogLevel logLevel, String metaData) {
-
-        logManager = LogManager.logManager;
-
         this.name = name;
         this.logLevel = logLevel;
         this.data = data;
@@ -60,10 +55,10 @@ public class LogEntry<T> {
         if (ntPublisher != null) ntPublisher.close();
         if (entry != null) entry.finish();
 
-        createLogEntry(logManager.log, name, metaData);
+        createLogEntry(LogManager.log, name, metaData);
 
-        if (logLevel == LogLevel.LOG_AND_NT || (logLevel == LogLevel.LOG_AND_NT_NOT_IN_COMP && !LogManager.isComp)) {
-            createPublisher(logManager.table, name);
+        if (logLevel == LogLevel.LOG_AND_NT || (logLevel == LogLevel.LOG_AND_NT_NOT_IN_COMP && !DemaciaUtils.getIsComp())) {
+            createPublisher(LogManager.table, name);
         } else {
             ntPublisher = null;
             ntStrategy = null;

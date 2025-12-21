@@ -65,10 +65,9 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
     public double maxJerk = 0;
     public double maxPositionError = 0.5;
 
-    public CloseLoopParam[] pid = {new CloseLoopParam(), new CloseLoopParam(), new CloseLoopParam()};
+    public CloseLoopParam[] pid = {new CloseLoopParam(), new CloseLoopParam(), new CloseLoopParam(), new CloseLoopParam()};
 
     public boolean isMeterMotor = false;
-    public boolean isDegreesMotor = false;
     public boolean isRadiansMotor = false;
 
     public double kv2 = 0;
@@ -125,7 +124,6 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         motorRatio = gearRatio / (diameter * Math.PI);
         isMeterMotor = true;
         isRadiansMotor = false;
-        isDegreesMotor = false;
         return (T) this;
     }
 
@@ -134,16 +132,6 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         motorRatio = gearRatio / (Math.PI * 2);
         isMeterMotor = false;
         isRadiansMotor = true;
-        isDegreesMotor = false;
-        return (T) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public T withDegreesMotor(double gearRatio) {
-        motorRatio = gearRatio / 360.0;
-        isMeterMotor = false;
-        isRadiansMotor = false;
-        isDegreesMotor = true;
         return (T) this;
     }
 
@@ -211,8 +199,8 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         this.pid[0].set(other.pid[0]);
         this.pid[1].set(other.pid[1]);
         this.pid[2].set(other.pid[2]);
+        this.pid[3].set(other.pid[3]);
         this.maxPositionError = other.maxPositionError;
-        this.isDegreesMotor = other.isDegreesMotor;
         this.isMeterMotor = other.isMeterMotor;
         this.isRadiansMotor = other.isRadiansMotor;
    }

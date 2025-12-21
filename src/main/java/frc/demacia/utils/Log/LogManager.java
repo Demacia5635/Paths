@@ -28,29 +28,26 @@ import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
  */
 public class LogManager extends SubsystemBase {
 
-  public static LogManager logManager;
+  private static LogManager logManager;
 
-  public static boolean isComp;
-
-  DataLog log;
-  NetworkTable table = NetworkTableInstance.getDefault().getTable("Log");
+  public static DataLog log;
+  public static NetworkTable table = NetworkTableInstance.getDefault().getTable("Log");
 
   private static ArrayList<ConsoleAlert> activeConsole;
 
-  ArrayList<LogEntry<?>> individualLogEntries = new ArrayList<>();
+  private ArrayList<LogEntry<?>> individualLogEntries = new ArrayList<>();
   
-  LogEntry<?>[] categoryLogEntries = new LogEntry<?>[16];
+  private LogEntry<?>[] categoryLogEntries = new LogEntry<?>[16];
 
   private Map<String, String[]> nameSplitCache = new HashMap<>();
   private Map<String, Integer[]> entryLocationMap = new HashMap<>();
 
-  public LogManager() {
+  private LogManager() {
     if (logManager != null) {
       CommandScheduler.getInstance().unregisterSubsystem(this);
       return;
     }
     logManager = this;
-    isComp = DriverStation.isFMSAttached();
     DataLogManager.start();
     DataLogManager.logNetworkTables(false);
     log = DataLogManager.getLog();
@@ -60,7 +57,7 @@ public class LogManager extends SubsystemBase {
     log("log manager is ready");
   }
 
-  private static void initializeIfNeeded() {
+  static{
     if (logManager == null) {
       new LogManager();
     }
@@ -68,18 +65,15 @@ public class LogManager extends SubsystemBase {
 
   @SuppressWarnings("unchecked")
   public static <T> LogEntryBuilder<T> addEntry(String name, StatusSignal<T>... statusSignals) {
-    initializeIfNeeded();
     return new LogEntryBuilder<T>(name, statusSignals);
   }
 
   @SuppressWarnings("unchecked")
   public static <T> LogEntryBuilder<T> addEntry(String name, Supplier<T>... suppliers) {
-    initializeIfNeeded();
     return new LogEntryBuilder<T>(name, suppliers);
   }
 
   public static void removeInComp() {
-    initializeIfNeeded();
     if (logManager == null) return; 
 
     for (int i = 0; i < logManager.individualLogEntries.size(); i++) {
@@ -103,7 +97,6 @@ public class LogManager extends SubsystemBase {
   }
   
   public static void clearEntries() {
-    initializeIfNeeded();
     if (logManager != null) {
       logManager.individualLogEntries.clear();
       for (int i = 0; i < logManager.categoryLogEntries.length; i++) {
@@ -115,7 +108,6 @@ public class LogManager extends SubsystemBase {
   }
   
   public static int getEntryCount() {
-    initializeIfNeeded();
     if (logManager == null) return 0;
 
     int count = logManager.individualLogEntries.size();
@@ -128,7 +120,6 @@ public class LogManager extends SubsystemBase {
   }
 
   public static LogEntry<?> findEntry(String name) {
-    initializeIfNeeded();
     if (logManager == null) return null;
     
     Integer[] location = logManager.entryLocationMap.get(name);
@@ -149,7 +140,6 @@ public class LogManager extends SubsystemBase {
   }
 
   public static boolean removeEntry(String name) {
-      initializeIfNeeded();
       if (logManager == null) return false;
       
       Integer[] location = logManager.entryLocationMap.get(name);
@@ -195,12 +185,10 @@ public class LogManager extends SubsystemBase {
           
           return true;
       }
-      
       return false;
   }
 
   public static ConsoleAlert log(Object message, AlertType alertType) {
-    initializeIfNeeded();
     DataLogManager.log(String.valueOf(message));
     
     ConsoleAlert alert = new ConsoleAlert(String.valueOf(message), alertType);
@@ -214,7 +202,6 @@ public class LogManager extends SubsystemBase {
   }
 
   public static ConsoleAlert log(Object message) {
-    initializeIfNeeded();
     return log(message, AlertType.kInfo);
   }
 
@@ -241,18 +228,18 @@ public class LogManager extends SubsystemBase {
     }
   }
 
-  public <T> LogEntry<T> add(String name, Data<T> data, LogLevel logLevel, String metaData, boolean isSeparated) {
+  public static <T> LogEntry<T> add(String name, Data<T> data, LogLevel logLevel, String metaData, boolean isSeparated) {
     LogEntry<T> entry = null;
 
-    int categoryIndex = getCategoryIndex(data, logLevel, isSeparated);
+    int categoryIndex = logManager.getCategoryIndex(data, logLevel, isSeparated);
 
     if (categoryIndex == -1){
       entry = new LogEntry<T>(name, data, logLevel, metaData);
-      individualLogEntries.add(entry);
-      int index = individualLogEntries.size() - 1;
-      entryLocationMap.put(name, new Integer[] {-1, index, null, null});
+      logManager.individualLogEntries.add(entry);
+      int index = logManager.individualLogEntries.size() - 1;
+      logManager.entryLocationMap.put(name, new Integer[] {-1, index, null, null});
     } else{
-      entry = addToEntryArray(categoryIndex, name, data, metaData);
+      entry = logManager.addToEntryArray(categoryIndex, name, data, metaData);
     }
 
     return entry;
@@ -372,7 +359,6 @@ public class LogManager extends SubsystemBase {
 
   @SuppressWarnings("unchecked")
   public static <T> Pair<String, Supplier<T>>[] getSuppliers(String name) {
-    initializeIfNeeded();
     Integer[] loc = logManager.entryLocationMap.get(name);
     if (loc == null) return null;
 
@@ -399,7 +385,6 @@ public class LogManager extends SubsystemBase {
 
   @SuppressWarnings("unchecked")
   public static <T> Pair<String, StatusSignal<T>>[] getSignals(String name) {
-    initializeIfNeeded();
     Integer[] loc = logManager.entryLocationMap.get(name);
     if (loc == null) return null;
 

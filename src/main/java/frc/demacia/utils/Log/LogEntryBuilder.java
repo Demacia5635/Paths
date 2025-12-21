@@ -65,17 +65,16 @@ public class LogEntryBuilder<T> {
     }
     
     public LogEntry<T> build() {
-        if (LogManager.logManager == null) {
-            new LogManager();
-        }
         if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Log entry name cannot be null or empty");
+            LogManager.log("Log entry name cannot be null or empty");
+            return null;
         }
         if (logLevel == null) {
-            throw new IllegalArgumentException("Log level cannot be null");
+            LogManager.log("Log level cannot be null");
+            return null;
         }
         
-        LogEntry<T> entry = LogManager.logManager.add(name, data, logLevel, metadata, isSeparated);
+        LogEntry<T> entry = LogManager.add(name, data, logLevel, metadata, isSeparated);
         
         if (consumer != null) {
             entry.setConsumer(consumer);
