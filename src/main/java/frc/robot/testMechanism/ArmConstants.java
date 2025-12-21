@@ -4,6 +4,7 @@ import frc.demacia.utils.Motors.TalonFXConfig;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 import frc.demacia.utils.Sensors.DigitalEncoderConfig;
 import frc.demacia.utils.Sensors.LimitSwitchConfig;
+import frc.demacia.utils.Mechanisms.StateBasedMechanism.MechanismState;
 
 public class ArmConstants {
     
@@ -119,7 +120,7 @@ public class ArmConstants {
         public static final double TIME_TO_CHANGE_POWER = 0.75;
     }
 
-    public static enum ARM_STATES{
+    public static enum ARM_STATES implements MechanismState{
         L1(Math.toRadians(37.3)/*, 4.6*/),
         L2(1.8/*, 4.4*/),
         L3(2.64208984375/*, 4.729228859906724*/),

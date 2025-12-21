@@ -1,7 +1,5 @@
 package frc.demacia.utils.Mechanisms;
 
-import java.util.HashMap;
-
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -11,60 +9,54 @@ import frc.demacia.utils.Sensors.SensorInterface;
 
 public class StateBasedMechanism extends BaseMechanism {
 
-    public static class State {
-        private String name;
-        private double[] values;
-
-        public State(String name, double[] values){
-            if (values == null) {
-                LogManager.log("Values cannot be null");
-                return;
-            }
-            this.name = name;
-            this.values = values;
-        }
-
-        public String getName(){
-            return name;
-        }
-
-        public void setValues(double[] values){
-            this.values = values;
-        }
-
-        public double[] getValues(){
-            return values;
-        }
+    public interface MechanismState {
+        double[] getValues();
+        String name();
     }
 
     public String name;
 
-    SendableChooser<State> stateChooser = new SendableChooser<>();
-    public State state;
-    protected State testingState;
-    protected State idleState;
+    SendableChooser<MechanismState> stateChooser = new SendableChooser<>();
+    public MechanismState state;
+    private final MechanismState IDLE_STATE = new MechanismState() {
+        @Override 
+        public double[] getValues() { 
+            return new double[motors != null ? motors.size() : 0]; 
+        }
+        @Override
+        public String name() {
+            return "IDLE";
+        }
+    };
+
+    private final MechanismState TESTING_STATE = new MechanismState() {
+        @Override 
+        public double[] getValues() { 
+            return getTestValues(); 
+        }
+        @Override
+        public String name() {
+            return "TESTING";
+        }
+    };
 
     protected double[] testValues;
 
-    protected HashMap<String, State> states = new HashMap<>();
-
-    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors){
+    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<MechanismState> enumClass){
         super(name, motors, sensors);
         testValues = new double[motors.length];
-        double[] idleValues = new double[motors.length];
-        testingState = new State("TESTING", testValues);
-        idleState  = new State("IDLE", idleValues);
-        stateChooser.addOption(testingState.getName(), testingState);
-        stateChooser.addOption(idleState.getName(), idleState);
-        stateChooser.addOption(idleState.getName() + "2", idleState);
-        stateChooser.onChange(state -> this.state = state);
-        SmartDashboard.putData(getName() + "/State Chooser", stateChooser);
+        addNT(enumClass);
     }
 
-    public void addState(String name, double[] values){
-        State state = new State(name, values);
-        stateChooser.addOption(state.getName(), state);
-        states.put(state.getName(), state);
+    private void addNT(Class<MechanismState> enumClass) {
+        stateChooser.addOption("TESTING", TESTING_STATE);
+        stateChooser.addOption("IDLE", IDLE_STATE);
+        stateChooser.addOption("IDLE2", IDLE_STATE);
+        for (MechanismState state : enumClass.getEnumConstants()) {
+            stateChooser.addOption(state.name(), state);
+        }
+        stateChooser.onChange(state -> this.state = state);
+        SmartDashboard.putData(getName() + "/State Chooser", stateChooser);
     }
 
     /**
@@ -73,14 +65,13 @@ public class StateBasedMechanism extends BaseMechanism {
      * @param state Initial state (must implement MechanismState)
      * @return this mechanism for chaining
      */
-    public void setStartingOption(String stateName){
+    public void setStartingOption(MechanismState state){
         if (state == null) {
             LogManager.log("Starting state cannot be null");
             return;
         }
 
-        stateChooser.setDefaultOption(state.getName(), states.get(stateName));
-        this.state = states.get(stateName);
+        stateChooser.setDefaultOption(state.name(), state);
     }
 
     @Override
@@ -93,7 +84,7 @@ public class StateBasedMechanism extends BaseMechanism {
      * 
      * @return Current state enum
      */
-    public void setState(State state) {
+    public void setState(MechanismState state) {
         this.state = state;
     }
 
@@ -102,7 +93,7 @@ public class StateBasedMechanism extends BaseMechanism {
      * 
      * @return Current state enum
      */
-    public State getState() {
+    public MechanismState getState() {
         return state;
     }
 
@@ -111,8 +102,6 @@ public class StateBasedMechanism extends BaseMechanism {
     }
 
     public void setTestValues(double[] testValues){
-        if (testingState == null) return;
-        testingState.setValues(testValues);
         this.testValues = testValues;
     }
 }
