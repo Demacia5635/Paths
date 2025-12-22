@@ -11,16 +11,16 @@ public class ArmConstants {
     public static final String NAME = "Arm";
     public static class ArmAngleMotorConstants {
         /* all the main configs of the motor */
-        public static final int ID = 20;
+        public static final int ID = 11;
         public static final Canbus CAN_BUS = Canbus.Rio;
         public static final String NAME = "Arm Angle Motor";
 
         /* the pid and ff constants of the motor */
-        public static final double KP = 22;
-        public static final double KI = 1.0;
-        public static final double KD = 0.75;
-        public static final double KS = 0;
-        public static final double KV = 0;
+        public static final double KP = 0;
+        public static final double KI = 0;
+        public static final double KD = 0;
+        public static final double KS = 0.67;
+        public static final double KV = 0.23397;
         public static final double KA = 0;
         public static final double KG = 0;
 
@@ -36,7 +36,7 @@ public class ArmConstants {
         /* the basic configues of the motor */
         public static final boolean IS_BRAKE = true;
         public static final boolean IS_INVERTED = false;
-        public static final double GEAR_RATIO = 36.0 * (105.0 / 16.0);
+        public static final double GEAR_RATIO = 12.8;
 
         /* the ramp time of the motor */
         public static final double RAMP_TIME = 0.5;

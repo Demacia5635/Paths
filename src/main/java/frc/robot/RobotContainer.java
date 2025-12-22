@@ -6,10 +6,7 @@ package frc.robot;
 
 import frc.demacia.utils.Controller.CommandController;
 import frc.demacia.utils.Controller.CommandController.ControllerType;
-import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.chassis.Chassis;
-import frc.robot.ChassisConstants.Robot1ChassisConstants;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -21,19 +18,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
-public class RobotContainer {
+public class RobotContainer{
 
   Chassis chassis;
   // DriveCommand driveCommand;
-
   
   public static CommandController driverController;
-
-  public static boolean isComp = DriverStation.isFMSAttached();
-  private static boolean hasRemovedFromLog = false;
-
-  public static int N_CYCLE = 0;
-  public static double CYCLE_TIME = 0.02;
 
   // The robot's subsystems and commands are defined here...
 
@@ -44,23 +34,11 @@ public class RobotContainer {
   public RobotContainer() {
     driverController = new CommandController(0, ControllerType.kXbox);
 
-    chassis = new Chassis(Robot1ChassisConstants.CHASSIS_CONFIG);
+    // chassis = new Chassis(Robot1ChassisConstants.CHASSIS_CONFIG);
     // driveCommand = new DriveCommand(chassis, driverController);
 
     // Configure the trigger bindings
     configureBindings();
-  }
-
-  public static boolean isComp() {
-    return isComp;
-  }
-
-  public static void setIsComp(boolean isComp) {
-    RobotContainer.isComp = isComp;
-    if(!hasRemovedFromLog && isComp) {
-      hasRemovedFromLog = true;
-      LogManager.removeInComp();
-    }
   }
 
   /**
