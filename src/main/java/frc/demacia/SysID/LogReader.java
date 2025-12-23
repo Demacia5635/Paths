@@ -332,7 +332,6 @@ public class LogReader {
     private static List<SyncedDataPoint> synchronizeData(List<DataPoint> dataPoints) {
         List<SyncedDataPoint> result = new ArrayList<>();
         for (DataPoint dp : dataPoints) {
-            // Validate array length before accessing indices
             if (dp.value.length >= 4) {
                 // Assumption: [Position, Velocity, Acceleration, Voltage] are indices 0,1,2,3
                 result.add(new SyncedDataPoint(dp.value[1], dp.value[0], dp.value[2], dp.value[3], dp.timestamp));
@@ -347,11 +346,14 @@ public class LogReader {
         SyncedDataPoint prev = null;
         for (SyncedDataPoint m : data) {
             m.rawAcceleration = m.acceleration;
+            
             if (prev != null) {
                 double deltaTime = (m.timestamp - prev.timestamp) / 1000000.0;
                 if (deltaTime <= 0) deltaTime = 1e-6;
-                double acc = (m.velocity - prev.velocity) / deltaTime;
-                m.acceleration = (m.acceleration * deltaTime + acc * 0.02) / (deltaTime + 0.02);
+                
+                double accDerived = (m.velocity - prev.velocity) / deltaTime;
+
+                m.acceleration = (m.rawAcceleration + accDerived) / 2.0;
 
                 double absVolt = Math.abs(m.voltage);
                 if (prev.velocity == 0 && m.velocity != 0 && absVolt > 0.01 && 
@@ -453,6 +455,7 @@ public class LogReader {
         
         try {
             SimpleMatrix res = mat.solve(volt);
+            
             SimpleMatrix pred = mat.mult(res);
             SimpleMatrix error = volt.minus(pred);
             
@@ -471,9 +474,11 @@ public class LogReader {
             }
             double avgError = validCount > 0 ? sumError / validCount : 0;
             
+            double calculatedKs = res.get(0, 0); 
+
             double kp = CalculateFeedbackGains.calculateFeedbackGains(res.get(1, 0), res.get(2, 0));
             
-            return new BucketResult(minPowerToMove, res.get(1, 0), res.get(2, 0), kp, avgError, maxError, rows);
+            return new BucketResult(calculatedKs, res.get(1, 0), res.get(2, 0), kp, avgError, maxError, rows);
         } catch (Exception e) {
             System.err.println("Error solving bucket: " + e.getMessage());
             return null;

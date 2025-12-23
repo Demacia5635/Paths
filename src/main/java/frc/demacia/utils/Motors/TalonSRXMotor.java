@@ -117,7 +117,7 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface {
 
     @Override
     public void setAngle(double angle, double feedForward) {
-      setMotion(getCurrentPosition() + MathUtil.angleModulus(getCurrentAngle() - angle), feedForward);
+      setMotion(getCurrentPosition() + MathUtil.angleModulus(angle - getCurrentAngle()), feedForward);
       controlMode = ControlMode.ANGLE;
     }
 

@@ -263,8 +263,6 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
     @Override
     public void setAngle(double angle, double feedForward) {
       setMotion(getCurrentPosition() + MathUtil.angleModulus(angle - getCurrentAngle()), feedForward);
-      LogManager.log(getCurrentPosition() + MathUtil.angleModulus(getCurrentAngle() - angle));
-      LogManager.log(getCurrentPosition() + MathUtil.angleModulus(angle - getCurrentAngle()));
       controlMode = ControlMode.ANGLE;
     }
 
