@@ -107,8 +107,6 @@ public class LogReader {
         int recordCount = 0;
         int dataRecordsProcessed = 0;
         
-        // FIXED: Infinite loop that breaks only on EOFException. 
-        // available() is unreliable for files and causes early exit.
         while (true) {
             try {
                 if (readRecord(dataInputStream)) {
@@ -119,7 +117,6 @@ public class LogReader {
                     System.out.println("Processed " + recordCount + " records...");
                 }
             } catch (EOFException e) {
-                // Expected end of file
                 break;
             }
         }
@@ -127,9 +124,7 @@ public class LogReader {
         System.out.println("Valid data records stored: " + dataRecordsProcessed);
     }
 
-    // Returns true if data was added
     private static boolean readRecord(DataInputStream dataInputStream) throws IOException {
-        // These reads will throw EOFException if file ends, which is caught in readRecords
         int headerByte = dataInputStream.readUnsignedByte();
         int idLength = (headerByte & 0x3) + 1;
         int payloadLength = (headerByte >> 2 & 0x3) + 1;
@@ -145,7 +140,6 @@ public class LogReader {
         } else {
             List<EntryDescription> entryList = entries.get(recordId);
             if (entryList != null && !entryList.isEmpty()) {
-                // Check type of the first one
                 String type = entryList.get(0).type.trim();
 
                 boolean isFloat = type.equals("float") || type.equals("float[]");
@@ -179,18 +173,14 @@ public class LogReader {
                     }
 
                     if (value != null) {
-                        // FIXED: Handle merged entries (e.g. FrontLeft | FrontRight sharing one ID)
-                        // If we have 4 motors mapped to this ID, we split the value array into 4 chunks.
                         int numEntries = entryList.size();
                         if (numEntries > 1 && value.length % numEntries == 0) {
                             int chunkSize = value.length / numEntries;
                             for (int i = 0; i < numEntries; i++) {
-                                // Slice the array for this specific motor
                                 double[] slice = Arrays.copyOfRange(value, i * chunkSize, (i + 1) * chunkSize);
                                 entryList.get(i).data.add(new DataPoint(timestamp, slice));
                             }
                         } else {
-                            // Standard 1-to-1 mapping
                             for (EntryDescription entry : entryList) {
                                 entry.data.add(new DataPoint(timestamp, value));
                             }
@@ -199,11 +189,9 @@ public class LogReader {
                     }
 
                 } else {
-                    // Skip types we don't handle (boolean, string, etc)
                     dataInputStream.skipBytes(payloadSize);
                 }
             } else {
-                // Unknown ID
                 dataInputStream.skipBytes(payloadSize);
             }
         }
@@ -212,15 +200,12 @@ public class LogReader {
 
     private static void addEntryFromControlRecord(DataInputStream dataInputStream, int payloadSize) throws IOException {
         int recordType = dataInputStream.readUnsignedByte();
-        if (recordType == 0) { // Start Record
+        if (recordType == 0) {
             int entryId = Integer.reverseBytes(dataInputStream.readInt());
-
             int nameLength = Integer.reverseBytes(dataInputStream.readInt());
             String name = readString(dataInputStream, nameLength);
-
             int typeLength = Integer.reverseBytes(dataInputStream.readInt());
             String type = readString(dataInputStream, typeLength);
-
             int metaLength = Integer.reverseBytes(dataInputStream.readInt());
             String metadata = readString(dataInputStream, metaLength);
 
@@ -237,8 +222,6 @@ public class LogReader {
                 }
             }
         } else {
-            // Skip other control records (Finish, SetMetadata, etc.)
-            // We already read 1 byte (recordType), so skip the rest
             if (payloadSize > 1) {
                 dataInputStream.skipBytes(payloadSize - 1);
             }
@@ -276,7 +259,7 @@ public class LogReader {
             SysIDResults result = analyzeGroup(group);
             if (result != null) {
                 results.put(group, result);
-                // System.out.println("SUCCESS: Analyzed " + group);
+                System.out.println("SUCCESS: Analyzed " + group);
             } else {
                 System.out.println("WARNING: No valid data for " + group);
             }
@@ -417,36 +400,27 @@ public class LogReader {
 
     private static int rangeBucket(SyncedDataPoint d, double[] vRange) {
         double vAbs = Math.abs(d.velocity);
-        int i = vAbs < vRange[0] ? 0 : (vAbs < vRange[1] ? 1 : 2);
+        return vAbs < vRange[0] ? 0 : (vAbs < vRange[1] ? 1 : 2);
+    }
+
+    private static BucketResult solveBucket(List<SyncedDataPoint> sourceData) {
+        if (sourceData == null || sourceData.isEmpty()) return null;
         
-        if (valid(vAbs, 0.1) && valid(d.voltage, 0.05)) {
-            if (d.prev != null) {
-                if (valid(Math.abs(d.prev.velocity), 0.1) && valid(Math.abs(d.prev.voltage), 0.2)) {
-                    return i;
-                } else {
-                    return -1;
-                }
-            } else {
-                return i;
+        List<SyncedDataPoint> validData = new ArrayList<>();
+        for (SyncedDataPoint d : sourceData) {
+            if (Math.abs(d.velocity) > 0.05 && Math.abs(d.voltage) > 0.05) {
+                validData.add(d);
             }
-        } else {
-            return -1;
         }
-    }
 
-    private static boolean valid(double val, double min) {
-        return Math.abs(val) > min;
-    }
+        if (validData.size() < 10) return null;
 
-    private static BucketResult solveBucket(List<SyncedDataPoint> arr) {
-        if (arr == null || arr.size() <= 50) return null;
-        
-        int rows = arr.size();
+        int rows = validData.size();
         SimpleMatrix mat = new SimpleMatrix(rows, 3);
         SimpleMatrix volt = new SimpleMatrix(rows, 1);
         
         for (int r = 0; r < rows; r++) {
-            SyncedDataPoint d = arr.get(r);
+            SyncedDataPoint d = validData.get(r);
             mat.set(r, 0, Math.signum(d.velocity));
             mat.set(r, 1, d.velocity);
             mat.set(r, 2, d.acceleration);
@@ -464,7 +438,7 @@ public class LogReader {
             int validCount = 0;
             
             for (int i = 0; i < rows; i++) {
-                SyncedDataPoint d = arr.get(i);
+                SyncedDataPoint d = validData.get(i);
                 if (Math.abs(d.voltage) > 0.001) {
                     double relError = Math.abs(error.get(i, 0) / d.voltage);
                     sumError += relError;
@@ -475,10 +449,12 @@ public class LogReader {
             double avgError = validCount > 0 ? sumError / validCount : 0;
             
             double calculatedKs = res.get(0, 0); 
+            double calculatedKv = res.get(1, 0);
+            double calculatedKa = res.get(2, 0);
 
-            double kp = CalculateFeedbackGains.calculateFeedbackGains(res.get(1, 0), res.get(2, 0));
+            double kp = CalculateFeedbackGains.calculateFeedbackGains(calculatedKv, calculatedKa);
             
-            return new BucketResult(calculatedKs, res.get(1, 0), res.get(2, 0), kp, avgError, maxError, rows);
+            return new BucketResult(calculatedKs, calculatedKv, calculatedKa, kp, avgError, maxError, rows);
         } catch (Exception e) {
             System.err.println("Error solving bucket: " + e.getMessage());
             return null;
@@ -486,9 +462,14 @@ public class LogReader {
     }
 
     public static class CalculateFeedbackGains {
+        private static final double MIN_PHYSICAL_KA = 0.05;
+
         public static double calculateFeedbackGains(double kv, double ka) {
-            if (Math.abs(ka) < 1e-10) return 0.0;
-            double kP = (2.0 * kv) / ka;
+            double absKa = Math.abs(ka);
+            double effectiveKa = Math.max(absKa, MIN_PHYSICAL_KA);
+
+            double kP = (2.0 * kv) / effectiveKa;
+            
             return kP;
         }
     }

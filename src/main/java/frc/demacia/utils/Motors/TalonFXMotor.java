@@ -152,6 +152,16 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
         accelerationSignal = new Data<>(getAcceleration());
         voltageSignal = new Data<>(getMotorVoltage());
         currentSignal = new Data<>(getStatorCurrent());
+
+        // BaseStatusSignal.setUpdateFrequencyForAll(50, 
+        //     closedLoopSPSignal.getSignal(),
+        //     closedLoopErrorSignal.getSignal(),
+        //     positionSignal.getSignal(),
+        //     velocitySignal.getSignal(),
+        //     accelerationSignal.getSignal(),
+        //     voltageSignal.getSignal(),
+        //     currentSignal.getSignal()
+        // );
     }
 
     @SuppressWarnings("unchecked")
