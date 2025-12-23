@@ -5,18 +5,18 @@ package frc.demacia.utils.Motors;
  * 
  * <p>Stores seven control parameters used for precise motor control:</p>
  * <ul>
- *   <li>kp, ki, kd - PID gains</li>
- *   <li>ks - Static friction compensation</li>
- *   <li>kv - Velocity feed-forward</li>
- *   <li>ka - Acceleration feed-forward</li>
- *   <li>kg - Gravity feed-forward</li>
+ *   <li>kP, kI, kD - PID gains</li>
+ *   <li>kS - Static friction compensation</li>
+ *   <li>kV - Velocity feed-forward</li>
+ *   <li>kA - Acceleration feed-forward</li>
+ *   <li>kG - Gravity feed-forward</li>
  * </ul>
  * 
  * <p><b>Note:</b> This class calculates output in <i>volts</i>, not normalized [-1, 1].</p>
  */
 class CloseLoopParam {
 
-    public static String[] PARAMETER_NAMES = {"kp", "ki", "kd", "ks", "kv", "ka", "kg"};
+    public static String[] PARAMETER_NAMES = {"kP", "kI", "kD", "kS", "kV", "kA", "kG"};
 
     private double[] parameters = {0,0,0,0,0,0,0};
 
@@ -28,38 +28,38 @@ class CloseLoopParam {
     /**
      * Constructor with all seven control parameters.
      * 
-     * @param kp Proportional gain
-     * @param ki Integral gain
-     * @param kd Derivative gain
-     * @param ks Static friction feed-forward (volts)
-     * @param kv Velocity feed-forward (volts per unit/sec)
-     * @param ka Acceleration feed-forward (volts per unit/sec²)
-     * @param kg Gravity feed-forward (volts)
+     * @param kP Proportional gain
+     * @param kI Integral gain
+     * @param kD Derivative gain
+     * @param kS Static friction feed-forward (volts)
+     * @param kV Velocity feed-forward (volts per unit/sec)
+     * @param kA Acceleration feed-forward (volts per unit/sec²)
+     * @param kG Gravity feed-forward (volts)
      */
-    CloseLoopParam(double kp, double ki, double kd, double ks, double kv, double ka, double kg) {
-        set(kp,ki,kd,ks,kv,ka,kg);
+    CloseLoopParam(double kP, double kI, double kD, double kS, double kV, double kA, double kG) {
+        set(kP,kI,kD,kS,kV,kA,kG);
     }
 
     /**
      * Simplified constructor with feed-forward (legacy).
      * 
-     * @param kp Proportional gain
-     * @param ki Integral gain
-     * @param kd Derivative gain
-     * @param kf Feed-forward gain (mapped to kv)
+     * @param kP Proportional gain
+     * @param kI Integral gain
+     * @param kD Derivative gain
+     * @param kf Feed-forward gain (mapped to kV)
      */
-    CloseLoopParam(double kp, double ki, double kd, double kf) {
-        set(kp,ki,kd,0,kf,0,0);
+    CloseLoopParam(double kP, double kI, double kD, double kf) {
+        set(kP,kI,kD,0,kf,0,0);
     }
 
-    public void set (double kp, double ki, double kd, double ks, double kv, double ka, double kg) {
-        parameters[0] = kp;
-        parameters[1] = ki;
-        parameters[2] = kd;
-        parameters[3] = ks;
-        parameters[4] = kv;
-        parameters[5] = ka;
-        parameters[6] = kg;
+    public void set (double kP, double kI, double kD, double kS, double kV, double kA, double kG) {
+        parameters[0] = kP;
+        parameters[1] = kI;
+        parameters[2] = kD;
+        parameters[3] = kS;
+        parameters[4] = kV;
+        parameters[5] = kA;
+        parameters[6] = kG;
     }
 
     public void set(CloseLoopParam other) {
@@ -70,59 +70,59 @@ class CloseLoopParam {
         return parameters;
     }
 
-    public double kp() {
+    public double kP() {
         return parameters[0];
     }
     
-    public void setKp(double kp) {
-        parameters[0] = kp;
+    public void setKP(double kP) {
+        parameters[0] = kP;
     }
 
-    public double ki() {
+    public double kI() {
         return parameters[1];
     }
     
-    public void setKi(double ki) {
-        parameters[1] = ki;
+    public void setKI(double kI) {
+        parameters[1] = kI;
     }
 
-    public double kd() {
+    public double kD() {
         return parameters[2];
     }
     
-    public void setKd(double kd) {
-        parameters[2] = kd;
+    public void setKD(double kD) {
+        parameters[2] = kD;
     }
 
-    public double ks() {
+    public double kS() {
         return parameters[3];
     }
     
-    public void setKs(double ks) {
-        parameters[3] = ks;
+    public void setKS(double kS) {
+        parameters[3] = kS;
     }
 
-    public double kv() {
+    public double kV() {
         return parameters[4];
     }
     
-    public void setKv(double kv) {
-        parameters[4] = kv;
+    public void setKV(double kV) {
+        parameters[4] = kV;
     }
 
-    public double ka() {
+    public double kA() {
         return parameters[5];
     }
     
-    public void setKa(double ka) {
-        parameters[5] = ka;
+    public void setKA(double kA) {
+        parameters[5] = kA;
     }
 
-    public double kg() {
+    public double kG() {
         return parameters[6];
     }
     
-    public void setKg(double kg) {
-        parameters[6] = kg;
+    public void setKG(double kG) {
+        parameters[6] = kG;
     }
 }

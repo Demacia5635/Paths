@@ -104,31 +104,31 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
     }
 
     private void updatePID(boolean apply) {
-        cfg.Slot0.kP = config.pid[0].kp();
-        cfg.Slot0.kI = config.pid[0].ki();
-        cfg.Slot0.kD = config.pid[0].kd();
-        cfg.Slot0.kS = config.pid[0].ks();
-        cfg.Slot0.kV = config.pid[0].kv();
-        cfg.Slot0.kA = config.pid[0].ka();
-        cfg.Slot0.kG = config.pid[0].kg();
+        cfg.Slot0.kP = config.pid[0].kP();
+        cfg.Slot0.kI = config.pid[0].kI();
+        cfg.Slot0.kD = config.pid[0].kD();
+        cfg.Slot0.kS = config.pid[0].kS();
+        cfg.Slot0.kV = config.pid[0].kV();
+        cfg.Slot0.kA = config.pid[0].kA();
+        cfg.Slot0.kG = config.pid[0].kG();
         cfg.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
 
-        cfg.Slot1.kP = config.pid[1].kp();
-        cfg.Slot1.kI = config.pid[1].ki();
-        cfg.Slot1.kD = config.pid[1].kd();
-        cfg.Slot1.kS = config.pid[1].ks();
-        cfg.Slot1.kV = config.pid[1].kv();
-        cfg.Slot1.kA = config.pid[1].ka();
-        cfg.Slot1.kG = config.pid[1].kg();
+        cfg.Slot1.kP = config.pid[1].kP();
+        cfg.Slot1.kI = config.pid[1].kI();
+        cfg.Slot1.kD = config.pid[1].kD();
+        cfg.Slot1.kS = config.pid[1].kS();
+        cfg.Slot1.kV = config.pid[1].kV();
+        cfg.Slot1.kA = config.pid[1].kA();
+        cfg.Slot1.kG = config.pid[1].kG();
         cfg.Slot1.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
         
-        cfg.Slot2.kP = config.pid[2].kp();
-        cfg.Slot2.kI = config.pid[2].ki();
-        cfg.Slot2.kD = config.pid[2].kd();
-        cfg.Slot2.kS = config.pid[2].ks();
-        cfg.Slot2.kV = config.pid[2].kv();
-        cfg.Slot2.kA = config.pid[2].ka();
-        cfg.Slot2.kG = config.pid[2].kg();
+        cfg.Slot2.kP = config.pid[2].kP();
+        cfg.Slot2.kI = config.pid[2].kI();
+        cfg.Slot2.kD = config.pid[2].kD();
+        cfg.Slot2.kS = config.pid[2].kS();
+        cfg.Slot2.kV = config.pid[2].kV();
+        cfg.Slot2.kA = config.pid[2].kA();
+        cfg.Slot2.kG = config.pid[2].kG();
         cfg.Slot2.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
         if(apply) {
             getConfigurator().apply(cfg.Slot0);
@@ -368,43 +368,43 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
       cfg.SlotNumber = slot;
       switch (slot) {
         case 0:
-          cfg.kP = config.pid[0].kp();
-          cfg.kI = config.pid[0].ki();
-          cfg.kD = config.pid[0].kd();
-          cfg.kS = config.pid[0].ks();
-          cfg.kV = config.pid[0].kv();
-          cfg.kA = config.pid[0].ka();
-          cfg.kG = config.pid[0].kg();
+          cfg.kP = config.pid[0].kP();
+          cfg.kI = config.pid[0].kI();
+          cfg.kD = config.pid[0].kD();
+          cfg.kS = config.pid[0].kS();
+          cfg.kV = config.pid[0].kV();
+          cfg.kA = config.pid[0].kA();
+          cfg.kG = config.pid[0].kG();
           break;
 
         case 1:
-          cfg.kP = config.pid[0].kp();
-          cfg.kI = config.pid[0].ki();
-          cfg.kD = config.pid[0].kd();
-          cfg.kS = config.pid[0].ks();
-          cfg.kV = config.pid[0].kv();
-          cfg.kA = config.pid[0].ka();
-          cfg.kG = config.pid[0].kg();
+          cfg.kP = config.pid[0].kP();
+          cfg.kI = config.pid[0].kI();
+          cfg.kD = config.pid[0].kD();
+          cfg.kS = config.pid[0].kS();
+          cfg.kV = config.pid[0].kV();
+          cfg.kA = config.pid[0].kA();
+          cfg.kG = config.pid[0].kG();
           break;
 
         case 2:
-          cfg.kP = config.pid[0].kp();
-          cfg.kI = config.pid[0].ki();
-          cfg.kD = config.pid[0].kd();
-          cfg.kS = config.pid[0].ks();
-          cfg.kV = config.pid[0].kv();
-          cfg.kA = config.pid[0].ka();
-          cfg.kG = config.pid[0].kg();
+          cfg.kP = config.pid[0].kP();
+          cfg.kI = config.pid[0].kI();
+          cfg.kD = config.pid[0].kD();
+          cfg.kS = config.pid[0].kS();
+          cfg.kV = config.pid[0].kV();
+          cfg.kA = config.pid[0].kA();
+          cfg.kG = config.pid[0].kG();
           break;
       
         default:
-          cfg.kP = config.pid[0].kp();
-          cfg.kI = config.pid[0].ki();
-          cfg.kD = config.pid[0].kd();
-          cfg.kS = config.pid[0].ks();
-          cfg.kV = config.pid[0].kv();
-          cfg.kA = config.pid[0].ka();
-          cfg.kG = config.pid[0].kg();
+          cfg.kP = config.pid[0].kP();
+          cfg.kI = config.pid[0].kI();
+          cfg.kD = config.pid[0].kD();
+          cfg.kS = config.pid[0].kS();
+          cfg.kV = config.pid[0].kV();
+          cfg.kA = config.pid[0].kA();
+          cfg.kG = config.pid[0].kG();
           break;
       }
 
@@ -415,13 +415,13 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
       @Override
       public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("PID+FF Config");
-          builder.addDoubleProperty("KP", ()-> config.pid[0].kp(), (double newValue) -> config.pid[0].setKp(newValue));
-          builder.addDoubleProperty("KI", ()-> config.pid[0].ki(), (double newValue) -> config.pid[0].setKi(newValue));
-          builder.addDoubleProperty("KD", ()-> config.pid[0].kd(), (double newValue) -> config.pid[0].setKd(newValue));
-          builder.addDoubleProperty("KS", ()-> config.pid[0].ks(), (double newValue) -> config.pid[0].setKs(newValue));
-          builder.addDoubleProperty("KV", ()-> config.pid[0].kv(), (double newValue) -> config.pid[0].setKv(newValue));
-          builder.addDoubleProperty("KA", ()-> config.pid[0].ka(), (double newValue) -> config.pid[0].setKa(newValue));
-          builder.addDoubleProperty("KG", ()-> config.pid[0].kg(), (double newValue) -> config.pid[0].setKg(newValue));
+          builder.addDoubleProperty("KP", ()-> config.pid[0].kP(), (double newValue) -> config.pid[0].setKP(newValue));
+          builder.addDoubleProperty("KI", ()-> config.pid[0].kI(), (double newValue) -> config.pid[0].setKI(newValue));
+          builder.addDoubleProperty("KD", ()-> config.pid[0].kD(), (double newValue) -> config.pid[0].setKD(newValue));
+          builder.addDoubleProperty("KS", ()-> config.pid[0].kS(), (double newValue) -> config.pid[0].setKS(newValue));
+          builder.addDoubleProperty("KV", ()-> config.pid[0].kV(), (double newValue) -> config.pid[0].setKV(newValue));
+          builder.addDoubleProperty("KA", ()-> config.pid[0].kA(), (double newValue) -> config.pid[0].setKA(newValue));
+          builder.addDoubleProperty("KG", ()-> config.pid[0].kG(), (double newValue) -> config.pid[0].setKG(newValue));
         
         builder.addBooleanProperty("Update", ()-> configPidFf.isScheduled(), 
           value -> {
