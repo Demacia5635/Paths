@@ -145,7 +145,6 @@ public class LogReader {
         } else {
             List<EntryDescription> entryList = entries.get(recordId);
             if (entryList != null && !entryList.isEmpty()) {
-                // Check type of the first one
                 String type = entryList.get(0).type.trim();
 
                 boolean isFloat = type.equals("float") || type.equals("float[]");
@@ -179,18 +178,14 @@ public class LogReader {
                     }
 
                     if (value != null) {
-                        // FIXED: Handle merged entries (e.g. FrontLeft | FrontRight sharing one ID)
-                        // If we have 4 motors mapped to this ID, we split the value array into 4 chunks.
                         int numEntries = entryList.size();
                         if (numEntries > 1 && value.length % numEntries == 0) {
                             int chunkSize = value.length / numEntries;
                             for (int i = 0; i < numEntries; i++) {
-                                // Slice the array for this specific motor
                                 double[] slice = Arrays.copyOfRange(value, i * chunkSize, (i + 1) * chunkSize);
                                 entryList.get(i).data.add(new DataPoint(timestamp, slice));
                             }
                         } else {
-                            // Standard 1-to-1 mapping
                             for (EntryDescription entry : entryList) {
                                 entry.data.add(new DataPoint(timestamp, value));
                             }
@@ -199,11 +194,9 @@ public class LogReader {
                     }
 
                 } else {
-                    // Skip types we don't handle (boolean, string, etc)
                     dataInputStream.skipBytes(payloadSize);
                 }
             } else {
-                // Unknown ID
                 dataInputStream.skipBytes(payloadSize);
             }
         }
@@ -212,7 +205,7 @@ public class LogReader {
 
     private static void addEntryFromControlRecord(DataInputStream dataInputStream, int payloadSize) throws IOException {
         int recordType = dataInputStream.readUnsignedByte();
-        if (recordType == 0) { // Start Record
+        if (recordType == 0) {
             int entryId = Integer.reverseBytes(dataInputStream.readInt());
 
             int nameLength = Integer.reverseBytes(dataInputStream.readInt());
@@ -237,8 +230,6 @@ public class LogReader {
                 }
             }
         } else {
-            // Skip other control records (Finish, SetMetadata, etc.)
-            // We already read 1 byte (recordType), so skip the rest
             if (payloadSize > 1) {
                 dataInputStream.skipBytes(payloadSize - 1);
             }
@@ -276,7 +267,7 @@ public class LogReader {
             SysIDResults result = analyzeGroup(group);
             if (result != null) {
                 results.put(group, result);
-                // System.out.println("SUCCESS: Analyzed " + group);
+                System.out.println("SUCCESS: Analyzed " + group);
             } else {
                 System.out.println("WARNING: No valid data for " + group);
             }

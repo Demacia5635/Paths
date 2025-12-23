@@ -291,9 +291,23 @@ public class Data<T> {
     public T[] getValueArray() { return length == 0 ? null : currentValues; }
     
     public StatusSignal<T> getSignal() { return (signal != null && signal.length > 0) ? signal[0] : null; }
-    public StatusSignal<T>[] getSignals() { return signal; }
-    public Supplier<T> getSupplier() { return (oldSupplier != null && oldSupplier.length > 0) ? oldSupplier[0] : null; }
-    public Supplier<T>[] getSuppliers() { return oldSupplier; }
+    public StatusSignal<T>[] getSignals() {return signal;}
+    public Supplier<T> getSupplier() {
+        if (signal != null && signal.length > 0) return () -> signal[0].getValue();
+        return (oldSupplier != null && oldSupplier.length > 0) ? oldSupplier[0] : null;
+    }
+    public Supplier<T>[] getSuppliers() {
+        if (signal != null) {
+            @SuppressWarnings("unchecked")
+            Supplier<T>[] sigSuppliers = new Supplier[signal.length];
+            for (int i = 0; i < signal.length; i++) {
+                final int index = i;
+                sigSuppliers[i] = () -> signal[index].getValue();
+            }
+            return sigSuppliers;
+        }
+        return oldSupplier;
+    }
 
     public long getTime() {
         if (signal != null) return (long) (signal[0].getTimestamp().getTime() * 1000);

@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusSignal;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DataLog;
@@ -41,6 +40,7 @@ public class LogManager extends SubsystemBase {
 
   private Map<String, String[]> nameSplitCache = new HashMap<>();
   private Map<String, Integer[]> entryLocationMap = new HashMap<>();
+  private Map<String, Supplier<?>> supplierCache = new HashMap<>();
 
   private LogManager() {
     if (logManager != null) {
@@ -104,6 +104,7 @@ public class LogManager extends SubsystemBase {
       }
       logManager.entryLocationMap.clear();
       logManager.nameSplitCache.clear();
+      logManager.supplierCache.clear();
     }
   }
   
@@ -153,6 +154,7 @@ public class LogManager extends SubsystemBase {
               logManager.individualLogEntries.remove(index);
               logManager.entryLocationMap.remove(name);
               logManager.nameSplitCache.remove(name);
+              logManager.supplierCache.remove(name);
               
               logManager.updateIndicesAfterRemoval(index);
               return true;
@@ -164,6 +166,7 @@ public class LogManager extends SubsystemBase {
           
           logManager.entryLocationMap.remove(name);
           logManager.nameSplitCache.remove(name);
+          logManager.supplierCache.remove(name);
           
           LogEntry<?> categoryEntry = logManager.categoryLogEntries[categoryIndex];
           if (categoryEntry != null) {
@@ -241,8 +244,20 @@ public class LogManager extends SubsystemBase {
     } else{
       entry = logManager.addToEntryArray(categoryIndex, name, data, metaData);
     }
+    String[] nameParts = name.split(": ");
+    String GroupName = nameParts[0];
+    String[] parts = nameParts[1].split(", ");
+    for (int i = 0; i < Math.min(parts.length, data.getSuppliers().length); i++) {
+      LogManager.log(GroupName + ": " + parts[i]);
+      LogManager.log(data.getSuppliers()[i].get());
+      logManager.supplierCache.put((GroupName + ": " + parts[i]).toLowerCase(), data.getSuppliers()[i]);
+    }
 
     return entry;
+  }
+
+  public static Supplier<?> getSupplier(String name) {
+    return logManager.supplierCache.get(name.toLowerCase());
   }
 
   @SuppressWarnings("unchecked")
@@ -355,78 +370,5 @@ public class LogManager extends SubsystemBase {
               entry.setValue(new Integer[] {location[0], location[1], location[2] - removedCount, location[3]});
           }
       }
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> Pair<String, Supplier<T>>[] getSuppliers(String name) {
-    Integer[] loc = logManager.entryLocationMap.get(name);
-    if (loc == null) return null;
-
-    LogEntry<?> entry = (loc[0] == -1) 
-        ? logManager.individualLogEntries.get(loc[1]) 
-        : logManager.categoryLogEntries[loc[0]];
-
-    if (entry == null || entry.getData() == null) return null;
-
-    Supplier<T>[] allSuppliers = (Supplier<T>[]) entry.getData().getSuppliers();
-    if (allSuppliers == null) return null; 
-
-    int start = (loc[0] == -1) ? 0 : loc[2];
-    int len = (loc[0] == -1) ? allSuppliers.length : loc[3];
-
-    String[] subNames = parseSubNames(name, len);
-
-    Pair<String, Supplier<T>>[] result = new Pair[len];
-    for (int i = 0; i < len; i++) {
-        result[i] = new Pair<>(subNames[i], allSuppliers[start + i]);
-    }
-    return result;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> Pair<String, StatusSignal<T>>[] getSignals(String name) {
-    Integer[] loc = logManager.entryLocationMap.get(name);
-    if (loc == null) return null;
-
-    LogEntry<?> entry = (loc[0] == -1) 
-        ? logManager.individualLogEntries.get(loc[1]) 
-        : logManager.categoryLogEntries[loc[0]];
-
-    if (entry == null || entry.getData() == null) return null;
-
-    StatusSignal<T>[] allSignals = (StatusSignal<T>[]) entry.getData().getSignals();
-    if (allSignals == null) return null; 
-
-    int start = (loc[0] == -1) ? 0 : loc[2];
-    int len = (loc[0] == -1) ? allSignals.length : loc[3];
-
-    String[] subNames = parseSubNames(name, len);
-
-    Pair<String, StatusSignal<T>>[] result = new Pair[len];
-    for (int i = 0; i < len; i++) {
-        result[i] = new Pair<>(subNames[i], allSignals[start + i]);
-    }
-    return result;
-  }
-
-  private static String[] parseSubNames(String name, int count) {
-    String cleanName = name;
-    if (name.contains(":")) {
-        cleanName = name.substring(name.indexOf(":") + 1);
-    }
-    
-    String[] parts = cleanName.split(",");
-    
-    for(int i = 0; i < parts.length; i++) {
-        parts[i] = parts[i].trim();
-    }
-
-    if (parts.length == count) {
-        return parts;
-    }
-    
-    String[] fallback = new String[count];
-    for(int i = 0; i < count; i++) fallback[i] = name;
-    return fallback; 
   }
 }
