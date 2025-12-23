@@ -22,8 +22,8 @@ public class SwerveModuleConfig {
 
     public String name;             // Name of the motor - used for logging
 
-    public BaseMotorConfig<?> steerConfig;
-    public BaseMotorConfig<?> driveConfig;
+    public BaseMotorConfig steerConfig;
+    public BaseMotorConfig driveConfig;
     public CancoderConfig cancoderConfig;
     public double steerOffset;
 
@@ -32,7 +32,7 @@ public class SwerveModuleConfig {
      * @param id - CAN bus ID
      * @param name - name of motor for logging
      */
-    public SwerveModuleConfig(String name, BaseMotorConfig<?> steerConfig, BaseMotorConfig<?> driveConfig, CancoderConfig cancoderConfig) {
+    public SwerveModuleConfig(String name, BaseMotorConfig steerConfig, BaseMotorConfig driveConfig, CancoderConfig cancoderConfig) {
         this.name = name;
         this.steerConfig = steerConfig;
         this.driveConfig = driveConfig;
