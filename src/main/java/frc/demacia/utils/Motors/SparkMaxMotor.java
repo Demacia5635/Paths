@@ -60,13 +60,13 @@ public class SparkMaxMotor extends SparkMax implements MotorInterface {
   }
 
   private void updatePID(boolean apply) {
-    cfg.closedLoop.pidf(config.pid[0].kp(), config.pid[0].ki(), config.pid[0].kd(), config.pid[0].kv(),
+    cfg.closedLoop.pidf(config.pid[0].kP(), config.pid[0].kI(), config.pid[0].kD(), config.pid[0].kV(),
         ClosedLoopSlot.kSlot0);
-    cfg.closedLoop.pidf(config.pid[1].kp(), config.pid[1].ki(), config.pid[1].kd(), config.pid[1].kv(),
+    cfg.closedLoop.pidf(config.pid[1].kP(), config.pid[1].kI(), config.pid[1].kD(), config.pid[1].kV(),
         ClosedLoopSlot.kSlot1);
-    cfg.closedLoop.pidf(config.pid[2].kp(), config.pid[2].ki(), config.pid[2].kd(), config.pid[2].kv(),
+    cfg.closedLoop.pidf(config.pid[2].kP(), config.pid[2].kI(), config.pid[2].kD(), config.pid[2].kV(),
         ClosedLoopSlot.kSlot2);
-    cfg.closedLoop.pidf(config.pid[3].kp(), config.pid[3].ki(), config.pid[3].kd(), config.pid[3].kv(),
+    cfg.closedLoop.pidf(config.pid[3].kP(), config.pid[3].kI(), config.pid[3].kD(), config.pid[3].kV(),
         ClosedLoopSlot.kSlot3);
     if (apply) {
       this.configure(cfg, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
@@ -168,7 +168,7 @@ public class SparkMaxMotor extends SparkMax implements MotorInterface {
   }
 
   public void setVelocity(double velocity) {
-    setVelocity(velocity, config.pid[closedLoopSlot.value].ks()*Math.signum(velocity));
+    setVelocity(velocity, config.pid[closedLoopSlot.value].kS()*Math.signum(velocity));
   }
 
   public void setPositionVoltage(double position, double feedForward) {
@@ -204,7 +204,7 @@ public class SparkMaxMotor extends SparkMax implements MotorInterface {
 
   @Override
   public void setMotion(double position) {
-    setMotion(position, config.pid[closedLoopSlot.value].ks());
+    setMotion(position, config.pid[closedLoopSlot.value].kS());
   }
 
   @Override
@@ -306,7 +306,7 @@ public class SparkMaxMotor extends SparkMax implements MotorInterface {
     Command configPidFf = new InstantCommand(()-> {
       cfg = new SparkMaxConfig();
       closedLoopSlot = slot == 0 ? ClosedLoopSlot.kSlot0 : slot == 1 ? ClosedLoopSlot.kSlot1 : ClosedLoopSlot.kSlot2;
-      cfg.closedLoop.pidf(config.pid[slot].kp(), config.pid[slot].ki(), config.pid[slot].kd(), config.pid[slot].kv(),
+      cfg.closedLoop.pidf(config.pid[slot].kP(), config.pid[slot].kI(), config.pid[slot].kD(), config.pid[slot].kV(),
         closedLoopSlot);
       this.configure(cfg, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }).ignoringDisable(true);
@@ -315,13 +315,13 @@ public class SparkMaxMotor extends SparkMax implements MotorInterface {
       @Override
       public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("PID+FF Config");
-          builder.addDoubleProperty("KP", ()-> config.pid[0].kp(), (double newValue) -> config.pid[0].setKp(newValue));
-          builder.addDoubleProperty("KI", ()-> config.pid[0].ki(), (double newValue) -> config.pid[0].setKi(newValue));
-          builder.addDoubleProperty("KD", ()-> config.pid[0].kd(), (double newValue) -> config.pid[0].setKd(newValue));
-          builder.addDoubleProperty("KS", ()-> config.pid[0].ks(), (double newValue) -> config.pid[0].setKs(newValue));
-          builder.addDoubleProperty("KV", ()-> config.pid[0].kv(), (double newValue) -> config.pid[0].setKv(newValue));
-          builder.addDoubleProperty("KA", ()-> config.pid[0].ka(), (double newValue) -> config.pid[0].setKa(newValue));
-          builder.addDoubleProperty("KG", ()-> config.pid[0].kg(), (double newValue) -> config.pid[0].setKg(newValue));
+          builder.addDoubleProperty("KP", ()-> config.pid[0].kP(), (double newValue) -> config.pid[0].setKP(newValue));
+          builder.addDoubleProperty("KI", ()-> config.pid[0].kI(), (double newValue) -> config.pid[0].setKI(newValue));
+          builder.addDoubleProperty("KD", ()-> config.pid[0].kD(), (double newValue) -> config.pid[0].setKD(newValue));
+          builder.addDoubleProperty("KS", ()-> config.pid[0].kS(), (double newValue) -> config.pid[0].setKS(newValue));
+          builder.addDoubleProperty("KV", ()-> config.pid[0].kV(), (double newValue) -> config.pid[0].setKV(newValue));
+          builder.addDoubleProperty("KA", ()-> config.pid[0].kA(), (double newValue) -> config.pid[0].setKA(newValue));
+          builder.addDoubleProperty("KG", ()-> config.pid[0].kG(), (double newValue) -> config.pid[0].setKG(newValue));
         
         builder.addBooleanProperty("Update", ()-> configPidFf.isScheduled(), 
           value -> {

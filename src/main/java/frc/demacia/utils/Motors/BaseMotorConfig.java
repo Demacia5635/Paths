@@ -196,10 +196,10 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         this.maxAcceleration = other.maxAcceleration;
         this.maxVelocity = other.maxVelocity;
         this.maxJerk = other.maxJerk;
-        this.pid[0].set(other.pid[0]);
-        this.pid[1].set(other.pid[1]);
-        this.pid[2].set(other.pid[2]);
-        this.pid[3].set(other.pid[3]);
+        this.pid[0] = (other.pid[0]);
+        this.pid[1] = (other.pid[1]);
+        this.pid[2] = (other.pid[2]);
+        this.pid[3] = (other.pid[3]);
         this.maxPositionError = other.maxPositionError;
         this.isMeterMotor = other.isMeterMotor;
         this.isRadiansMotor = other.isRadiansMotor;
