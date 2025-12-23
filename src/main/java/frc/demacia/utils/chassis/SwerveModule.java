@@ -29,8 +29,8 @@ public class SwerveModule {
     public String name;
 
     public SwerveModule(SwerveModuleConfig config) {
-        steerMotor = config.steerConfig.create();
-        driveMotor = config.driveConfig.create();
+        steerMotor = config.steerConfig.getMotorClass().create(config.steerConfig);
+        driveMotor = config.driveConfig.getMotorClass().create(config.driveConfig);
         cancoder = new Cancoder(config.cancoderConfig);
         name = config.name;
 
