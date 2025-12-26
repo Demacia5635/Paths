@@ -246,7 +246,8 @@ public class LogManager extends SubsystemBase {
     }
     String[] nameParts = name.split(": ");
     String GroupName = nameParts[0];
-    String[] parts = nameParts[1].split(", ");
+    String[] parts = nameParts.length >=2 ? nameParts[1].split(", ") 
+    : new String[0];
     for (int i = 0; i < Math.min(parts.length, data.getSuppliers().length); i++) {
       LogManager.log(GroupName + ": " + parts[i]);
       LogManager.log(data.getSuppliers()[i].get());

@@ -16,8 +16,16 @@ import org.ejml.simple.SimpleMatrix;
 
 public class LogReader {
 
-    private static Map<Integer,List<EntryDescription>> entries;
+    // Cache the data here so we don't re-read the file every time
+    private static Map<Integer,List<EntryDescription>> entries = new HashMap<>();
     private static double minPowerToMove = Double.MAX_VALUE;
+
+    public enum MechanismType {
+        SIMPLE,          // Velocity Loop (Drive) -> Aggressive KP
+        SIMPLE_POSITION, // Position Loop No Gravity (Steer) -> Smooth KP
+        ELEVATOR,        // Position + Constant Gravity
+        ARM              // Position + Cosine Gravity
+    }
 
     private static class EntryDescription {
         String name;
@@ -61,17 +69,33 @@ public class LogReader {
         }
     }
 
-    public static Map<String, SysIDResults> getResult(String fileName) {
+    /**
+     * Step 1: LOAD the file from disk (Slow part)
+     */
+    public static void loadFile(String fileName) {
         entries = new HashMap<>();
         try {
             System.out.println("Reading log file: " + fileName);
             wpilogReader(fileName);
-            return performAnalysis();
         } catch (IOException e) {
             System.err.println("Error reading log file: " + e.getMessage());
             e.printStackTrace();
-            return new HashMap<>();
         }
+    }
+
+    /**
+     * Step 2: ANALYZE the data in memory (Fast part)
+     */
+    public static Map<String, SysIDResults> analyze(MechanismType type) {
+        if (entries == null || entries.isEmpty()) return new HashMap<>();
+        System.out.println("Analyzing as " + type);
+        return performAnalysis(type);
+    }
+
+    // Backwards compatibility wrapper
+    public static Map<String, SysIDResults> getResult(String fileName) {
+        loadFile(fileName);
+        return analyze(MechanismType.SIMPLE);
     }
 
     private static void wpilogReader(String fileName) throws IOException {
@@ -113,9 +137,6 @@ public class LogReader {
                     dataRecordsProcessed++;
                 }
                 recordCount++;
-                if (recordCount % 10000 == 0) {
-                    System.out.println("Processed " + recordCount + " records...");
-                }
             } catch (EOFException e) {
                 break;
             }
@@ -250,18 +271,14 @@ public class LogReader {
         return result;
     }
 
-    private static Map<String, SysIDResults> performAnalysis() {
+    private static Map<String, SysIDResults> performAnalysis(MechanismType type) {
         Map<String, SysIDResults> results = new HashMap<>();
         Set<String> groups = findGroups();
-        System.out.println("Found " + groups.size() + " unique motor names to analyze.");
         
         for (String group : groups) {
-            SysIDResults result = analyzeGroup(group);
+            SysIDResults result = analyzeGroup(group, type);
             if (result != null) {
                 results.put(group, result);
-                System.out.println("SUCCESS: Analyzed " + group);
-            } else {
-                System.out.println("WARNING: No valid data for " + group);
             }
         }
         return results;
@@ -277,7 +294,7 @@ public class LogReader {
         return groups;
     }
 
-    private static SysIDResults analyzeGroup(String name) {
+    private static SysIDResults analyzeGroup(String name, MechanismType type) {
         List<DataPoint> allData = new ArrayList<>();
 
         for (List<EntryDescription> list : entries.values()) {
@@ -295,7 +312,7 @@ public class LogReader {
         allData.sort((p1, p2) -> Long.compare(p1.timestamp, p2.timestamp));
 
         List<SyncedDataPoint> syncedData = synchronizeData(allData);
-        return performSysIdLikeAnalysis(syncedData);
+        return performSysIdLikeAnalysis(syncedData, type);
     }
 
     public static class SyncedDataPoint {
@@ -316,7 +333,6 @@ public class LogReader {
         List<SyncedDataPoint> result = new ArrayList<>();
         for (DataPoint dp : dataPoints) {
             if (dp.value.length >= 4) {
-                // Assumption: [Position, Velocity, Acceleration, Voltage] are indices 0,1,2,3
                 result.add(new SyncedDataPoint(dp.value[1], dp.value[0], dp.value[2], dp.value[3], dp.timestamp));
             }
         }
@@ -351,13 +367,14 @@ public class LogReader {
     }
 
     public static class BucketResult {
-        double ks, kv, ka, kp, avgError, maxError;
+        double ks, kv, ka, kg, kp, avgError, maxError;
         int points;
 
-        BucketResult(double ks, double kv, double ka, double kp, double avgError, double maxError, int points) {
+        BucketResult(double ks, double kv, double ka, double kg, double kp, double avgError, double maxError, int points) {
             this.ks = ks;
             this.kv = kv;
             this.ka = ka;
+            this.kg = kg;
             this.kp = kp;
             this.avgError = avgError;
             this.maxError = maxError;
@@ -366,12 +383,12 @@ public class LogReader {
 
         @Override
         public String toString() {
-            return String.format("KS=%.4f, KV=%.4f, KA=%.4f, KP=%.4f, AvgError=%.2f%%, MaxError=%.2f%%, Points=%d", 
-                               ks, kv, ka, kp, avgError*100, maxError*100, points);
+            return String.format("KS=%.4f, KV=%.4f, KA=%.4f, KG=%.4f, KP=%.4f, AvgError=%.2f%%, MaxError=%.2f%%, Points=%d", 
+                               ks, kv, ka, kg, kp, avgError*100, maxError*100, points);
         }
     }
 
-    private static SysIDResults performSysIdLikeAnalysis(List<SyncedDataPoint> data) {
+    private static SysIDResults performSysIdLikeAnalysis(List<SyncedDataPoint> data, MechanismType type) {
         if (data.isEmpty()) return new SysIDResults(null, null, null);
 
         double maxV = 0.0;
@@ -391,9 +408,9 @@ public class LogReader {
             else if (r == 2) high.add(d);
         }
 
-        BucketResult slowR = solveBucket(slow);
-        BucketResult midR = solveBucket(mid);
-        BucketResult highR = solveBucket(high);
+        BucketResult slowR = solveBucket(slow, type);
+        BucketResult midR = solveBucket(mid, type);
+        BucketResult highR = solveBucket(high, type);
 
         return new SysIDResults(slowR, midR, highR);
     }
@@ -403,12 +420,12 @@ public class LogReader {
         return vAbs < vRange[0] ? 0 : (vAbs < vRange[1] ? 1 : 2);
     }
 
-    private static BucketResult solveBucket(List<SyncedDataPoint> sourceData) {
+    private static BucketResult solveBucket(List<SyncedDataPoint> sourceData, MechanismType type) {
         if (sourceData == null || sourceData.isEmpty()) return null;
         
         List<SyncedDataPoint> validData = new ArrayList<>();
         for (SyncedDataPoint d : sourceData) {
-            if (Math.abs(d.velocity) > 0.05 && Math.abs(d.voltage) > 0.05) {
+            if (Math.abs(d.velocity) > 0.05 || Math.abs(d.voltage) > 0.05) {
                 validData.add(d);
             }
         }
@@ -416,14 +433,26 @@ public class LogReader {
         if (validData.size() < 10) return null;
 
         int rows = validData.size();
-        SimpleMatrix mat = new SimpleMatrix(rows, 3);
+        
+        int cols = (type == MechanismType.SIMPLE || type == MechanismType.SIMPLE_POSITION) ? 3 : 4;
+
+        SimpleMatrix mat = new SimpleMatrix(rows, cols);
         SimpleMatrix volt = new SimpleMatrix(rows, 1);
         
         for (int r = 0; r < rows; r++) {
             SyncedDataPoint d = validData.get(r);
-            mat.set(r, 0, Math.signum(d.velocity));
-            mat.set(r, 1, d.velocity);
-            mat.set(r, 2, d.acceleration);
+            mat.set(r, 0, Math.signum(d.velocity)); // KS
+            mat.set(r, 1, d.velocity);              // KV
+            mat.set(r, 2, d.acceleration);          // KA
+            
+            if (cols == 4) {
+                if (type == MechanismType.ELEVATOR) {
+                    mat.set(r, 3, 1.0);
+                } else if (type == MechanismType.ARM) {
+                    mat.set(r, 3, Math.cos(d.position));
+                }
+            }
+            
             volt.set(r, 0, d.voltage);
         }
         
@@ -451,10 +480,15 @@ public class LogReader {
             double calculatedKs = res.get(0, 0); 
             double calculatedKv = res.get(1, 0);
             double calculatedKa = res.get(2, 0);
-
-            double kp = CalculateFeedbackGains.calculateFeedbackGains(calculatedKv, calculatedKa);
             
-            return new BucketResult(calculatedKs, calculatedKv, calculatedKa, kp, avgError, maxError, rows);
+            double calculatedKg = 0.0;
+            if (cols == 4) {
+                calculatedKg = res.get(3, 0);
+            }
+
+            double kp = CalculateFeedbackGains.calculateFeedbackGains(calculatedKv, calculatedKa, type);
+            
+            return new BucketResult(calculatedKs, calculatedKv, calculatedKa, calculatedKg, kp, avgError, maxError, rows);
         } catch (Exception e) {
             System.err.println("Error solving bucket: " + e.getMessage());
             return null;
@@ -464,13 +498,15 @@ public class LogReader {
     public static class CalculateFeedbackGains {
         private static final double MIN_PHYSICAL_KA = 0.05;
 
-        public static double calculateFeedbackGains(double kv, double ka) {
+        public static double calculateFeedbackGains(double kv, double ka, MechanismType type) {
             double absKa = Math.abs(ka);
             double effectiveKa = Math.max(absKa, MIN_PHYSICAL_KA);
 
-            double kP = (2.0 * kv) / effectiveKa;
-            
-            return kP;
+            if (type == MechanismType.SIMPLE) {
+                return (2.0 * kv) / effectiveKa;
+            } else {
+                return (kv * kv) / (4.0 * effectiveKa);
+            }
         }
     }
 }
