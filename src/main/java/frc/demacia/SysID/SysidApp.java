@@ -25,6 +25,8 @@ class Sysid implements Consumer<File> {
     JTextArea msgArea = new JTextArea();
     JScrollPane msgPane = new JScrollPane(msgArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     
+    File currentFile;
+
     private static Sysid sysid = null;
 
     public Sysid() {
@@ -70,11 +72,14 @@ class Sysid implements Consumer<File> {
     @Override
     public void accept(File file) {
         System.out.println("File set to " + file);
+        this.currentFile = file;
         LogReader.loadFile(file.getAbsolutePath());
-        analyzeFile(LogReader.MechanismType.SIMPLE);
+        analyzeFile(LogReader.MechanismType.POSITION);
     }
 
     public void analyzeFile(LogReader.MechanismType type) {
+        if (currentFile == null) return;
+        
         MotorData currentlySelected = motorList.getSelectedValue();
         String selectedName = (currentlySelected != null) ? currentlySelected.name : null;
 
@@ -159,17 +164,16 @@ class SysidResultPanel extends JPanel {
     JLabel[][] k;
     
     JComboBox<LogReader.MechanismType> mechTypeBox;
-    JButton applyButton;
     
-    JLabel[] velLabels = {new JLabel("Velocity Range"), new JLabel("0%-30%"), new JLabel("30%-70%"), new JLabel("70%-100%")};
-    JLabel[] countLabels = {new JLabel("Number of records"), new JLabel("0"), new JLabel("0"), new JLabel("0")};
-    JLabel[] avgErrorLabels = {new JLabel("Average Error %"), new JLabel("0"), new JLabel("0"), new JLabel("0")};
-    JLabel[] maxErrorLabels = {new JLabel("Max Error %"), new JLabel("0"), new JLabel("0"), new JLabel("0")};
-    JLabel[] kpLabels = {new JLabel("KP"), new JLabel("0"), new JLabel("0"), new JLabel("0")};
+    JLabel[] labels = {new JLabel("Result Type"), new JLabel("Final Analysis")};
+    JLabel[] countLabels = {new JLabel("Points"), new JLabel("0")};
+    JLabel[] avgErrorLabels = {new JLabel("Avg Error %"), new JLabel("0")};
+    JLabel[] maxErrorLabels = {new JLabel("Max Error %"), new JLabel("0")};
+    JLabel[] kpLabels = {new JLabel("KP"), new JLabel("0")};
     Sysid app;
 
     public SysidResultPanel(Sysid app) {
-        super(new GridLayout(nK + 8, 4, 5, 5));
+        super(new GridLayout(nK + 7, 2, 5, 5));
         this.app = app;
 
         add(new JLabel("Mechanism Type:"));
@@ -182,34 +186,27 @@ class SysidResultPanel extends JPanel {
         });
         add(mechTypeBox);
         
-        applyButton = new JButton("Calculate");
-        add(applyButton);
+        add(new JLabel(""));
         add(new JLabel(""));
 
-        for(JLabel l : velLabels) add(l);
-        for(JLabel l : countLabels) add(l);
-        for(JLabel l : avgErrorLabels) add(l);
-        for(JLabel l : maxErrorLabels) add(l);
+        add(labels[0]); add(labels[1]);
+        add(countLabels[0]); add(countLabels[1]);
+        add(avgErrorLabels[0]); add(avgErrorLabels[1]);
+        add(maxErrorLabels[0]); add(maxErrorLabels[1]);
 
         checkBoxes = new JCheckBox[nK];
-        k = new JLabel[nK][3];
+        k = new JLabel[nK][1];
         for(int i = 0; i < nK; i++) {
             checkBoxes[i] = new JCheckBox(KTypes.values()[i].name());
-            if(i < 4) { checkBoxes[i].setEnabled(false); checkBoxes[i].setSelected(true); } else { checkBoxes[i].setSelected(false);}
+            checkBoxes[i].setEnabled(false);
+            checkBoxes[i].setSelected(true);
             add(checkBoxes[i]);
-            for(int j=0;j<3;j++){
-                k[i][j] = new JLabel("0");
-                add(k[i][j]);
-            }
+            
+            k[i][0] = new JLabel("0");
+            add(k[i][0]);
         }
 
-        for(JLabel l : kpLabels) add(l);
-
-        applyButton.addActionListener(e -> {
-            LogReader.MechanismType selectedType = (LogReader.MechanismType) mechTypeBox.getSelectedItem();
-            Sysid.msg("Manually calculating as " + selectedType + "...");
-            app.analyzeFile(selectedType);
-        });
+        add(kpLabels[0]); add(kpLabels[1]);
     }
     
     public void updateDisplay(MotorData motorData) {
@@ -219,32 +216,21 @@ class SysidResultPanel extends JPanel {
         }
         
         LogReader.SysIDResults result = motorData.sysidResult;
-        LogReader.BucketResult[] buckets = {result.slow, result.mid, result.high};
+        LogReader.BucketResult bucket = result.finalFit;
         
-        for(int rangeIdx = 0; rangeIdx < 3; rangeIdx++) {
-            LogReader.BucketResult bucket = buckets[rangeIdx];
+        if(bucket != null) {
+            k[KTypes.KS.ordinal()][0].setText(String.format("%7.5f", bucket.ks));
+            k[KTypes.KV.ordinal()][0].setText(String.format("%7.5f", bucket.kv));
+            k[KTypes.KA.ordinal()][0].setText(String.format("%7.5f", bucket.ka));
+            k[KTypes.KG.ordinal()][0].setText(String.format("%7.5f", bucket.kg));
             
-            if(bucket != null) {
-                k[KTypes.KS.ordinal()][rangeIdx].setText(String.format("%7.5f", bucket.ks));
-                k[KTypes.KV.ordinal()][rangeIdx].setText(String.format("%7.5f", bucket.kv));
-                k[KTypes.KA.ordinal()][rangeIdx].setText(String.format("%7.5f", bucket.ka));
-                k[KTypes.KG.ordinal()][rangeIdx].setText(String.format("%7.5f", bucket.kg));
-                
-                countLabels[rangeIdx+1].setText(Integer.toString(bucket.points));
-                avgErrorLabels[rangeIdx+1].setText(String.format("%4.2f%%", bucket.avgError*100));
-                maxErrorLabels[rangeIdx+1].setText(String.format("%4.2f%%", bucket.avgError*120));
-                
-                kpLabels[rangeIdx+1].setText(String.format("%.5f", bucket.kp));
-            } else {
-                k[KTypes.KS.ordinal()][rangeIdx].setText("N/A");
-                k[KTypes.KV.ordinal()][rangeIdx].setText("N/A");
-                k[KTypes.KA.ordinal()][rangeIdx].setText("N/A");
-                k[KTypes.KG.ordinal()][rangeIdx].setText("N/A");
-                countLabels[rangeIdx+1].setText("0");
-                avgErrorLabels[rangeIdx+1].setText("N/A");
-                maxErrorLabels[rangeIdx+1].setText("N/A");
-                kpLabels[rangeIdx+1].setText("N/A");
-            }
+            countLabels[1].setText(Integer.toString(bucket.points));
+            avgErrorLabels[1].setText(String.format("%4.2f%%", bucket.avgError*100));
+            maxErrorLabels[1].setText(String.format("%4.2f%%", bucket.avgError*120));
+            
+            kpLabels[1].setText(String.format("%.5f", bucket.kp));
+        } else {
+            clearDisplay();
         }
         
         Sysid.msg("Display updated for " + motorData.name);
@@ -252,16 +238,12 @@ class SysidResultPanel extends JPanel {
     
     private void clearDisplay() {
         for(int i = 0; i < nK; i++) {
-            for(int j = 0; j < 3; j++) {
-                k[i][j].setText("0");
-            }
+            k[i][0].setText("0");
         }
-        for(int i = 1; i < 4; i++) {
-            countLabels[i].setText("0");
-            avgErrorLabels[i].setText("0");
-            maxErrorLabels[i].setText("0");
-            kpLabels[i].setText("0");
-        }
+        countLabels[1].setText("0");
+        avgErrorLabels[1].setText("0");
+        maxErrorLabels[1].setText("0");
+        kpLabels[1].setText("0");
     }
 }
 
@@ -275,7 +257,5 @@ class MotorData {
         return name;
     }
 }
-
-enum VelocityRange {SLOW,MID,HIGH}
 
 enum KTypes {KS,KV,KA,KG}
