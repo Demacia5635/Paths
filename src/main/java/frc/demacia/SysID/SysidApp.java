@@ -9,14 +9,12 @@ import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class SysidApp {
+public class SysidApp implements Consumer<File> {
     public static void main(String[] args) {
-        Sysid app = new Sysid();
+        SysidApp app = new SysidApp();
         app.show();
     }
-}
-
-class Sysid implements Consumer<File> {
+    
     JFrame frame = new JFrame("Sysid");
     FileChooserPanel fileChooser = new FileChooserPanel(this);
     DefaultListModel<MotorData> listModel = new DefaultListModel<>();
@@ -27,9 +25,9 @@ class Sysid implements Consumer<File> {
     
     File currentFile;
 
-    private static Sysid sysid = null;
+    private static SysidApp sysid = null;
 
-    public Sysid() {
+    public SysidApp() {
         sysid = this;
         frame.setSize(1024,800);
         frame.setMinimumSize(new Dimension(1024,800));
@@ -170,9 +168,9 @@ class SysidResultPanel extends JPanel {
     JLabel[] avgErrorLabels = {new JLabel("Avg Error %"), new JLabel("0")};
     JLabel[] maxErrorLabels = {new JLabel("Max Error %"), new JLabel("0")};
     JLabel[] kpLabels = {new JLabel("KP"), new JLabel("0")};
-    Sysid app;
+    SysidApp app;
 
-    public SysidResultPanel(Sysid app) {
+    public SysidResultPanel(SysidApp app) {
         super(new GridLayout(nK + 7, 2, 5, 5));
         this.app = app;
 
@@ -181,7 +179,7 @@ class SysidResultPanel extends JPanel {
         
         mechTypeBox.addActionListener(e -> {
             LogReader.MechanismType selectedType = (LogReader.MechanismType) mechTypeBox.getSelectedItem();
-            Sysid.msg("Recalculating as " + selectedType + "...");
+            SysidApp.msg("Recalculating as " + selectedType + "...");
             app.analyzeFile(selectedType);
         });
         add(mechTypeBox);
@@ -234,7 +232,7 @@ class SysidResultPanel extends JPanel {
             clearDisplay();
         }
         
-        Sysid.msg("Display updated for " + motorData.name);
+        SysidApp.msg("Display updated for " + motorData.name);
     }
     
     private void clearDisplay() {
