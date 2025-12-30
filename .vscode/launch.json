@@ -6,6 +6,20 @@
   "configurations": [
     {
       "type": "java",
+      "name": "LogReaderTester",
+      "request": "launch",
+      "mainClass": "frc.demacia.utils.Log.LogReaderTester",
+      "projectName": "offseason2026"
+    },
+    {
+      "type": "java",
+      "name": "LogConverterUI",
+      "request": "launch",
+      "mainClass": "frc.demacia.utils.Log.LogConverterUI",
+      "projectName": "offseason2026"
+    },
+    {
+      "type": "java",
       "name": "SysIDTest",
       "request": "launch",
       "mainClass": "frc.demacia.SysID.SysIDTest",
