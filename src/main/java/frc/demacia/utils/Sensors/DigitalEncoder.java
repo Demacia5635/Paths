@@ -43,7 +43,7 @@ public class DigitalEncoder extends DutyCycleEncoder implements AnalogSensorInte
      * @param config Configuration with DIO channel and settings
      */
     public DigitalEncoder(DigitalEncoderConfig config){
-        super(config.echoChannel, config.scalar, config.offset);
+        super(config.echoChannel, config.fullRange, config.offset);
         this.config = config;
         name = config.name;
         setName(name);

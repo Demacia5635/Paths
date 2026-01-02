@@ -21,7 +21,7 @@ package frc.demacia.utils.Sensors;
  * </pre>
  */
 public class DigitalEncoderConfig extends BaseSensorConfig<DigitalEncoderConfig>{
-    public double scalar = 1;
+    public double fullRange = 2 * Math.PI;
     public double minRange = 0;
     public double maxRange = 1;
     public double frequency = 1000;
@@ -44,9 +44,9 @@ public class DigitalEncoderConfig extends BaseSensorConfig<DigitalEncoderConfig>
      * 
      * @param scalar Scaling factor (typically 1.0)
      * @return this config for method chaining
-     */
-    public DigitalEncoderConfig withScalar(double scalar) {
-        this.scalar = scalar;
+     */ 
+    public DigitalEncoderConfig withScalar(double fullRange) {
+        this.fullRange = fullRange * 2 * Math.PI;
         return this;
     }
 
