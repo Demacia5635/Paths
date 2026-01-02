@@ -4,7 +4,7 @@
 
 package frc.robot.testMotors.sparkFlex;
 
-import frc.demacia.utils.Motors.SparkFlexConfig;
+import frc.demacia.utils.motors.SparkFlexConfig;
 public final class Constants {
   public static final int ID = 2;
   public static final String NAME = "Test Motor";

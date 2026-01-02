@@ -1,4 +1,4 @@
-package frc.demacia.utils.Motors;
+package frc.demacia.utils.motors;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.SlotConfigs;
@@ -27,8 +27,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.demacia.utils.Data;
-import frc.demacia.utils.Log.LogManager;
-import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
+import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 
 public class TalonFXMotor extends TalonFX implements MotorInterface {
 

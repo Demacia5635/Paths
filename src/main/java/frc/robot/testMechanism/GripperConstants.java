@@ -1,10 +1,10 @@
 package frc.robot.testMechanism;
 
 import edu.wpi.first.math.Pair;
-import frc.demacia.utils.Motors.TalonSRXConfig;
-import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
-import frc.demacia.utils.Sensors.OpticalSensorConfig;
-import frc.demacia.utils.Sensors.UltraSonicSensorConfig;
+import frc.demacia.utils.motors.TalonSRXConfig;
+import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.sensors.OpticalSensorConfig;
+import frc.demacia.utils.sensors.UltraSonicSensorConfig;
 
 /**
  * All gripper constants divided to diffrent static class based on all the

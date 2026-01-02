@@ -1,4 +1,4 @@
-package frc.demacia.utils.Motors;
+package frc.demacia.utils.motors;
 
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkLowLevel;
@@ -14,12 +14,12 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.demacia.utils.Log.LogManager;
-import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
+import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 
 public class SparkMaxMotor extends SparkMax implements MotorInterface {
 
-  private frc.demacia.utils.Motors.SparkMaxConfig config;
+  private frc.demacia.utils.motors.SparkMaxConfig config;
   private String name;
   private SparkMaxConfig cfg;
   private ClosedLoopSlot closedLoopSlot = ClosedLoopSlot.kSlot0;
@@ -31,7 +31,7 @@ public class SparkMaxMotor extends SparkMax implements MotorInterface {
   private double setPoint = 0;
   private double lastTime = 0;
 
-  public SparkMaxMotor(frc.demacia.utils.Motors.SparkMaxConfig config) {
+  public SparkMaxMotor(frc.demacia.utils.motors.SparkMaxConfig config) {
     super(config.id, SparkLowLevel.MotorType.kBrushless);
     this.config = config;
     name = config.name;

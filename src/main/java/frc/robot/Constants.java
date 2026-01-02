@@ -4,8 +4,8 @@
 
 package frc.robot;
 
-import frc.demacia.utils.Motors.TalonFXConfig;
-import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.motors.TalonFXConfig;
+import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean

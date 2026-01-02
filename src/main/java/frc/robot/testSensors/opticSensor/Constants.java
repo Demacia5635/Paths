@@ -1,6 +1,6 @@
 package frc.robot.testSensors.opticSensor;
 
-import frc.demacia.utils.Sensors.OpticalSensorConfig;
+import frc.demacia.utils.sensors.OpticalSensorConfig;
 
 public class Constants {
 private static final int channel= 2;

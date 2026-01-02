@@ -1,4 +1,4 @@
-package frc.demacia.utils.Leds;
+package frc.demacia.utils.leds;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.util.Color;

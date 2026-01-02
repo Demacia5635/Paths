@@ -4,8 +4,8 @@
 
 package frc.robot.testMotors.talonFX;
 
-import frc.demacia.utils.Motors.TalonFXConfig;
-import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.motors.TalonFXConfig;
+import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
 public final class Constants {
   public static final int ID = 10;
   public static final Canbus CAN_BUS = Canbus.Rio;

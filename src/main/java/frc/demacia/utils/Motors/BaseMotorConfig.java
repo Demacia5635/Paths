@@ -1,4 +1,4 @@
-package frc.demacia.utils.Motors;
+package frc.demacia.utils.motors;
 
 import com.ctre.phoenix6.CANBus;
 

@@ -1,7 +1,7 @@
 package frc.robot.testSensors.piegon;
 
-import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
-import frc.demacia.utils.Sensors.PigeonConfig;
+import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.sensors.PigeonConfig;
 
 public class Constants {
     public static final boolean INVERTED= false;

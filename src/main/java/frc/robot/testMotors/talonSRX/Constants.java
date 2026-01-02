@@ -4,7 +4,7 @@
 
 package frc.robot.testMotors.talonSRX;
 
-import frc.demacia.utils.Motors.TalonSRXConfig;
+import frc.demacia.utils.motors.TalonSRXConfig;
 public final class Constants {
   public static final int ID = 30;
   public static final String NAME = "Test Motoor";

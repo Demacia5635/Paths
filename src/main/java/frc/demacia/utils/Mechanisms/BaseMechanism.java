@@ -1,13 +1,13 @@
-package frc.demacia.utils.Mechanisms;
+package frc.demacia.utils.mechanisms;
 
 import java.util.HashMap;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.demacia.utils.Log.LogManager;
-import frc.demacia.utils.Motors.MotorInterface;
-import frc.demacia.utils.Sensors.SensorInterface;
+import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.motors.MotorInterface;
+import frc.demacia.utils.sensors.SensorInterface;
 
 public class BaseMechanism extends SubsystemBase{
     protected String name;

@@ -1,11 +1,11 @@
-package frc.demacia.utils.Sensors;
+package frc.demacia.utils.sensors;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Ultrasonic;
-import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
-import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 
 /**
  * Ultrasonic distance sensor wrapper (e.g., MaxBotix, HC-SR04).

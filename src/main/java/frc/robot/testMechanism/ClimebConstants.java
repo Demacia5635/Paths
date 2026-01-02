@@ -1,8 +1,8 @@
 package frc.robot.testMechanism;
 
-import frc.demacia.utils.Motors.TalonFXConfig;
-import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
-import frc.demacia.utils.Sensors.LimitSwitchConfig;
+import frc.demacia.utils.motors.TalonFXConfig;
+import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.sensors.LimitSwitchConfig;
 
 /** Add your docs here. */
 public class ClimebConstants {

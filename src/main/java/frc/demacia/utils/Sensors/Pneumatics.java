@@ -1,8 +1,8 @@
-package frc.demacia.utils.Sensors;
+package frc.demacia.utils.sensors;
 
 import edu.wpi.first.wpilibj.Compressor;
-import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
-import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 
 public class Pneumatics extends Compressor {
     PneumaticsConfig config;

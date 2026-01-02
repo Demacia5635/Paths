@@ -1,6 +1,6 @@
 package frc.robot.testSensors.LimitSwitch;
 
-import frc.demacia.utils.Sensors.LimitSwitchConfig;
+import frc.demacia.utils.sensors.LimitSwitchConfig;
 
 public class Constants {
     public static final double CHANNEL = 0;

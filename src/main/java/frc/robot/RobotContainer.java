@@ -4,10 +4,10 @@
 
 package frc.robot;
 
-import frc.demacia.utils.Controller.CommandController;
-import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.demacia.utils.chassis.Chassis;
-import frc.robot.ChassisConstants.Robot1ChassisConstants;
+import frc.demacia.utils.controller.CommandController;
+import frc.demacia.utils.controller.CommandController.ControllerType;
+import frc.robot.chassisConstants.Robot1ChassisConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;

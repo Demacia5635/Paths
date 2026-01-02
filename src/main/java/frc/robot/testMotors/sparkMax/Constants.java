@@ -4,7 +4,7 @@
 
 package frc.robot.testMotors.sparkMax;
 
-import frc.demacia.utils.Motors.SparkMaxConfig;
+import frc.demacia.utils.motors.SparkMaxConfig;
 public final class Constants {
   public static final int ID = 2;
   public static final String NAME = "Test Motor";

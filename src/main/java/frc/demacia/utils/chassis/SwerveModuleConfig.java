@@ -1,7 +1,7 @@
 package frc.demacia.utils.chassis;
 
-import frc.demacia.utils.Motors.BaseMotorConfig;
-import frc.demacia.utils.Sensors.CancoderConfig;
+import frc.demacia.utils.motors.BaseMotorConfig;
+import frc.demacia.utils.sensors.CancoderConfig;
 
 /**
  * Configuration for a single swerve module.

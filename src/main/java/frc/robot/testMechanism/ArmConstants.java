@@ -1,10 +1,10 @@
 package frc.robot.testMechanism;
 
-import frc.demacia.utils.Motors.TalonFXConfig;
-import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
-import frc.demacia.utils.Sensors.DigitalEncoderConfig;
-import frc.demacia.utils.Sensors.LimitSwitchConfig;
-import frc.demacia.utils.Mechanisms.StateBaseMechanism.MechanismState;
+import frc.demacia.utils.mechanisms.StateBaseMechanism.MechanismState;
+import frc.demacia.utils.motors.TalonFXConfig;
+import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.sensors.DigitalEncoderConfig;
+import frc.demacia.utils.sensors.LimitSwitchConfig;
 
 public class ArmConstants {
     

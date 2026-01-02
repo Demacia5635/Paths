@@ -1,9 +1,9 @@
 package frc.robot.testMechanism;
 
-import frc.demacia.utils.Mechanisms.BaseMechanism;
-import frc.demacia.utils.Motors.MotorInterface;
-import frc.demacia.utils.Motors.TalonFXMotor;
-import frc.demacia.utils.Sensors.SensorInterface;
+import frc.demacia.utils.mechanisms.BaseMechanism;
+import frc.demacia.utils.motors.MotorInterface;
+import frc.demacia.utils.motors.TalonFXMotor;
+import frc.demacia.utils.sensors.SensorInterface;
 
 public class MotorMechanism extends BaseMechanism{
 

@@ -1,6 +1,6 @@
 
 package frc.robot.testSensors.UltraSonicSensor;
-import frc.demacia.utils.Sensors.UltraSonicSensorConfig;
+import frc.demacia.utils.sensors.UltraSonicSensorConfig;
 
 public class Constants {
       private static final int channel=1;

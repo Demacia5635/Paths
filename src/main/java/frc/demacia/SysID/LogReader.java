@@ -1,4 +1,4 @@
-package frc.demacia.SysID;
+package frc.demacia.sysID;
 
 import java.io.DataInputStream;
 import java.io.EOFException;

@@ -1,4 +1,4 @@
-package frc.demacia.utils.Sensors;
+package frc.demacia.utils.sensors;
 
 /**
  * Configuration for digital duty-cycle encoders.

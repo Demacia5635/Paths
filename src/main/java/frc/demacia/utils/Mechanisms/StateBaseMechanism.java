@@ -1,11 +1,11 @@
-package frc.demacia.utils.Mechanisms;
+package frc.demacia.utils.mechanisms;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.demacia.utils.Log.LogManager;
-import frc.demacia.utils.Motors.MotorInterface;
-import frc.demacia.utils.Sensors.SensorInterface;
+import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.motors.MotorInterface;
+import frc.demacia.utils.sensors.SensorInterface;
 
 public class StateBaseMechanism extends BaseMechanism {
 

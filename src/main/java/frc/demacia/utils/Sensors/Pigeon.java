@@ -1,4 +1,4 @@
-package frc.demacia.utils.Sensors;
+package frc.demacia.utils.sensors;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
@@ -7,8 +7,8 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
-import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 
 import com.ctre.phoenix6.StatusSignal;
 

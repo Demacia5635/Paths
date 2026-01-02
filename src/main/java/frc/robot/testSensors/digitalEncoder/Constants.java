@@ -1,6 +1,6 @@
 package frc.robot.testSensors.digitalEncoder;
 
-import frc.demacia.utils.Sensors.DigitalEncoderConfig;
+import frc.demacia.utils.sensors.DigitalEncoderConfig;
 
 public class Constants {
     public static final double OFFSET = 0;
