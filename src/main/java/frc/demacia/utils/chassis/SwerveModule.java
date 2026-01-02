@@ -23,12 +23,14 @@ import frc.demacia.utils.Sensors.Cancoder;
  * reverse drive direction and rotate <90° instead for faster response.</p>
  */
 public class SwerveModule {
+    private SwerveModuleConfig config;
     private MotorInterface steerMotor;
     private MotorInterface driveMotor;
     private Cancoder cancoder;
     public String name;
 
     public SwerveModule(SwerveModuleConfig config) {
+        this.config = config;
         steerMotor = config.steerConfig.getMotorClass().create(config.steerConfig);
         driveMotor = config.driveConfig.getMotorClass().create(config.driveConfig);
         cancoder = new Cancoder(config.cancoderConfig);
@@ -92,7 +94,7 @@ public class SwerveModule {
     }
 
     public double getSteerAngle() {
-        return steerMotor.getCurrentPosition();
+        return steerMotor.getCurrentAngle();
     }
     public Rotation2d getSteerRotation() {
         return new Rotation2d(getSteerAngle());
@@ -130,7 +132,7 @@ public class SwerveModule {
         }
 
         setSteerPosition(steerMotor.getCurrentPosition() + diff);
-        setDriveVelocity(vel);
+        setDriveVelocity(vel - steerMotor.getCurrentVelocity() * config.SteerVelToDriveVel);
     }
 
     /**

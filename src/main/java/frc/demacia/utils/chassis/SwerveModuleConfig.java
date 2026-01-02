@@ -27,6 +27,8 @@ public class SwerveModuleConfig {
     public CancoderConfig cancoderConfig;
     public double steerOffset;
 
+    public double SteerVelToDriveVel;
+
         /**
      * Constructor
      * @param id - CAN bus ID
@@ -50,6 +52,11 @@ public class SwerveModuleConfig {
      */
     public SwerveModuleConfig withSteerOffset(double steerOffset) {
         this.steerOffset = steerOffset;
+        return this;
+    }
+
+    public SwerveModuleConfig withDrivePowerToSteerPower(double drivePowerToSteerPower){
+        this.SteerVelToDriveVel = drivePowerToSteerPower;
         return this;
     }
 }
