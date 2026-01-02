@@ -238,8 +238,8 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
      * 
      * @param velocity    the wanted velocity in meter per second or radians per
      *                    seconds depending on the config
-     * @param feedForward wanted feed forward to add to the ks kv ka and kg,
-     *                    defaults to 0
+     * @param feedForward wanted feed forward to add
+     * 
      */
     public void setVelocity(double velocity, double feedForward) {
         setControl(velocityVoltage.withVelocity(velocity).withFeedForward(feedForward));

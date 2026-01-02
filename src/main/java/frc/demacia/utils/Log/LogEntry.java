@@ -22,7 +22,6 @@ import edu.wpi.first.util.datalog.FloatArrayLogEntry;
 import edu.wpi.first.util.datalog.FloatLogEntry;
 import edu.wpi.first.util.datalog.StringArrayLogEntry;
 import edu.wpi.first.util.datalog.StringLogEntry;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.demacia.utils.Data;
 import frc.demacia.utils.DemaciaUtils;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
@@ -62,6 +61,10 @@ public class LogEntry<T> {
         } else {
             ntPublisher = null;
             ntStrategy = null;
+        }
+
+        if (ntPublisher != null && ntStrategy != null) {
+            ntStrategy.accept(data, ntPublisher);
         }
     }
 
@@ -178,55 +181,12 @@ public class LogEntry<T> {
     public void addData(String name, Data<T> data, String metaData){
         this.name = this.name + " | " + name;
         this.metaData = this.metaData + " | " + metaData;
-        if (this.data.getSignals() != null){
-            this.data.expandWithSignals(data.getSignals());
+        if (this.data.getSignalArray() != null){
+            this.data.expandWithSignals(data.getSignalArray());
         } else {
-            this.data.expandWithSuppliers(data.getSuppliers());
+            this.data.expandWithSuppliers(data.getSupplierArray());
         }
 
-        initializeLogging();
-    }
-
-    public void removeData(int nameIndex, int dataIndex, int count) {
-        int actualIndex = nameIndex - 1;
-        String[] parts = name.split(" \\| ");
-
-        if (actualIndex >= parts.length || actualIndex < 0) {
-            LogManager.log("removeData: nameIndex out of range: " + nameIndex + " (parts length: " + parts.length + ")", AlertType.kWarning);
-            return;
-        }
-
-        StringBuilder newName = new StringBuilder();
-        for (int i = 0; i < parts.length; i++) {
-            if (i != actualIndex) {
-                if (newName.length() > 0) newName.append(" | ");
-                newName.append(parts[i]);
-            }
-        }
-
-        this.name = newName.toString();
-
-        if (data != null) {
-            try {
-                if (data.getSignals() != null) {
-                    data.removeSignalRange(dataIndex, count);
-                } else if (data.getSuppliers() != null) {
-                    data.removeSupplierRange(dataIndex, count);
-                }
-            } catch (Exception e) {
-                LogManager.log("removeData: failed to remove from data: " + e.getMessage(), AlertType.kError);
-            }
-        }
-
-        if (this.name.isEmpty()) {
-            if (ntPublisher != null) ntPublisher.close();
-            if (entry != null) entry.finish();
-            ntPublisher = null;
-            entry = null;
-            data = null;
-            return;
-        }
-        
         initializeLogging();
     }
 }
