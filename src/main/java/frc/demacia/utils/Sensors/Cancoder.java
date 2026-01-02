@@ -115,12 +115,12 @@ public class Cancoder extends CANcoder implements AnalogSensorInterface{
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + " abs Position, Position, Velocity, Acceleration",  () -> new double[] {
-            getCurrentAbsPosition(),
-            getCurrentPosition(),
-            getCurrentVelocity(),
-            getCurrentAcceleration()
-        }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
+        LogManager.addEntry(name + ": abs Position, Position, Velocity, Acceleration", 
+            () -> getCurrentAbsPosition(),
+            () -> getCurrentPosition(),
+            () -> getCurrentVelocity(),
+            () -> getCurrentAcceleration()
+        ).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
     /**

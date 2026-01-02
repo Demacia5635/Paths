@@ -7,6 +7,7 @@ package frc.robot;
 import frc.demacia.utils.Controller.CommandController;
 import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.demacia.utils.chassis.Chassis;
+import frc.robot.ChassisConstants.Robot1ChassisConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -34,7 +35,7 @@ public class RobotContainer{
   public RobotContainer() {
     driverController = new CommandController(0, ControllerType.kXbox);
 
-    // chassis = new Chassis(Robot1ChassisConstants.CHASSIS_CONFIG);
+    chassis = new Chassis(Robot1ChassisConstants.CHASSIS_CONFIG);
     // driveCommand = new DriveCommand(chassis, driverController);
 
     // Configure the trigger bindings

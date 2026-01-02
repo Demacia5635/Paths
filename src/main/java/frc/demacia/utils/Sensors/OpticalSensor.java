@@ -42,7 +42,7 @@ public class OpticalSensor extends AnalogInput implements SensorInterface {
     
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + " value",  () -> get())
+        LogManager.addEntry(name + ": value",  this::get)
         .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
 
     }

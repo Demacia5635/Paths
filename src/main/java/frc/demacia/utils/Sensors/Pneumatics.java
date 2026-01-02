@@ -1,16 +1,34 @@
 package frc.demacia.utils.Sensors;
 
 import edu.wpi.first.wpilibj.Compressor;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
+import frc.demacia.utils.Log.LogManager;
 
 public class Pneumatics extends Compressor {
- PneumaticsConfig config;
- String name;
+    PneumaticsConfig config;
+    String name;
 	
-public Pneumatics(PneumaticsConfig config) {
+    public Pneumatics(PneumaticsConfig config) {
         super(config.module, config.moduleType);
-    this.config = config;
-    this.name= config.name;
+        this.config = config;
+        this.name= config.name;
+        addLog();
+        LogManager.log(name + " Pneumatics initialized");
     }
+
+    @SuppressWarnings("unchecked")
+    private void addLog() {
+        LogManager.addEntry(name + ": Compressor State, Pressure Switch",  
+            () -> getCompressorState(),
+            () -> getPressureSwitch()
+        ).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
+        LogManager.addEntry(name + ": Current, Analog Voltage, Analog Pressure",  
+            () -> getCurrent(),
+            () -> getAnalogVoltage(),
+            () -> getAnalogPressure()
+        ).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
+    }
+
     public String getName() {
         return config.name;   
     }

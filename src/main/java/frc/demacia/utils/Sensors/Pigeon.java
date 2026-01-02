@@ -144,20 +144,20 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + " yaw, pitch, roll, x velocity, y velocity, z velocity, x acceleration, y acceleration, z acceleration, x angular acceleration, y angular acceleration, z angular acceleration", () -> new double[] {
-            getCurrentYaw(),
-            getCurrentPitch(),
-            getCurrentRoll(),
-            getXVelocity(),
-            getYVelocity(),
-            getZVelocity(),
-            getXAcceleration(),
-            getYAcceleration(),
-            getZAcceleration(),
-            getXAngularAcceleration(),
-            getYAngularAcceleration(),
-            getZAngularAcceleration()
-        }).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
+        LogManager.addEntry(name + ": yaw, pitch, roll, x velocity, y velocity, z velocity, x acceleration, y acceleration, z acceleration, x angular acceleration, y angular acceleration, z angular acceleration",
+            () -> getCurrentYaw(),
+            () -> getCurrentPitch(),
+            () -> getCurrentRoll(),
+            () -> getXVelocity(),
+            () -> getYVelocity(),
+            () -> getZVelocity(),
+            () -> getXAcceleration(),
+            () -> getYAcceleration(),
+            () -> getZAcceleration(),
+            () -> getXAngularAcceleration(),
+            () -> getYAngularAcceleration(),
+            () -> getZAngularAcceleration()
+        ).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
     /**

@@ -56,7 +56,7 @@ public class AnalogEncoder extends edu.wpi.first.wpilibj.AnalogEncoder implement
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(getName() + " Position", this::get)
+        LogManager.addEntry(getName() + ": Position", this::get)
         .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 

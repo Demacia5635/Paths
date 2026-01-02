@@ -68,13 +68,13 @@ public class ColorSensor extends ColorSensorV3 implements ColorSensorInterface {
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + " Color", () -> get()
+        LogManager.addEntry(name + ": Color", this::get
         ).withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
 
-        LogManager.addEntry(name + " Proximity", this::getProximity)
+        LogManager.addEntry(name + ": Proximity", this::getProximity)
             .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
 
-        LogManager.addEntry(name + " Matched Color", this::getMatchedColorName)
+        LogManager.addEntry(name + ": Matched Color", this::getMatchedColorName)
             .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 

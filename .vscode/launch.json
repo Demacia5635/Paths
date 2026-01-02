@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "LogConverter",
+      "request": "launch",
+      "mainClass": "frc.demacia.utils.Log.LogConverter",
+      "projectName": "offseason2026"
+    },
+    {
+      "type": "java",
       "name": "LogConverterUI",
       "request": "launch",
       "mainClass": "frc.demacia.utils.Log.LogConverterUI",

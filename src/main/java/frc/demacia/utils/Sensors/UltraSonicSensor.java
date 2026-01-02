@@ -65,12 +65,12 @@ public class UltraSonicSensor extends Ultrasonic implements AnalogSensorInterfac
         setName(name);
         setAutomaticMode(true);
         addLog();
-		LogManager.log(name + "UltraSonicSensor initialized");
+		LogManager.log(name + " UltraSonicSensor initialized");
     }
 
     @SuppressWarnings("unchecked")
     private void addLog() {
-        LogManager.addEntry(name + " range", () -> getRangeMeters())
+        LogManager.addEntry(name + ": range", this::getRangeMeters)
         .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
