@@ -4,7 +4,7 @@ import frc.demacia.utils.Motors.TalonFXConfig;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 import frc.demacia.utils.Sensors.DigitalEncoderConfig;
 import frc.demacia.utils.Sensors.LimitSwitchConfig;
-import frc.demacia.utils.Mechanisms.StateBasedMechanism.MechanismState;
+import frc.demacia.utils.Mechanisms.StateBaseMechanism.MechanismState;
 
 public class ArmConstants {
     

@@ -7,7 +7,7 @@ import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Motors.MotorInterface;
 import frc.demacia.utils.Sensors.SensorInterface;
 
-public class StateBasedMechanism extends BaseMechanism {
+public class StateBaseMechanism extends BaseMechanism {
 
     public interface MechanismState {
         double[] getValues();
@@ -42,7 +42,7 @@ public class StateBasedMechanism extends BaseMechanism {
 
     protected double[] testValues;
 
-    public StateBasedMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends MechanismState> enumClass){
+    public StateBaseMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors, Class<? extends MechanismState> enumClass){
         super(name, motors, sensors);
         testValues = new double[motors.length];
         addNT(enumClass);
