@@ -10,6 +10,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.demacia.utils.log.LogManager;
 import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 
+/**
+ * Wrapper class for the CTRE Talon SRX motor controller using Phoenix 5.
+ * <p>
+ * Implements the MotorInterface for standard control.
+ * <b>Note:</b> Many advanced control methods (Velocity, Motion Magic) are currently 
+ * unimplemented in this wrapper and will log an error if called.
+ * </p>
+ */
 public class TalonSRXMotor extends TalonSRX implements MotorInterface {
     TalonSRXConfig config;
     String name;
@@ -18,6 +26,10 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface {
 
     ControlMode controlMode = ControlMode.DISABLE;
 
+    /**
+     * Creates a new Talon SRX motor wrapper.
+     * @param config The configuration object
+     */
     public TalonSRXMotor(TalonSRXConfig config) {
         super(config.id);
         this.config = config;
@@ -29,6 +41,10 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface {
         LogManager.log(name + " motor initialized");
     }
 
+    /**
+     * Applies the configuration to the motor using Phoenix 5 API.
+     * Sets limits, ramps, inversion, and neutral mode.
+     */
     private void configMotor() {
         configFactoryDefault();
         configContinuousCurrentLimit((int) config.maxCurrent);
@@ -51,6 +67,7 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface {
         this.name = name;
     }
 
+    /** Configures the logging entries for this motor */
     @SuppressWarnings("unchecked")
     private void addLog() {
       LogManager.addEntry(name + ": position, Velocity, Acceleration, Voltage, Current, CloseLoopError, CloseLoopSP", 
@@ -65,6 +82,7 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface {
         .withIsMotor().build();
     }
 
+    @Override
     public void checkElectronics() {
         com.ctre.phoenix.motorcontrol.Faults faults = new com.ctre.phoenix.motorcontrol.Faults();
         getFaults(faults);
@@ -73,6 +91,7 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface {
         }
     }
 
+    @Override
     public void changeSlot(int slot){
         if (slot < 0 || slot > 2) {
             LogManager.log("slot is not between 0 and 2", AlertType.kError);
@@ -81,10 +100,12 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface {
         this.slot = slot;
     }
 
+    @Override
     public void setNeutralMode(boolean isBrake){
         setNeutralMode(isBrake ? NeutralMode.Brake : NeutralMode.Coast);
     }
 
+    @Override
     public void setDuty(double power){
         set(com.ctre.phoenix.motorcontrol.ControlMode.PercentOutput, power);
         if (power == 0){
@@ -94,23 +115,28 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface {
         }
     }
 
+    @Override
     public void setVoltage(double voltage){
         set(com.ctre.phoenix.motorcontrol.ControlMode.PercentOutput, voltage/12.0);
         controlMode = ControlMode.VOLTAGE;
     }
 
+    @Override
     public void setVelocity(double velocity, double feedForward){
         LogManager.log("there is no Velocity");
     }
 
+    @Override
     public void setVelocity(double velocity){
         setVelocity(velocity, 0);
     }
 
+    @Override
     public void setMotion(double position, double feedForward){
         LogManager.log("there is no motion");
     }
 
+    @Override
     public void setMotion(double position){
         setMotion(position, 0);
     }
@@ -152,6 +178,7 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface {
         return Math.cos(position * config.posToRad) * config.kSin;
     }
 
+    @Override
     public int getCurrentControlMode(){
         return controlMode.ordinal();
     }

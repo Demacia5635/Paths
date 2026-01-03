@@ -17,6 +17,13 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.demacia.utils.log.LogManager;
 import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 
+/**
+ * Wrapper class for the REV Spark Flex motor controller.
+ * <p>
+ * Handles configuration, PID control, logging, and on-the-fly tuning via SmartDashboard.
+ * Uses the REV Lib 2025 API.
+ * </p>
+ */
 public class SparkFlexMotor extends SparkFlex implements MotorInterface {
 
   private frc.demacia.utils.motors.SparkFlexConfig config;
@@ -26,11 +33,17 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
   private ControlType controlType = ControlType.kDutyCycle;
 
   private ControlMode controlMode = ControlMode.DISABLE;
+  
+  // Variables for manual velocity/acceleration calculation
   private double lastVelocity;
   private double lastAcceleration;
   private double setPoint = 0;
   private double lastTime = 0;
 
+  /**
+   * Creates a new Spark Flex motor wrapper.
+   * @param config The configuration object
+   */
   public SparkFlexMotor(frc.demacia.utils.motors.SparkFlexConfig config) {
     super(config.id, SparkLowLevel.MotorType.kBrushless);
     this.config = config;
@@ -42,6 +55,10 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
     LogManager.log(name + " motor initialized");
   }
 
+  /**
+   * Applies the configuration to the motor.
+   * Sets current limits, ramps, inversion, idle mode, and PID slots.
+   */
   private void configMotor() {
     cfg = new SparkFlexConfig();
     cfg.smartCurrentLimit((int) config.maxCurrent);
@@ -59,6 +76,10 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
     this.configure(cfg, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 
+  /**
+   * Updates PID constants in the config object.
+   * @param apply Whether to apply the config to the motor immediately
+   */
   private void updatePID(boolean apply) {
     cfg.closedLoop.pidf(config.pid[0].kP(), config.pid[0].kI(), config.pid[0].kD(), config.pid[0].kV(),
         ClosedLoopSlot.kSlot0);
@@ -79,6 +100,7 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
       this.name = name;
   }
 
+  /** Configures the logging entries for this motor */
   @SuppressWarnings("unchecked")
   private void addLog() {
     LogManager.addEntry(name + ": Position, Velocity, Acceleration, Voltage, Current, CloseLoopError, CloseLoopSP", 
@@ -95,6 +117,7 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
       .build();
   }
 
+  @Override
   public void checkElectronics() {
     Faults faults = getFaults();
     boolean hasFault = faults.other || faults.motorType || faults.sensor || 
@@ -106,10 +129,8 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
   }
 
   /**
-   * change the slot of the pid and feed forward.
-   * will not work if the slot is null
-   * 
-   * @param slot the wanted slot between 0 and 2
+   * Changes the active PID slot for the closed loop controller.
+   * @param slot The slot index (0-3)
    */
   public void changeSlot(int slot) {
     if (slot < 0 || slot > 3) {
@@ -119,19 +140,13 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
     this.closedLoopSlot = slot == 0 ? ClosedLoopSlot.kSlot0 : slot == 1 ? ClosedLoopSlot.kSlot1 : ClosedLoopSlot.kSlot2;
   }
 
-  /*
-   * set motor to brake or coast
-   */
+  @Override
   public void setNeutralMode(boolean isBrake) {
     cfg.idleMode(isBrake ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
     configure(cfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
-  /**
-   * set power from 1 to -1 (v/12) no PID/FF
-   * 
-   * @param power the wanted power between -1 to 1
-   */
+  @Override
   public void setDuty(double power) {
     super.set(power);
     controlType = ControlType.kDutyCycle;
@@ -142,20 +157,14 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
     }
   }
 
+  @Override
   public void setVoltage(double voltage) {
     super.setVoltage(voltage);
     controlType = ControlType.kVoltage;
     controlMode = ControlMode.VOLTAGE;
   }
 
-  /**
-   * set volocity to motor with PID and FF
-   * 
-   * @param velocity    the wanted velocity in meter per second or radians per
-   *                    seconds depending on the config
-   * @param feedForward wanted feed forward to add to the ks kv ka and kg,
-   *                    defaults to 0
-   */
+  @Override
   public void setVelocity(double velocity, double feedForward) {
     if (config.maxVelocity == 0) {
       LogManager.log(name + ": maxVelocity not configured", AlertType.kError);
@@ -167,10 +176,12 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
     setPoint = velocity;
   }
 
+  @Override
   public void setVelocity(double velocity) {
     setVelocity(velocity, config.pid[closedLoopSlot.value].kS()*Math.signum(velocity));
   }
 
+  @Override
   public void setPositionVoltage(double position, double feedForward) {
     getClosedLoopController().setReference(position, ControlType.kPosition, closedLoopSlot, feedForward);
     controlType = ControlType.kPosition;
@@ -178,14 +189,17 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
     setPoint = position;
   }
 
+  @Override
   public void setPositionVoltage(double position) {
     setPositionVoltage(position, 0);
   }
 
+  @Override
   public void setVelocityWithFeedForward(double velocity) {
     setVelocity(velocity, velocityFeedForward(velocity));
   }
 
+  @Override
   public void setMotionWithFeedForward(double velocity) {
     setVelocity(velocity, positionFeedForward(velocity));
   }
@@ -248,10 +262,12 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
     return setPoint;
   }
 
+  @Override
   public double getCurrentPosition() {
     return getEncoder().getPosition();
   }
 
+  @Override
   public double getCurrentAngle() {
     if (config.isRadiansMotor) {
       return MathUtil.angleModulus(getCurrentPosition());
@@ -259,6 +275,7 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
     return 0;
   }
 
+  @Override
   public double getCurrentVelocity() {
     double velocity = getEncoder().getVelocity();
     double time = Timer.getFPGATimestamp();
@@ -271,20 +288,25 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
     return velocity;
   }
 
+  @Override
   public double getCurrentAcceleration() {
     return lastAcceleration;
   }
 
+  @Override
   public double getCurrentVoltage() {
     return getAppliedOutput() * 12;
   }
+  
+  @Override
   public double getCurrentCurrent() {
     return getOutputCurrent();
   }
-	  
+    
   /**
-   * creates a widget in elastic of the pid and ff for hot reload
-   * @param slot the slot of the close loop perams (from 0 to 2)
+   * Creates a command to configure PID and FeedForward parameters via the Dashboard.
+   * Useful for tuning without redeploying code.
+   * @param slot The slot index to tune (0-3)
    */
   public void configPidFf(int slot) {
 
@@ -326,7 +348,8 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
   }
 
   /**
-   * creates a widget in elastic to configure motion magic in hot reload
+   * Creates a command to configure Motion Magic parameters via the Dashboard.
+   * Useful for tuning velocity/acceleration constraints live.
    */
   public void configMotionMagic() {
     Command configMotionMagic = new InstantCommand(()-> {

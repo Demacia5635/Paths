@@ -3,10 +3,16 @@ package frc.demacia.utils.motors;
 import com.ctre.phoenix6.CANBus;
 
 /**
- * Abstract base class for motor configurations.
+ * Abstract base class for motor configurations using the Builder pattern.
+ * <p>
+ * Allows constructing complex motor configurations (PID, Limits, Ramps, etc.)
+ * in a readable, chained manner.
+ * </p>
+ * @param <T> The concrete type of the configuration class (self-reference for builder chaining)
  */
 public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
     
+    /** Supported CAN bus types */
     public static enum Canbus { 
         Rio("rio"), 
         CANIvore("canivore");
@@ -17,6 +23,7 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         }
     } 
 
+    /** Supported Motor Controller types with factory methods */
     public static enum MotorControllerType {
         TalonFX {
             @Override
@@ -74,11 +81,22 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
     public double kSin = 0;
     public double posToRad = 0;
 
+    /**
+     * Base constructor.
+     * @param id The CAN ID
+     * @param name The name of the motor
+     */
     public BaseMotorConfig(int id, String name) {
         this.id = id;
         this.name = name;
     }
 
+    /**
+     * Base constructor with CAN bus.
+     * @param id The CAN ID
+     * @param name The name of the motor
+     * @param canbus The CAN bus instance
+     */
     public BaseMotorConfig(int id, String name, Canbus canbus) {
         this(id, name);
         this.canbus = canbus;
@@ -88,12 +106,22 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         return motorClass;
     }
 
+    /**
+     * Sets the type of the motor controller.
+     * @param motorClass The controller type
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withMotorClass(MotorControllerType motorClass) {
         this.motorClass = motorClass;
         return (T) this;
     }
 
+    /**
+     * Sets the voltage limits (symmetrical).
+     * @param maxVolt The maximum forward voltage (reverse will be -maxVolt)
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withVolts(double maxVolt) {
         this.maxVolt = maxVolt;
@@ -101,24 +129,46 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         return (T) this;
     }
 
+    /**
+     * Sets the neutral mode.
+     * @param brake true for Brake, false for Coast
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withBrake(boolean brake) {
         this.brake = brake;
         return (T) this;
     }
 
+    /**
+     * Sets whether the motor is inverted.
+     * @param invert true to invert
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withInvert(boolean invert) {
         this.inverted = invert;
         return (T) this;
     }
 
+    /**
+     * Sets the open/closed loop ramp time.
+     * @param rampTime Time in seconds to ramp from 0 to full output
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withRampTime(double rampTime) {
         this.rampUpTime = rampTime;
         return (T) this;
     }
 
+    /**
+     * Configures the motor for linear motion (Meters).
+     * Calculates the sensor-to-mechanism ratio automatically.
+     * @param gearRatio The gear ratio (Input / Output)
+     * @param diameter The diameter of the wheel/pulley in meters
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withMeterMotor(double gearRatio, double diameter) {
         motorRatio = gearRatio / (diameter * Math.PI);
@@ -127,6 +177,12 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         return (T) this;
     }
 
+    /**
+     * Configures the motor for angular motion (Radians).
+     * Calculates the sensor-to-mechanism ratio automatically.
+     * @param gearRatio The gear ratio (Input / Output)
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withRadiansMotor(double gearRatio) {
         motorRatio = gearRatio / (Math.PI * 2);
@@ -135,18 +191,35 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         return (T) this;
     }
 
+    /**
+     * Sets the maximum allowable position error.
+     * @param maxPositionError The error threshold
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withMaxPositionError(double maxPositionError) {
         this.maxPositionError = maxPositionError;
         return (T) this;
     }
 
+    /**
+     * Sets the supply current limit.
+     * @param maxCurrent Maximum current in Amps
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withCurrent(double maxCurrent) {
         this.maxCurrent = maxCurrent;
         return (T) this;
     }
 
+    /**
+     * Sets Motion Magic parameters.
+     * @param maxVelocity Maximum cruise velocity
+     * @param maxAcceleration Maximum acceleration
+     * @param maxJerk Maximum jerk
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withMotionParam(double maxVelocity, double maxAcceleration, double maxJerk) {
         this.maxVelocity = maxVelocity;
@@ -155,6 +228,13 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         return (T) this;
     }
 
+    /**
+     * Sets custom feedforward parameters.
+     * @param kv2 Velocity squared constant
+     * @param ksin Sine term constant (for gravity/arms)
+     * @param posToRad Conversion factor for position to radians
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withFeedForward(double kv2, double ksin, double posToRad) {
         this.kv2 = kv2;
@@ -163,10 +243,33 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         return (T) this;
     }
 
+    /**
+     * Sets the PID parameters for Slot 0.
+     * @param kp Proportional gain
+     * @param ki Integral gain
+     * @param kd Derivative gain
+     * @param ks Static friction feedforward
+     * @param kv Velocity feedforward
+     * @param ka Acceleration feedforward
+     * @param kg Gravity feedforward
+     * @return this configuration for chaining
+     */
     public T withPID(double kp, double ki, double kd, double ks, double kv, double ka, double kg) {
         return withPID(0, kp, ki, kd, ks, kv, ka, kg);
     }
     
+    /**
+     * Sets the PID parameters for a specific slot.
+     * @param slot The PID slot index
+     * @param kp Proportional gain
+     * @param ki Integral gain
+     * @param kd Derivative gain
+     * @param ks Static friction feedforward
+     * @param kv Velocity feedforward
+     * @param ka Acceleration feedforward
+     * @param kg Gravity feedforward
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withPID(int slot, double kp, double ki, double kd, double ks, double kv, double ka, double kg) {
         if (slot >= 0 && slot < pid.length) {
@@ -175,12 +278,21 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         return (T) this;
     }
 
+    /**
+     * Sets the CAN bus for the motor.
+     * @param canbus The CAN bus enum
+     * @return this configuration for chaining
+     */
     @SuppressWarnings("unchecked")
     public T withCanbus(Canbus canbus) {
         this.canbus = canbus;
         return (T) this;
     }
 
+    /**
+     * Helper method to copy fields from another configuration object.
+     * @param other The config to copy from
+     */
     protected void copyBaseFields(BaseMotorConfig<?> other) {
         this.canbus = other.canbus;
         this.maxVolt = other.maxVolt;

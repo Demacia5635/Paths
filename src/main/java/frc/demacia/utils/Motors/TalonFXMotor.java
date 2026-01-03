@@ -30,6 +30,13 @@ import frc.demacia.utils.Data;
 import frc.demacia.utils.log.LogManager;
 import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 
+/**
+ * Wrapper class for the TalonFX motor controller using Phoenix 6.
+ * <p>
+ * Handles configuration, control requests (Voltage, Velocity, MotionMagic),
+ * and integrates with the logging system and SmartDashboard.
+ * </p>
+ */
 public class TalonFXMotor extends TalonFX implements MotorInterface {
 
     TalonFXConfig config;
@@ -38,6 +45,7 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
 
     int slot = 0;
 
+    // Phoenix 6 Control Requests
     DutyCycleOut dutyCycle = new DutyCycleOut(0);
     VoltageOut voltageOut = new VoltageOut(0);
     VelocityVoltage velocityVoltage = new VelocityVoltage(0).withSlot(slot);
@@ -45,6 +53,7 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
     MotionMagicExpoVoltage motionMagicExpoVoltage = new MotionMagicExpoVoltage(0).withSlot(slot);
     PositionVoltage positionVoltage = new PositionVoltage(0).withSlot(slot);
 
+    // Data Signals for Logging
     Data<Double> closedLoopSPSignal;
     Data<Double> closedLoopErrorSignal;
     Data<Angle> positionSignal;
@@ -55,6 +64,10 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
 
     ControlMode controlMode = ControlMode.DISABLE;
 
+    /**
+     * Creates a new TalonFX motor wrapper.
+     * @param config The configuration object for this motor
+     */
     public TalonFXMotor(TalonFXConfig config) {
         super(config.id, config.canbus.canbus);
         this.config = config;
@@ -67,6 +80,10 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
         LogManager.log(name + " motor initialized");
     }
 
+    /**
+     * Applies the initial configuration to the motor.
+     * Sets limits, ramps, PID, and Motion Magic parameters.
+     */
     private void configMotor() {
         cfg = new TalonFXConfiguration();
         cfg.CurrentLimits.SupplyCurrentLimit = config.maxCurrent;
@@ -87,10 +104,13 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
         cfg.Voltage.PeakReverseVoltage = config.minVolt;
         configureMotionMagic(false);
 
-
         getConfigurator().apply(cfg);
     }
 
+    /**
+     * Configures Motion Magic parameters (Velocity, Acceleration, Jerk).
+     * @param apply Whether to apply the config immediately to the hardware
+     */
     private void configureMotionMagic(boolean apply) {
         cfg.MotionMagic.MotionMagicAcceleration = config.maxAcceleration;
         cfg.MotionMagic.MotionMagicCruiseVelocity = config.maxVelocity;
@@ -103,6 +123,10 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
 
     }
 
+    /**
+     * Updates PID constants from the config object to the Phoenix configuration.
+     * @param apply Whether to apply the config immediately to the hardware
+     */
     private void updatePID(boolean apply) {
         cfg.Slot0.kP = config.pid[0].kP();
         cfg.Slot0.kI = config.pid[0].kI();
@@ -143,6 +167,7 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
         this.name = name;
     }
 
+    /** Initializes the data signals for telemetry */
     @SuppressWarnings("unchecked")
     private void setSignals() {
         closedLoopSPSignal = new Data<>(getClosedLoopReference());
@@ -152,18 +177,9 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
         accelerationSignal = new Data<>(getAcceleration());
         voltageSignal = new Data<>(getMotorVoltage());
         currentSignal = new Data<>(getStatorCurrent());
-
-        // BaseStatusSignal.setUpdateFrequencyForAll(50, 
-        //     closedLoopSPSignal.getSignal(),
-        //     closedLoopErrorSignal.getSignal(),
-        //     positionSignal.getSignal(),
-        //     velocitySignal.getSignal(),
-        //     accelerationSignal.getSignal(),
-        //     voltageSignal.getSignal(),
-        //     currentSignal.getSignal()
-        // );
     }
 
+    /** Registers the motor's signals with the LogManager */
     @SuppressWarnings("unchecked")
     private void addLog() {
         LogManager.addEntry(name + ": Position, Velocity, Acceleration, Voltage, Current, CloseLoopError, CloseLoopSP",  new StatusSignal[] {
@@ -181,6 +197,7 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
             .withLogLevel(LogLevel.LOG_ONLY_NOT_IN_COMP).build();
     }
 
+    @Override
     public void checkElectronics() {
         int fault = getFaultField().getValue();
         if (fault != 0) {
@@ -188,12 +205,7 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
         }
     }
 
-    /**
-     * change the slot of the pid and feed forward.
-     * will not work if the slot is null
-     * 
-     * @param slot the wanted slot between 0 and 2
-     */
+    @Override
     public void changeSlot(int slot) {
         if (slot < 0 || slot > 2) {
             LogManager.log("slot is not between 0 and 2", AlertType.kError);
@@ -206,19 +218,13 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
         positionVoltage.withSlot(slot);
     }
 
-    /*
-     * set motor to brake or coast
-     */
+    @Override
     public void setNeutralMode(boolean isBrake) {
         cfg.MotorOutput.NeutralMode = isBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
         getConfigurator().apply(cfg.MotorOutput);
     }
 
-    /**
-     * set power from 1 to -1 (v/12) no PID/FF
-     * 
-     * @param power the wanted power between -1 to 1
-     */
+    @Override
     public void setDuty(double power) {
         setControl(dutyCycle.withOutput(power));
         if (power == 0){
@@ -228,44 +234,30 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
         }
     }
 
+    @Override
     public void setVoltage(double voltage) {
         setControl(voltageOut.withOutput(voltage));
         controlMode = ControlMode.VOLTAGE;
     }
 
-    /**
-     * set volocity to motor with PID and FF
-     * 
-     * @param velocity    the wanted velocity in meter per second or radians per
-     *                    seconds depending on the config
-     * @param feedForward wanted feed forward to add
-     * 
-     */
+    @Override
     public void setVelocity(double velocity, double feedForward) {
         setControl(velocityVoltage.withVelocity(velocity).withFeedForward(feedForward));
         controlMode = ControlMode.VELOCITY;
     }
 
+    @Override
     public void setVelocity(double velocity) {
         setVelocity(velocity, 0);
     }
 
-    /**
-     * set motion magic with PID and Ff
-     * <br>
-     * </br>
-     * must add to config motion magic configs (vel, acc, jerk[optional])
-     * 
-     * @param position    the wanted position in meter or radians depending on the
-     *                    config
-     * @param feedForward wanted feed forward to add to the ks kv ka and kg defaults
-     *                    to 0
-     */
+    @Override
     public void setMotion(double position, double feedForward) {
         setControl(motionMagicExpoVoltage.withPosition(position).withFeedForward(feedForward));
         controlMode = ControlMode.MOTION;  
     }
 
+    @Override
     public void setMotion(double position) {
         setMotion(position, 0);
     }
@@ -281,21 +273,25 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
       setAngle(angle, 0);
     }
   
+    @Override
     public void setPositionVoltage(double position, double feedForward) {
         setControl(positionVoltage.withPosition(position).withFeedForward(feedForward));
         controlMode = ControlMode.POSITION_VOLTAGE;
     }
 
+    @Override
     public void setPositionVoltage(double position) {
         setPositionVoltage(position, 0);
     }
 
+    @Override
     public void setVelocityWithFeedForward(double velocity) {
         setVelocity(velocity, velocityFeedForward(velocity));
     }
 
-    public void setMotionWithFeedForward(double velocity) {
-        setMotion(velocity, positionFeedForward(velocity));
+    @Override
+    public void setMotionWithFeedForward(double position) {
+        setMotion(position, positionFeedForward(position));
     }
 
     private double velocityFeedForward(double velocity) {
@@ -306,35 +302,42 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
         return Math.cos(position * config.posToRad) * config.kSin;
     }
 
+    @Override
     public int getCurrentControlMode() {
         return controlMode.ordinal();
     }
 
+    @Override
     public double getCurrentClosedLoopSP() {
         Double value = closedLoopSPSignal.getDouble();
         return value != null ? value : 0.0;
     }
     
+    @Override
     public double getCurrentClosedLoopError() {
         Double value = closedLoopErrorSignal.getDouble();
         return value != null ? value : 0.0;
     }
     
+    @Override
     public double getCurrentPosition() {
         Double value = positionSignal.getDouble();
         return value != null ? value : 0.0;
     }
     
+    @Override
     public double getCurrentVelocity() {
         Double value = velocitySignal.getDouble();
         return value != null ? value : 0.0;
     }
     
+    @Override
     public double getCurrentAcceleration() {
         Double value = accelerationSignal.getDouble();
         return value != null ? value : 0.0;
     }
     
+    @Override
     public double getCurrentAngle() {
         if(config.isRadiansMotor) {
             return MathUtil.angleModulus(getCurrentPosition());
@@ -342,11 +345,13 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
         return 0;
     }
     
+    @Override
     public double getCurrentVoltage() {
         Double value = voltageSignal.getDouble();
         return value != null ? value : 0.0;
     }
     
+    @Override
     public double getCurrentCurrent() {
         Double value = currentSignal.getDouble();
         return value != null ? value : 0.0;
@@ -366,10 +371,11 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
         }
         builder.addDoubleProperty("ControlMode", this::getCurrentControlMode, null);
     }
-	  
+
   /**
-   * creates a widget in elastic of the pid and ff for hot reload
-   * @param slot the slot of the close loop perams (from 0 to 2)
+   * Creates a command to configure PID and FeedForward parameters via the Dashboard.
+   * Useful for tuning without redeploying code.
+   * @param slot The slot index to tune
    */
   public void configPidFf(int slot) {
 
@@ -451,7 +457,8 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
   }
 
   /**
-   * creates a widget in elastic to configure motion magic in hot reload
+   * Creates a command to configure Motion Magic parameters via the Dashboard.
+   * Useful for tuning velocity/acceleration constraints live.
    */
   public void configMotionMagic() {
     Command configMotionMagic = new InstantCommand(()-> {
@@ -523,6 +530,7 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
         return currentSignal;
     }
 
+    @Override
     public void stop(){
         stopMotor();
         controlMode = ControlMode.DISABLE;
