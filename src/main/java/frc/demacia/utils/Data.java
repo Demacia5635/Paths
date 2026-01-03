@@ -254,7 +254,7 @@ public class Data<T> {
         }
 
         for (int i = 0; i < supplierInstances.size(); i++) {
-            supplierInstances.get(i).updateSignalValue();
+            supplierInstances.get(i).refreshSupplier();
         }
     }
 
