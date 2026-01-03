@@ -172,7 +172,7 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
       LogManager.log(name + ": maxVelocity not configured", AlertType.kError);
       return;
     }
-    getClosedLoopController().setReference(velocity, ControlType.kMAXMotionVelocityControl, closedLoopSlot, feedForward);
+    getClosedLoopController().setReference(velocity, ControlType.kMAXMotionVelocityControl, closedLoopSlot, feedForward + velocityFeedForward(velocity) + config.pid[closedLoopSlot.value].kS()*Math.signum(velocity));
     controlType = ControlType.kMAXMotionVelocityControl;
     controlMode = ControlMode.VELOCITY;
     setPoint = velocity;
@@ -180,7 +180,7 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
 
   @Override
   public void setVelocity(double velocity) {
-    setVelocity(velocity, config.pid[closedLoopSlot.value].kS()*Math.signum(velocity));
+    setVelocity(velocity, 0);
   }
 
   @Override
@@ -202,27 +202,12 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
   }
 
   @Override
-  public void setVelocityWithFeedForward(double velocity) {
-    setVelocity(velocity, velocityFeedForward(velocity));
-  }
-
-  @Override
-  public void setVelocityWithFeedForwardAndAcceleratoin(double velocity, Supplier<Double> wantedAccelerationSupplier) {
-      setVelocity(velocity, velocityFeedForward(velocity) + wantedAccelerationSupplier.get() * config.pid[closedLoopSlot.value].kA());
-  }
-
-  @Override
-  public void setMotionWithFeedForward(double velocity) {
-    setVelocity(velocity, positionFeedForward(velocity));
-  }
-
-  @Override
   public void setMotion(double position, double feedForward) {
     if (config.maxVelocity == 0) {
       LogManager.log(name + ": maxVelocity not configured", AlertType.kError);
       return;
     }
-    getClosedLoopController().setReference(position, ControlType.kMAXMotionPositionControl, closedLoopSlot, feedForward);
+    getClosedLoopController().setReference(position, ControlType.kMAXMotionPositionControl, closedLoopSlot, feedForward + config.pid[closedLoopSlot.value].kS() + positionFeedForward(position));
     controlType = ControlType.kMAXMotionPositionControl;
     controlMode = ControlMode.MOTION;
     setPoint = position;
@@ -230,7 +215,7 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
 
   @Override
   public void setMotion(double position) {
-    setMotion(position, config.pid[closedLoopSlot.value].kS());
+    setMotion(position, 0);
   }
 
   @Override
@@ -248,8 +233,8 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
     return velocity * velocity * Math.signum(velocity) * config.kv2;
   }
 
-  private double positionFeedForward(double positin) {
-    return Math.cos(positin * config.posToRad) * config.kSin;
+  private double positionFeedForward(double position) {
+    return Math.cos(position * config.posToRad) * config.kSin;
   }
 
   @Override

@@ -222,6 +222,7 @@ class SysidResultPanel extends JPanel {
             k[KTypes.KV2.ordinal()][0].setText(String.format("%7.5f", bucket.kv2));
             k[KTypes.KA.ordinal()][0].setText(String.format("%7.5f", bucket.ka));
             k[KTypes.KG.ordinal()][0].setText(String.format("%7.5f", bucket.kg));
+            k[KTypes.KSIN.ordinal()][0].setText(String.format("%7.5f", bucket.ksin));
             
             countLabels[1].setText(Integer.toString(bucket.points));
             avgErrorLabels[1].setText(String.format("%4.2f%%", bucket.avgError*100));
@@ -257,4 +258,4 @@ class MotorData {
     }
 }
 
-enum KTypes {KS, KV, KV2, KA, KG}
+enum KTypes {KS, KV, KV2, KA, KG, KSIN}

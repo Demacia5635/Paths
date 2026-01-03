@@ -361,15 +361,16 @@ public class LogReader {
     }
 
     public static class BucketResult {
-        double ks, kv, kv2, ka, kg, kp, avgError, maxError;
+        double ks, kv, kv2, ka, kg, ksin, kp, avgError, maxError;
         int points;
 
-        BucketResult(double ks, double kv, double kv2, double ka, double kg, double kp, double avgError, double maxError, int points) {
+        BucketResult(double ks, double kv, double kv2, double ka, double kg, double ksin, double kp, double avgError, double maxError, int points) {
             this.ks = ks;
             this.kv = kv;
             this.kv2 = kv2;
             this.ka = ka;
             this.kg = kg;
+            this.ksin = ksin;
             this.kp = kp;
             this.avgError = avgError;
             this.maxError = maxError;
@@ -378,8 +379,8 @@ public class LogReader {
 
         @Override
         public String toString() {
-            return String.format("KS=%.4f, KV=%.4f, KV2=%.4f, KA=%.4f, KG=%.4f, KP=%.4f, AvgError=%.2f%%, MaxError=%.2f%%", 
-                               ks, kv, kv2, ka, kg, kp, avgError*100, maxError*100);
+            return String.format("KS=%.4f, KV=%.4f, KV2=%.4f, KA=%.4f, KG=%.4f, KSIN=%.4f, KP=%.4f, AvgError=%.2f%%, MaxError=%.2f%%", 
+                               ks, kv, kv2, ka, kg, ksin, kp, avgError*100, maxError*100);
         }
     }
 
@@ -517,16 +518,15 @@ public class LogReader {
         int rows = sourceData.size();
         boolean useFixedKs = (fixedKs >= 0);
         
-        boolean useGravity = (type == MechanismType.ELEVATOR || type == MechanismType.ARM);
-        
         int cols = 0;
-        int idxSign = -1, idxVel = -1, idxKv2 = -1, idxAcc = -1, idxGrav = -1;
+        int idxSign = -1, idxVel = -1, idxKv2 = -1, idxAcc = -1, idxGrav = -1, idxSin = -1;
 
         if (!useFixedKs) { idxSign = cols++; }
         idxVel = cols++;
         if (useKv2) { idxKv2 = cols++; }
         idxAcc = cols++;
-        if (useGravity) { idxGrav = cols++; }
+        if (type == MechanismType.ELEVATOR) { idxGrav = cols++; }
+        if (type == MechanismType.ARM) { idxSin = cols++; }
 
         SimpleMatrix mat = new SimpleMatrix(rows, cols);
         SimpleMatrix volt = new SimpleMatrix(rows, 1);
@@ -547,11 +547,11 @@ public class LogReader {
             mat.set(r, idxAcc, d.acceleration);
             
             if (idxGrav != -1) {
-                if (type == MechanismType.ELEVATOR) {
-                    mat.set(r, idxGrav, 1.0);
-                } else if (type == MechanismType.ARM) {
-                    mat.set(r, idxGrav, Math.cos(d.position));
-                }
+                mat.set(r, idxGrav, 1.0);
+            }
+
+            if (idxSin != -1) {
+                mat.set(r, idxSin, Math.cos(d.position)); 
             }
             
             double effectiveVoltage = d.voltage;
@@ -565,13 +565,14 @@ public class LogReader {
             SimpleMatrix res = mat.solve(volt);
             
             double calculatedKs = (useFixedKs) ? fixedKs : 0.0;
-            double calculatedKv = 0, calculatedKv2 = 0, calculatedKa = 0, calculatedKg = 0;
+            double calculatedKv = 0, calculatedKv2 = 0, calculatedKa = 0, calculatedKg = 0, calculatedKSin = 0;
             
             if (!useFixedKs && idxSign != -1) calculatedKs = res.get(idxSign, 0);
             if (idxVel != -1) calculatedKv = res.get(idxVel, 0);
             if (idxKv2 != -1) calculatedKv2 = res.get(idxKv2, 0);
             if (idxAcc != -1) calculatedKa = res.get(idxAcc, 0);
             if (idxGrav != -1) calculatedKg = res.get(idxGrav, 0);
+            if (idxSin != -1) calculatedKSin = res.get(idxSin, 0);
             
             if (useFixedKs && fastDataForCheck != null && !fastDataForCheck.isEmpty()) {
                 double observedKv = measureObservedKvRANSAC(fastDataForCheck, calculatedKs, calculatedKv2, calculatedKg, type);
@@ -600,10 +601,9 @@ public class LogReader {
                                      + (calculatedKv2 * d.velocity * Math.abs(d.velocity)) 
                                      + (calculatedKa * d.acceleration);
                     
-                    if (useGravity) {
-                        double gravFactor = (type == MechanismType.ELEVATOR) ? 1.0 : Math.cos(d.position);
-                        predVolts += (calculatedKg * gravFactor);
-                    }
+                    predVolts += (type == MechanismType.ELEVATOR) ? (calculatedKg)
+                    : (type == MechanismType.ARM) ? (calculatedKg * Math.cos(d.position))
+                    : 0;
                     
                     double relError = Math.abs(d.voltage - predVolts) / Math.abs(d.voltage);
                     sumError += relError;
@@ -614,7 +614,7 @@ public class LogReader {
             double avgError = validCount > 0 ? sumError / validCount : 0;
             double kp = CalculateFeedbackGains.calculateFeedbackGains(calculatedKv, calculatedKa, type);
             
-            return new BucketResult(calculatedKs, calculatedKv, calculatedKv2, calculatedKa, calculatedKg, kp, avgError, maxError, rows);
+            return new BucketResult(calculatedKs, calculatedKv, calculatedKv2, calculatedKa, calculatedKg, calculatedKSin, kp, avgError, maxError, rows);
         } catch (Exception e) {
             System.err.println("Error solving bucket: " + e.getMessage());
             return null;

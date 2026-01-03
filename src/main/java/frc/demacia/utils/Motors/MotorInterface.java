@@ -113,25 +113,6 @@ public interface MotorInterface extends Sendable {
      */
     void setPositionVoltage(double position);
 
-    /**
-     * Sets velocity with internally calculated feedforward.
-     * @param velocity The target velocity
-     */
-    void setVelocityWithFeedForward(double velocity);
-
-    /**
-     * Sets velocity with internally calculated feedforward using Ka.
-     * @param velocity The target velocity
-     * @param wantedAccelerationSupplier The supplier for the acceleration
-     */
-    void setVelocityWithFeedForwardAndAcceleratoin(double velocity, Supplier<Double> wantedAccelerationSupplier);
-
-    /**
-     * Sets motion profile target with internally calculated feedforward.
-     * @param position The target position
-     */
-    void setMotionWithFeedForward(double position);
-
     /** @return The integer representation of the current control mode */
     int getCurrentControlMode();
 

@@ -172,7 +172,7 @@ public class SparkMaxMotor extends SparkMax implements MotorInterface {
       LogManager.log(name + ": maxVelocity not configured", AlertType.kError);
       return;
     }
-    getClosedLoopController().setReference(velocity, ControlType.kMAXMotionVelocityControl, closedLoopSlot, feedForward);
+    getClosedLoopController().setReference(velocity, ControlType.kMAXMotionVelocityControl, closedLoopSlot, feedForward + velocityFeedForward(velocity) + config.pid[closedLoopSlot.value].kS()*Math.signum(velocity));
     controlType = ControlType.kMAXMotionVelocityControl;
     controlMode = ControlMode.VELOCITY;
     setPoint = velocity;
@@ -180,7 +180,7 @@ public class SparkMaxMotor extends SparkMax implements MotorInterface {
 
   @Override
   public void setVelocity(double velocity) {
-    setVelocity(velocity, config.pid[closedLoopSlot.value].kS()*Math.signum(velocity));
+    setVelocity(velocity, 0);
   }
 
   @Override
@@ -202,35 +202,20 @@ public class SparkMaxMotor extends SparkMax implements MotorInterface {
   }
 
   @Override
-  public void setVelocityWithFeedForward(double velocity) {
-    setVelocity(velocity, velocityFeedForward(velocity));
-  }
-
-  @Override
-  public void setVelocityWithFeedForwardAndAcceleratoin(double velocity, Supplier<Double> wantedAccelerationSupplier) {
-      setVelocity(velocity, velocityFeedForward(velocity) + wantedAccelerationSupplier.get() * config.pid[closedLoopSlot.value].kA());
-  }
-
-  @Override
-  public void setMotionWithFeedForward(double velocity) {
-    setVelocity(velocity, positionFeedForward(velocity));
-  }
-
-  @Override
   public void setMotion(double position, double feedForward) {
     if (config.maxVelocity == 0) {
       LogManager.log(name + ": maxVelocity not configured", AlertType.kError);
       return;
     }
-    getClosedLoopController().setReference(position, ControlType.kMAXMotionPositionControl, closedLoopSlot, feedForward);
+    getClosedLoopController().setReference(position, ControlType.kMAXMotionPositionControl, closedLoopSlot, feedForward + config.pid[closedLoopSlot.value].kS() + positionFeedForward(position));
     controlType = ControlType.kMAXMotionPositionControl;
-    controlMode = ControlMode.POSITION_VOLTAGE;
+    controlMode = ControlMode.MOTION;
     setPoint = position;
-  }
+  } 
 
   @Override
   public void setMotion(double position) {
-    setMotion(position, config.pid[closedLoopSlot.value].kS());
+    setMotion(position, 0);
   }
 
   @Override

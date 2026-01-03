@@ -244,7 +244,7 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
 
     @Override
     public void setVelocity(double velocity, double feedForward) {
-        setControl(velocityVoltage.withVelocity(velocity).withFeedForward(feedForward));
+        setControl(velocityVoltage.withVelocity(velocity).withFeedForward(feedForward + velocityFeedForward(velocity)));
         controlMode = ControlMode.VELOCITY;
     }
 
@@ -260,7 +260,7 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
 
     @Override
     public void setMotion(double position, double feedForward) {
-        setControl(motionMagicExpoVoltage.withPosition(position).withFeedForward(feedForward));
+        setControl(motionMagicExpoVoltage.withPosition(position).withFeedForward(feedForward + positionFeedForward(position)));
         controlMode = ControlMode.MOTION;  
     }
 
@@ -289,21 +289,6 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
     @Override
     public void setPositionVoltage(double position) {
         setPositionVoltage(position, 0);
-    }
-
-    @Override
-    public void setVelocityWithFeedForward(double velocity) {
-        setVelocity(velocity, velocityFeedForward(velocity));
-    }
-
-    @Override
-    public void setVelocityWithFeedForwardAndAcceleratoin(double velocity, Supplier<Double> wantedAccelerationSupplier) {
-        setVelocity(velocity, velocityFeedForward(velocity) + wantedAccelerationSupplier.get() * config.pid[slot].kA());
-    }
-
-    @Override
-    public void setMotionWithFeedForward(double position) {
-        setMotion(position, positionFeedForward(position));
     }
 
     private double velocityFeedForward(double velocity) {

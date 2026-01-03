@@ -172,6 +172,7 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
     @SuppressWarnings("unchecked")
     public T withMeterMotor(double gearRatio, double diameter) {
         motorRatio = gearRatio / (diameter * Math.PI);
+        posToRad = 2 / diameter;
         isMeterMotor = true;
         isRadiansMotor = false;
         return (T) this;
@@ -186,6 +187,7 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
     @SuppressWarnings("unchecked")
     public T withRadiansMotor(double gearRatio) {
         motorRatio = gearRatio / (Math.PI * 2);
+        posToRad = 1;
         isMeterMotor = false;
         isRadiansMotor = true;
         return (T) this;
@@ -236,10 +238,9 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
      * @return this configuration for chaining
      */
     @SuppressWarnings("unchecked")
-    public T withFeedForward(double kv2, double ksin, double posToRad) {
+    public T withFeedForward(double kv2, double ksin) {
         this.kv2 = kv2;
         this.kSin = ksin;
-        this.posToRad = posToRad;
         return (T) this;
     }
 

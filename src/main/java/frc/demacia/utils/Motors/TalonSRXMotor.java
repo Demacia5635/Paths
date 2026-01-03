@@ -169,23 +169,12 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface {
         setPositionVoltage(position, 0);
     }
 
-    public void setVelocityWithFeedForward(double velocity) {
-        setVelocity(velocity, velocityFeedForward(velocity));
-    }
-
-    @Override
-    public void setVelocityWithFeedForwardAndAcceleratoin(double velocity, Supplier<Double> wantedAccelerationSupplier) {
-        setVelocity(velocity, velocityFeedForward(velocity) + wantedAccelerationSupplier.get() * config.pid[slot].kA());
-    }
-
-    public void setMotionWithFeedForward(double velocity) {
-        setMotion(velocity, positionFeedForward(velocity));
-    }
-
+    @SuppressWarnings("unused")
     private double velocityFeedForward(double velocity) {
         return velocity * velocity * Math.signum(velocity) * config.kv2;
     }
 
+    @SuppressWarnings("unused")
     private double positionFeedForward(double position) {
         return Math.cos(position * config.posToRad) * config.kSin;
     }
