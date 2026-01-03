@@ -15,28 +15,7 @@ import frc.demacia.utils.Utilities;
 import frc.demacia.utils.log.LogManager;
 
 /**
- * Unified controller wrapper supporting Xbox and PS5 controllers.
- * 
- * <p>Provides consistent button/axis mapping across controller types
- * with automatic deadband handling.</p>
- * 
- * <p><b>Features:</b></p>
- * <ul>
- *   <li>Automatic deadband application (configurable)</li>
- *   <li>Consistent naming across controller types</li>
- *   <li>Trigger support (both digital and analog)</li>
- *   <li>Stick movement detection</li>
- * </ul>
- * 
- * <p><b>Example:</b></p>
- * <pre>
- * CommandController driver = new CommandController(0, ControllerType.kXbox);
- * 
- * // Same code works for both Xbox and PS5
- * driver.downButton().onTrue(Commands.runOnce(() -> shoot()));
- * double speed = -driver.getLeftY();  // Forward/backward
- * double turn = driver.getRightX();   // Left/right
- * </pre>
+ * controller wrapper supporting Xbox and PS5 controllers.
  */
 public class CommandController extends CommandGenericHID{
 

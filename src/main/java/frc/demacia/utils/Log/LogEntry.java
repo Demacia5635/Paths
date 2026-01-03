@@ -26,21 +26,43 @@ import frc.demacia.utils.Data;
 import frc.demacia.utils.DemaciaUtils;
 import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 
+/**
+ * Represents a single log entry of a specific type (T).
+ * <p>
+ * This class handles the logic of writing data to both the local DataLog (file)
+ * and NetworkTables (live dashboard)
+ * </p>
+ * @param <T> The type of data contained in this entry
+ */
 public class LogEntry<T> {
+    /** The actual WPILib DataLog entry for file logging */
     private DataLogEntry entry;
+    /** The data wrapper containing the value and type information */
     private Data<T> data;
+    /** Optional consumer to be executed when data is logged */
     private BiConsumer<T[], Long> consumer = null;
 
+    /** The name/key of the log entry */
     private String name;
+    /** Metadata description for the log */
     private String metaData;
+    /** The NetworkTables publisher for live dashboard updates */
     private Publisher ntPublisher;
+    /** The logging level configuration (Log only, NT only, or both) */
     private LogLevel logLevel;
 
+    /** Strategy for writing to the DataLog file based on type */
     private BiConsumer<Long, Data<T>> logStrategy;
+    /** Strategy for updating NetworkTables based on type */
     private BiConsumer<Data<T>, Publisher> ntStrategy;
-    /*
-        * Constructor with the suppliers and boolean if add to network table
-    */
+    
+    /**
+     * Constructs a new LogEntry.
+     * @param name The name of the entry
+     * @param data The data object wrapper
+     * @param logLevel The desired log level
+     * @param metaData Additional metadata for the log file
+     */
     LogEntry(String name, Data<T> data, LogLevel logLevel, String metaData) {
         this.name = name;
         this.logLevel = logLevel;
@@ -50,12 +72,18 @@ public class LogEntry<T> {
         initializeLogging();
     }
 
+    /**
+     * Initializes or re-initializes the logging strategies and publishers.
+     * Closes existing publishers if they exist before creating new ones.
+     * Determines if NT publishing is allowed based on competition status.
+     */
     private void initializeLogging() {
         if (ntPublisher != null) ntPublisher.close();
         if (entry != null) entry.finish();
 
         createLogEntry(LogManager.log, name, metaData);
 
+        // Check if we should publish to NetworkTables based on LogLevel and Competition state
         if (logLevel == LogLevel.LOG_AND_NT || (logLevel == LogLevel.LOG_AND_NT_NOT_IN_COMP && !DemaciaUtils.getIsComp())) {
             createPublisher(LogManager.table, name);
         } else {
@@ -63,11 +91,19 @@ public class LogEntry<T> {
             ntStrategy = null;
         }
 
+        // Initial update to NT if applicable
         if (ntPublisher != null && ntStrategy != null) {
             ntStrategy.accept(data, ntPublisher);
         }
     }
 
+    /**
+     * updates the log.
+     * <p>
+     * Checks if the data has changed. If so, updates the DataLog,
+     * the NetworkTable, and triggers the consumer.
+     * </p>
+     */
     void log() {
         if (!data.hasChanged()) {
             return;
@@ -75,49 +111,82 @@ public class LogEntry<T> {
 
         long time = data.getTime();
 
+        // Write to file log
         if (logStrategy != null) {
             logStrategy.accept(time, data);
         }
 
+        // Write to NetworkTables
         if (ntPublisher != null && ntStrategy != null) {
             ntStrategy.accept(data, ntPublisher);
         }
         
+        // Trigger custom consumer
         if (consumer != null) {
             consumer.accept(data.getValueArray(), time);
         } 
     }
 
+    /**
+     * @return The name of the entry
+     */
     public String getName(){
         return name;
     }
 
+    /**
+     * @return The data wrapper object
+     */
     public Data<T> getData(){
         return data;
     }
 
+    /**
+     * @return The metadata string
+     */
     public String getMetaData(){
         return metaData;
     }
 
+    /**
+     * @return The configured log level
+     */
     public LogLevel getLogLevel(){
         return logLevel;
     }
 
+    /**
+     * Sets a consumer to be called whenever the log updates.
+     * @param consumer A BiConsumer accepting the value array and the timestamp
+     */
     public void setConsumer(BiConsumer<T[], Long> consumer) {
         this.consumer = consumer;
     }
 
+    /**
+     * @return The current consumer
+     */
     public BiConsumer<T[], Long> getConsumer(){
         return consumer;
     }
 
+    /**
+     * Removes the NetworkTables publisher if the log level is set to 
+     * disable NT during competition.
+     */
     public void removeInComp() {
         if (logLevel == LogLevel.LOG_AND_NT_NOT_IN_COMP && ntPublisher != null) {
             ntPublisher.close();
         }
     }
 
+    /**
+     * Creates the specific DataLog entry and strategy based on the data type.
+     * Supports Float, Boolean, String and their Array variants.
+     * @param log The DataLog instance
+     * @param name The name of the entry
+     * @param metaData Metadata for the entry
+     */
     private void createLogEntry(DataLog log, String name, String metaData) {
         boolean isFloat = data.isDouble();
         boolean isBoolean = data.isBoolean();
@@ -148,6 +217,12 @@ public class LogEntry<T> {
         }
     }
 
+    /**
+     * Creates the specific NetworkTable publisher and strategy based on the data type.
+     * Supports Float, Boolean, String and their Array variants.
+     * @param table The NetworkTable instance
+     * @param name The name of the topic
+     */
     private void createPublisher(NetworkTable table, String name) {
         boolean isFloat = data.isDouble();
         boolean isBoolean = data.isBoolean();
@@ -178,6 +253,13 @@ public class LogEntry<T> {
         }
     }
 
+    /**
+     * Merges another data source into this entry, effectively creating or expanding an array entry.
+     * Re-initializes logging to reflect the combined data.
+     * @param name The name to append
+     * @param data The new data to add
+     * @param metaData The metadata to append
+     */
     public void addData(String name, Data<T> data, String metaData){
         this.name = this.name + " | " + name;
         this.metaData = this.metaData + " | " + metaData;

@@ -22,20 +22,36 @@ import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 
 /**
  * Centralized logging system for robot telemetry and diagnostics.
+ * <p>
+ * Manages the creation, updating, and optimization of log entries.
+ * Handles both file logging (DataLog) and live dashboard updates (NetworkTables).
+ * </p>
  */
 public class LogManager extends SubsystemBase {
 
+  /** Singleton instance of the LogManager */
   private static LogManager logManager;
 
+  /** The main DataLog instance for file writing */
   public static DataLog log;
+  /** The NetworkTable instance for the "Log" table */
   public static NetworkTable table = NetworkTableInstance.getDefault().getTable("Log");
 
+  /** List of currently active console alerts */
   private static ArrayList<ConsoleAlert> activeConsole;
 
+  /** List of individual log entries that are not grouped */
   private ArrayList<LogEntry<?>> individualLogEntries = new ArrayList<>();
   
+  /** * Array of grouped log entries.
+   * Used to optimize logging by combining similar data types and log levels into single array entries.
+   */
   private LogEntry<?>[] categoryLogEntries = new LogEntry<?>[24];
 
+  /**
+   * Private constructor to enforce Singleton pattern.
+   * Initializes DataLogManager and starts logging.
+   */
   private LogManager() {
     if (logManager != null) {
       CommandScheduler.getInstance().unregisterSubsystem(this);
@@ -51,22 +67,43 @@ public class LogManager extends SubsystemBase {
     log("log manager is ready");
   }
 
+  /**
+   * Static initializer to ensure the LogManager is created.
+   */
   static{
     if (logManager == null) {
       new LogManager();
     }
   }
 
+  /**
+   * Starts building a new log entry from Phoenix6 StatusSignals.
+   * @param <T> The type of data
+   * @param name The name of the log entry
+   * @param statusSignals The signals to log
+   * @return A new LogEntryBuilder
+   */
   @SuppressWarnings("unchecked")
   public static <T> LogEntryBuilder<T> addEntry(String name, StatusSignal<T>... statusSignals) {
     return new LogEntryBuilder<T>(name, statusSignals);
   }
 
+  /**
+   * Starts building a new log entry from standard Suppliers.
+   * @param <T> The type of data
+   * @param name The name of the log entry
+   * @param suppliers The suppliers to log
+   * @return A new LogEntryBuilder
+   */
   @SuppressWarnings("unchecked")
   public static <T> LogEntryBuilder<T> addEntry(String name, Supplier<T>... suppliers) {
     return new LogEntryBuilder<T>(name, suppliers);
   }
 
+  /**
+   * Removes non-essential log entries when in competition mode.
+   * Cleans up both individual and categorized entries based on their LogLevel.
+   */
   public static void removeInComp() {
     if (logManager == null) return; 
 
@@ -89,6 +126,9 @@ public class LogManager extends SubsystemBase {
     }
   }
   
+  /**
+   * Clears all log entries from the manager.
+   */
   public static void clearEntries() {
     if (logManager != null) {
       logManager.individualLogEntries.clear();
@@ -98,6 +138,13 @@ public class LogManager extends SubsystemBase {
     }
   }
 
+  /**
+   * Logs a message to the console and creates an alert.
+   * Manages the console limit by removing old alerts.
+   * @param message The message to log
+   * @param alertType The severity of the alert
+   * @return The created ConsoleAlert
+   */
   public static ConsoleAlert log(Object message, AlertType alertType) {
     DataLogManager.log(String.valueOf(message));
     
@@ -111,10 +158,19 @@ public class LogManager extends SubsystemBase {
     return alert;
   }
 
+  /**
+   * Logs an info message to the console.
+   * @param message The message to log
+   * @return The created ConsoleAlert
+   */
   public static ConsoleAlert log(Object message) {
     return log(message, AlertType.kInfo);
   }
 
+  /**
+   * Periodic method called by the scheduler.
+   * Refreshes data, updates console alerts (handling expiration), and updates all log entries.
+   */
   @Override
   public void periodic() {
     Data.refreshAll();
@@ -138,6 +194,16 @@ public class LogManager extends SubsystemBase {
     }
   }
 
+  /**
+   * Internal method to add a log entry to the manager.
+   * @param <T> The data type
+   * @param name Name of the entry
+   * @param data Data wrapper
+   * @param logLevel Logging level
+   * @param metaData Metadata
+   * @param isSeparated Whether to force a separate entry
+   * @return The created or updated LogEntry
+   */
   public static <T> LogEntry<T> add(String name, Data<T> data, LogLevel logLevel, String metaData, boolean isSeparated) {
     LogEntry<T> entry = null;
 
@@ -153,6 +219,16 @@ public class LogManager extends SubsystemBase {
     return entry;
   }
 
+  /**
+   * Adds data to an existing category entry or creates a new one if it doesn't exist.
+   * Handles type mismatches gracefully by creating a separate entry.
+   * @param i The index in the category array
+   * @param name Name of the entry
+   * @param logLevel Logging level
+   * @param data Data wrapper
+   * @param metaData Metadata
+   * @return The LogEntry
+   */
   @SuppressWarnings("unchecked")
   private <T> LogEntry<T> addToEntryArray(int i, String name, LogLevel logLevel, Data<T> data, String metaData) {
     if (categoryLogEntries[i] != null && categoryLogEntries[i].getData() != null) {
@@ -175,6 +251,13 @@ public class LogManager extends SubsystemBase {
     return (LogEntry<T>) categoryLogEntries[i];
   }
 
+  /**
+   * Calculates the index for the category array based on data type and log level.
+   * @param data The data object
+   * @param logLevel The log level
+   * @param isSeperated Whether the entry is forced to be separate
+   * @return The index, or -1 if it should be an individual entry
+   */
   private int getCategoryIndex(Data<?> data, LogLevel logLevel, Boolean isSeperated) {
     boolean isSignal = data.getSignalArray() != null;
     boolean isSupplier = data.getSupplierArray() != null;

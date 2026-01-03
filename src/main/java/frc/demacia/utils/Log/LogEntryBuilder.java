@@ -8,14 +8,26 @@ import com.ctre.phoenix6.StatusSignal;
 import frc.demacia.utils.Data;
 
 /**
- * Fluent builder for creating log entries with various options.
+ * Builder class for creating and configuring LogEntries.
+ * Allows setting properties like log level, metadata, and consumers before registration.
+ * @param <T> The type of data to log
  */
 public class LogEntryBuilder<T> {
 
     /**
-     * Enum representing LogLevel.
+     * Enumeration for different logging levels.
+     * Defines behavior for file logging and NetworkTables updating, both in and out of competition.
      */
-    public static enum LogLevel { LOG_ONLY_NOT_IN_COMP, LOG_ONLY, LOG_AND_NT_NOT_IN_COMP, LOG_AND_NT} 
+    public static enum LogLevel { 
+        /** Log to file only, but remove entirely during competition */
+        LOG_ONLY_NOT_IN_COMP, 
+        /** Log to file only */
+        LOG_ONLY, 
+        /** Log to file and NetworkTables only when not in competition */
+        LOG_AND_NT_NOT_IN_COMP, 
+        /** Log to file and NetworkTables */
+        LOG_AND_NT
+    } 
 
     private String name;
     private LogLevel logLevel = LogLevel.LOG_ONLY_NOT_IN_COMP;
@@ -24,39 +36,74 @@ public class LogEntryBuilder<T> {
     private boolean isSeparated = false;
     private Data<T> data;
     
+    /**
+     * Creates a builder for Phoenix6 StatusSignals.
+     * @param name The name of the log entry
+     * @param statusSignals Variable arguments of StatusSignals
+     */
     @SafeVarargs
     LogEntryBuilder(String name, StatusSignal<T>... statusSignals) {
         this.name = name;
         this.data = new Data<>(statusSignals);
     }
     
+    /**
+     * Creates a builder for Suppliers.
+     * @param name The name of the log entry
+     * @param suppliers Variable arguments of Suppliers
+     */
     @SafeVarargs
     LogEntryBuilder(String name, Supplier<T>... suppliers) {
         this.name = name;
         this.data = new Data<>(suppliers);
     }
     
+    /**
+     * Sets the log level for this entry.
+     * @param level The desired LogLevel
+     * @return The builder instance
+     */
     public LogEntryBuilder<T> withLogLevel(LogLevel level) {
         this.logLevel = level;
         return this;
     }
     
+    /**
+     * Sets the metadata description for this entry.
+     * @param metaData The metadata string
+     * @return The builder instance
+     */
     public LogEntryBuilder<T> withMetaData(String metaData) {
         this.metadata = metaData;
         return this;
     }
     
+    /**
+     * Convenience method to set metadata to "motor".
+     * @return The builder instance
+     */
     public LogEntryBuilder<T> withIsMotor() {
         this.metadata = "motor";
         return this;
     }
     
+    /**
+     * Attaches a consumer to run whenever the log updates.
+     * Automatically marks the entry as separated to ensure the consumer only receives this specific data.
+     * @param consumer BiConsumer receiving the data array and timestamp
+     * @return The builder instance
+     */
     public LogEntryBuilder<T> withConsumer(BiConsumer<T[], Long> consumer) {
         this.consumer = consumer;
         this.isSeparated = true; 
         return this;
     }
 
+    /**
+     * Forces the entry to be separated (not grouped with others).
+     * @param isSeparated true to keep separate
+     * @return The builder instance
+     */
     public LogEntryBuilder<T> withIsSeparated(boolean isSeparated) {
         if (this.consumer == null) {
             this.isSeparated = isSeparated;
@@ -64,6 +111,10 @@ public class LogEntryBuilder<T> {
         return this;
     }
     
+    /**
+     * Builds the LogEntry and registers it with the LogManager.
+     * @return The created LogEntry, or null if validation fails
+     */
     public LogEntry<T> build() {
         if (name == null || name.trim().isEmpty()) {
             LogManager.log("Log entry name cannot be null or empty");

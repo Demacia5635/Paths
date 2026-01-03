@@ -1,18 +1,28 @@
 package frc.demacia.utils;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 
+/**
+ * A generic wrapper class for data sources (StatusSignals or Suppliers).
+ * <p>
+ * This class abstracts the source of data and its type, allowing uniform handling
+ * of logging and network tables. It caches values to detect changes and convert
+ * types (e.g., Boolean to Double) efficiently.
+ * </p>
+ * @param <T> The type of the data (Double, Boolean, String, etc.)
+ */
 public class Data<T> {
+    /** Static array of all signals to refresh them all at once (CTRE optimization) */
     private static BaseStatusSignal[] signals = new BaseStatusSignal[0];
-    private static final ArrayList<WeakReference<Data<?>>> signalInstances = new ArrayList<>();
-    private static final ArrayList<WeakReference<Data<?>>> supplierInstances = new ArrayList<>();
+    /** List of all Data instances based on Signals */
+    private static final ArrayList<Data<?>> signalInstances = new ArrayList<>();
+    /** List of all Data instances based on Suppliers */
+    private static final ArrayList<Data<?>> supplierInstances = new ArrayList<>();
 
     private StatusSignal<T>[] signal;
     private Supplier<T>[] supplier;
@@ -24,12 +34,17 @@ public class Data<T> {
 
     private boolean changed = true;
 
+    // Cached primitive arrays to avoid auto-boxing and garbage collection
     private T[] values;
     private double[] doubleArrayValues;
     private float[] floatArrayValues;
     private boolean[] booleanArrayValues;
     private String[] stringArrayValues;
 
+    /**
+     * Creates a new Data object from Phoenix 6 StatusSignals.
+     * @param signal Variable arguments of StatusSignals
+     */
     @SuppressWarnings("unchecked")
     public Data(StatusSignal<T>... signal){
         this.signal = signal;
@@ -42,6 +57,10 @@ public class Data<T> {
         refresh();
     }
     
+    /**
+     * Creates a new Data object from Java Suppliers.
+     * @param supplier Variable arguments of Suppliers
+     */
     @SuppressWarnings("unchecked")
     public Data(Supplier<T>... supplier){
         this.supplier = supplier;
@@ -54,13 +73,16 @@ public class Data<T> {
         refresh();
     }
 
+    /** Registers this instance's signals to the static master list */
     private void registerSignal() {
         registerSignal(signal);
-        synchronized (signalInstances) {
-            signalInstances.add(new WeakReference<>(this));
-        }
+        signalInstances.add(this);
     }
 
+    /**
+     * Adds new signals to the static master array.
+     * @param newSignals The signals to add
+     */
     private void registerSignal(BaseStatusSignal[] newSignals) {
         int oldLength = signals.length;
         int newLength = oldLength + newSignals.length;
@@ -70,12 +92,12 @@ public class Data<T> {
         signals = combined;
     }
 
+    /** Registers this instance to the static supplier list */
     private void registerSupplier() {
-        synchronized (supplierInstances) {
-            supplierInstances.add(new WeakReference<>(this));
-        }
+        supplierInstances.add(this);
     }
 
+    /** Detects the data type based on the first signal's value */
     private void detectTypeFromSignal() {
         if (length == 0) return;
         
@@ -99,6 +121,7 @@ public class Data<T> {
         }
     }
 
+    /** Detects the data type based on the first supplier's value */
     private void detectTypeFromSupplier() {
         if (length == 0) return;
 
@@ -114,6 +137,7 @@ public class Data<T> {
         }
     }
 
+    /** Allocates the primitive arrays based on the detected type and length */
     @SuppressWarnings("unchecked")
     private void allocateCachedArrays() {
         if (length > 0) {
@@ -129,6 +153,10 @@ public class Data<T> {
         }
     }
     
+    /**
+     * Refreshes the local data from the source.
+     * If using signals, assumes the master refresh has already been called.
+     */
     public void refresh() {
         if (signal != null) {
             StatusSignal.refreshAll(signal);
@@ -138,6 +166,10 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Updates the internal primitive arrays from the signals.
+     * Sets the 'changed' flag if values have changed.
+     */
     private void updateSignalValue() {
         changed = false;
         if (values == null) return; 
@@ -171,6 +203,10 @@ public class Data<T> {
         }
     }
 
+    /**
+     * Updates the internal primitive arrays from the suppliers.
+     * Sets the 'changed' flag if values have changed.
+     */
     private void refreshSupplier() {
         changed = false;
         if (values == null) return; 
@@ -201,43 +237,49 @@ public class Data<T> {
                     stringArrayValues[i] = newVal;
                 }
             }
-    }
+        }
     }
 
+    /**
+     * Static method to refresh all registered Data instances.
+     * First refreshes all Phoenix signals, then updates local values.
+     */
     public static void refreshAll() {
         if (signals.length > 0) {
             BaseStatusSignal.refreshAll(signals);
         }
 
-        synchronized (signalInstances) {
-            Iterator<WeakReference<Data<?>>> iterator = signalInstances.iterator();
-            while (iterator.hasNext()) {
-                Data<?> data = iterator.next().get();
-                if (data == null) iterator.remove();
-                else data.updateSignalValue();
-            }
+        for (int i = 0; i < signalInstances.size(); i++) {
+            signalInstances.get(i).updateSignalValue();
         }
 
-        synchronized (supplierInstances) {
-            Iterator<WeakReference<Data<?>>> iterator = supplierInstances.iterator();
-            while (iterator.hasNext()) {
-                Data<?> data = iterator.next().get();
-                if (data == null) iterator.remove();
-                else data.refreshSupplier();
-            }
+        for (int i = 0; i < supplierInstances.size(); i++) {
+            supplierInstances.get(i).updateSignalValue();
         }
     }
 
+    /**
+     * @return true if the data has changed since the last refresh
+     */
     public boolean hasChanged() { return changed; }
 
+    /**
+     * @return The first value in the data set
+     */
     public T getValue() {
         return values[0];
     }
 
+    /**
+     * @return The array of all values
+     */
     public T[] getValueArray() {
         return values;
     }
 
+    /**
+     * @return The value as a double (1.0 for true if boolean)
+     */
     public double getDouble() {
         return length == 0 ? 0
         : isDouble? doubleArrayValues[0]
@@ -245,6 +287,9 @@ public class Data<T> {
         : 0;
     }
 
+    /**
+     * @return The array of values as doubles
+     */
     public double[] getDoubleArray() {
         if (length == 0) { return new double[0]; }
         else if (isDouble) { return doubleArrayValues; }
@@ -258,6 +303,9 @@ public class Data<T> {
         else { return new double[0]; }
     }
 
+    /**
+     * @return The value as a float (1f for true if boolean)
+     */
     public float getFloat() {
         return length == 0 ? 0f
         : isDouble? floatArrayValues[0]
@@ -265,6 +313,9 @@ public class Data<T> {
         : 0f;
     }
 
+    /**
+     * @return The array of values as floats
+     */
     public float[] getFloatArray() {
         if (length == 0) { return new float[0]; }
         else if (isDouble) { return floatArrayValues; }
@@ -278,6 +329,9 @@ public class Data<T> {
         else { return new float[0]; }
     }
 
+    /**
+     * @return The value as a boolean (true for 1 if number)
+     */
     public boolean getBoolean() {
         return length == 0 ? false
         : isBoolean? booleanArrayValues[0]
@@ -285,6 +339,9 @@ public class Data<T> {
         : false;
     }
 
+    /**
+     * @return The array of values as booleans
+     */
     public boolean[] getBooleanArray() {
         if (length == 0) { return new boolean[0]; }
         else if (isBoolean) { return booleanArrayValues; }
@@ -298,6 +355,9 @@ public class Data<T> {
         else { return new boolean[0]; }
     }
 
+    /**
+     * @return The value as a string
+     */
     public String getString() {
         return length == 0 ? ""
         : isDouble ? ((Double) doubleArrayValues[0]).toString()
@@ -305,6 +365,9 @@ public class Data<T> {
         : stringArrayValues[0];
     }
 
+    /**
+     * @return The array of values as strings
+     */
     public String[] getStringArray() {
         if (length == 0) { return new String[0]; }
         else if (isDouble) {
@@ -324,26 +387,41 @@ public class Data<T> {
         else { return stringArrayValues; }
     }
     
+    /**
+     * @return The first StatusSignal if available
+     */
     public StatusSignal<T> getSignal() {
         return (signal != null && signal.length > 0) ? signal[0]
         : null;
     }
 
+    /**
+     * @return The StatusSignal array if available
+     */
     public StatusSignal<T>[] getSignalArray() {
         return (signal != null) ? signal
         : null;
     }
 
+    /**
+     * @return The first Supplier if available
+     */
     public Supplier<T> getSupplier() {
         return (supplier != null && supplier.length > 0) ? supplier[0]
         : null;
     }
 
+    /**
+     * @return The Supplier array if available
+     */
     public Supplier<T>[] getSupplierArray() {
         return (supplier != null) ? supplier
         : null;
     }
 
+    /**
+     * @return The timestamp of the signal (in milliseconds) or 0
+     */
     public long getTime() {
         if (signal != null) return (long) (signal[0].getTimestamp().getTime() * 1000);
         return 0;
@@ -353,7 +431,14 @@ public class Data<T> {
     public boolean isBoolean() { return isBoolean; }
     public boolean isArray() { return isArray; }
 
+    /**
+     * Removes this instance from the static management lists.
+     * Also rebuilds the static signal array to remove these signals.
+     */
     public void cleanup() {
+        signalInstances.remove(this);
+        supplierInstances.remove(this);
+
         if (signal != null) {
             int count = 0;
             for (BaseStatusSignal s : signals) {
@@ -395,12 +480,19 @@ public class Data<T> {
         stringArrayValues = null;
     }
 
+    /**
+     * Clears all static references and signals.
+     */
     public static void clearAllSignals() {
         signals = new BaseStatusSignal[0];
         signalInstances.clear();
         supplierInstances.clear();
     }
 
+    /**
+     * Expands the current Data object by adding more StatusSignals.
+     * @param newSignals The new signals to append
+     */
     @SuppressWarnings("unchecked")
     public void expandWithSignals(StatusSignal<T>[] newSignals) {
         if (newSignals == null || newSignals.length == 0) return;
@@ -424,6 +516,10 @@ public class Data<T> {
         refresh();
     }
 
+    /**
+     * Expands the current Data object by adding more Suppliers.
+     * @param newSuppliers The new suppliers to append
+     */
     @SuppressWarnings("unchecked")
     public void expandWithSuppliers(Supplier<T>[] newSuppliers) {
 
