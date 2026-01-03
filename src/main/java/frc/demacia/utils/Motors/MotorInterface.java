@@ -1,5 +1,7 @@
 package frc.demacia.utils.motors;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableRegistry;
 
@@ -66,6 +68,13 @@ public interface MotorInterface extends Sendable {
     void setVelocity(double velocity);
 
     /**
+     * Sets the target velocity using Ka.
+     * @param velocity The target velocity
+     * @param wantedAccelerationSupplier The supplier for the acceleration
+     */
+    void setVelocityWithAcceleratoin(double velocity, Supplier<Double> wantedAccelerationSupplier);
+
+    /**
      * Sets the target position using Motion Magic.
      * @param position The target position
      * @param feedForward Arbitrary feedforward value
@@ -109,6 +118,13 @@ public interface MotorInterface extends Sendable {
      * @param velocity The target velocity
      */
     void setVelocityWithFeedForward(double velocity);
+
+    /**
+     * Sets velocity with internally calculated feedforward using Ka.
+     * @param velocity The target velocity
+     * @param wantedAccelerationSupplier The supplier for the acceleration
+     */
+    void setVelocityWithFeedForwardAndAcceleratoin(double velocity, Supplier<Double> wantedAccelerationSupplier);
 
     /**
      * Sets motion profile target with internally calculated feedforward.

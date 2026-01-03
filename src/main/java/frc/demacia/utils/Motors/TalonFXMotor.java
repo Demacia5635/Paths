@@ -1,5 +1,7 @@
 package frc.demacia.utils.motors;
 
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.SlotConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -252,6 +254,11 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
     }
 
     @Override
+    public void setVelocityWithAcceleratoin(double velocity, Supplier<Double> wantedAccelerationSupplier) {
+        setVelocity(velocity, wantedAccelerationSupplier.get() * config.pid[slot].kA());
+    }
+
+    @Override
     public void setMotion(double position, double feedForward) {
         setControl(motionMagicExpoVoltage.withPosition(position).withFeedForward(feedForward));
         controlMode = ControlMode.MOTION;  
@@ -287,6 +294,11 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
     @Override
     public void setVelocityWithFeedForward(double velocity) {
         setVelocity(velocity, velocityFeedForward(velocity));
+    }
+
+    @Override
+    public void setVelocityWithFeedForwardAndAcceleratoin(double velocity, Supplier<Double> wantedAccelerationSupplier) {
+        setVelocity(velocity, velocityFeedForward(velocity) + wantedAccelerationSupplier.get() * config.pid[slot].kA());
     }
 
     @Override

@@ -1,5 +1,7 @@
 package frc.demacia.utils.motors;
 
+import java.util.function.Supplier;
+
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -132,6 +134,11 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface {
     }
 
     @Override
+    public void setVelocityWithAcceleratoin(double velocity, Supplier<Double> wantedAccelerationSupplier) {
+        setVelocity(velocity, wantedAccelerationSupplier.get() * config.pid[slot].kA());
+    }
+
+    @Override
     public void setMotion(double position, double feedForward){
         LogManager.log("there is no motion");
     }
@@ -164,6 +171,11 @@ public class TalonSRXMotor extends TalonSRX implements MotorInterface {
 
     public void setVelocityWithFeedForward(double velocity) {
         setVelocity(velocity, velocityFeedForward(velocity));
+    }
+
+    @Override
+    public void setVelocityWithFeedForwardAndAcceleratoin(double velocity, Supplier<Double> wantedAccelerationSupplier) {
+        setVelocity(velocity, velocityFeedForward(velocity) + wantedAccelerationSupplier.get() * config.pid[slot].kA());
     }
 
     public void setMotionWithFeedForward(double velocity) {
