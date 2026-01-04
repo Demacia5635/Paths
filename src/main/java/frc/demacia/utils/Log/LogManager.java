@@ -234,7 +234,7 @@ public class LogManager extends SubsystemBase {
     if (categoryLogEntries[i] != null && categoryLogEntries[i].getData() != null) {
       if ((categoryLogEntries[i].getData().getSignalArray() != null) != (data.getSignalArray() != null)) {
           LogManager.log("Log Type Mismatch in '" + name + "'. Creating separate entry.", AlertType.kWarning);
-          return add(name, data, LogLevel.LOG_ONLY, metaData, false);
+          return add(name, data, LogLevel.LOG_ONLY, metaData, true);
       }
     }
     

@@ -8,12 +8,8 @@ public class DemaciaUtils{
     public static BooleanSupplier isRed = () -> false;
 
     public DemaciaUtils(BooleanSupplier isComp, BooleanSupplier isRed) {
-        if (DemaciaUtils.isComp == null) {
-            DemaciaUtils.isComp = isComp;
-        }
-        if (DemaciaUtils.isRed == null) {
-            DemaciaUtils.isRed = isRed;
-        }
+        DemaciaUtils.isComp = isComp;
+        DemaciaUtils.isRed = isRed;
     }
 
 
