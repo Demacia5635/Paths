@@ -39,8 +39,6 @@ public class LogEntry<T> {
     private DataLogEntry entry;
     /** The data wrapper containing the value and type information */
     private Data<T> data;
-    /** Optional consumer to be executed when data is logged */
-    private BiConsumer<T[], Long> consumer = null;
 
     /** The name/key of the log entry */
     private String name;
@@ -120,11 +118,6 @@ public class LogEntry<T> {
         if (ntPublisher != null && ntStrategy != null) {
             ntStrategy.accept(data, ntPublisher);
         }
-        
-        // Trigger custom consumer
-        if (consumer != null) {
-            consumer.accept(data.getValueArray(), time);
-        } 
     }
 
     /**
@@ -153,21 +146,6 @@ public class LogEntry<T> {
      */
     public LogLevel getLogLevel(){
         return logLevel;
-    }
-
-    /**
-     * Sets a consumer to be called whenever the log updates.
-     * @param consumer A BiConsumer accepting the value array and the timestamp
-     */
-    public void setConsumer(BiConsumer<T[], Long> consumer) {
-        this.consumer = consumer;
-    }
-
-    /**
-     * @return The current consumer
-     */
-    public BiConsumer<T[], Long> getConsumer(){
-        return consumer;
     }
 
     /**

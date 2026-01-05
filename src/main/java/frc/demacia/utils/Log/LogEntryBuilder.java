@@ -1,6 +1,5 @@
 package frc.demacia.utils.log;
 
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusSignal;
@@ -32,7 +31,6 @@ public class LogEntryBuilder<T> {
     private String name;
     private LogLevel logLevel = LogLevel.LOG_ONLY_NOT_IN_COMP;
     private String metadata = "";
-    private BiConsumer<T[], Long> consumer = null;
     private boolean isSeparated = false;
     private Data<T> data;
     
@@ -86,18 +84,6 @@ public class LogEntryBuilder<T> {
         this.metadata = "motor";
         return this;
     }
-    
-    /**
-     * Attaches a consumer to run whenever the log updates.
-     * Automatically marks the entry as separated to ensure the consumer only receives this specific data.
-     * @param consumer BiConsumer receiving the data array and timestamp
-     * @return The builder instance
-     */
-    public LogEntryBuilder<T> withConsumer(BiConsumer<T[], Long> consumer) {
-        this.consumer = consumer;
-        this.isSeparated = true; 
-        return this;
-    }
 
     /**
      * Forces the entry to be separated (not grouped with others).
@@ -105,9 +91,7 @@ public class LogEntryBuilder<T> {
      * @return The builder instance
      */
     public LogEntryBuilder<T> withIsSeparated(boolean isSeparated) {
-        if (this.consumer == null) {
-            this.isSeparated = isSeparated;
-        }
+        this.isSeparated = isSeparated;
         return this;
     }
     
@@ -126,10 +110,6 @@ public class LogEntryBuilder<T> {
         }
         
         LogEntry<T> entry = LogManager.add(name, data, logLevel, metadata, isSeparated);
-        
-        if (consumer != null) {
-            entry.setConsumer(consumer);
-        }
         return entry;
     }
 }

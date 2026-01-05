@@ -10,6 +10,7 @@ import frc.demacia.utils.controller.CommandController.ControllerType;
 import frc.demacia.utils.mechanisms.DefaultCommand;
 import frc.demacia.utils.mechanisms.DriveCommand;
 import frc.demacia.utils.motors.MotorInterface.ControlMode;
+import frc.robot.chassisConstants.Robot1ChassisConstants;
 import frc.robot.testMechanism.Arm.Arm;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -44,7 +45,7 @@ public class RobotContainer {
   public RobotContainer() {
     driverController = new CommandController(0, ControllerType.kXbox);
 
-    // chassis = new Chassis(Robot1ChassisConstants.CHASSIS_CONFIG);
+    chassis = new Chassis(Robot1ChassisConstants.CHASSIS_CONFIG);
     // driveCommand = new DriveCommand(chassis, driverController);
 
     arm = new Arm();

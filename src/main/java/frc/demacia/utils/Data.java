@@ -35,7 +35,6 @@ public class Data<T> {
     private boolean changed = true;
 
     // Cached primitive arrays to avoid auto-boxing and garbage collection
-    private T[] values;
     private double[] doubleArrayValues;
     private float[] floatArrayValues;
     private boolean[] booleanArrayValues;
@@ -138,10 +137,8 @@ public class Data<T> {
     }
 
     /** Allocates the primitive arrays based on the detected type and length */
-    @SuppressWarnings("unchecked")
     private void allocateCachedArrays() {
         if (length > 0) {
-            values = (T[]) new Object[length];
             if (isDouble) {
                 doubleArrayValues = new double[length];
                 floatArrayValues = new float[length];
@@ -172,32 +169,32 @@ public class Data<T> {
      */
     private void updateSignalValue() {
         changed = false;
-        if (values == null) return; 
-        for (int i = 0; i < length; i++) {
-            T val = signal[i].getValue();
-            values[i] = val;
-            if (isDouble) {
-                double newVal = signal[i].getValueAsDouble();
-                if (doubleArrayValues[i] != newVal) {
+        if (isDouble) {
+            if (doubleArrayValues == null) return;
+            for (int i = 0; i < length; i++) {
+                if (doubleArrayValues[i] != signal[i].getValueAsDouble()) {
                     changed = true;
-                    doubleArrayValues[i] = newVal;
+                    doubleArrayValues[i] = signal[i].getValueAsDouble();
                 }
-                float newFloatVal = (float) newVal;
-                if (floatArrayValues[i] != newFloatVal) {
+                if (floatArrayValues[i] != (float) signal[i].getValueAsDouble()) {
                     changed = true;
-                    floatArrayValues[i] = newFloatVal;
+                    floatArrayValues[i] = (float) signal[i].getValueAsDouble();
                 }
-            } else if (isBoolean) {
-                boolean newVal = (Boolean) val;
-                if (booleanArrayValues[i] != newVal) {
+            }
+        } else if (isBoolean) {
+            if (booleanArrayValues == null) return;
+            for (int i = 0; i < length; i++) {
+                if (booleanArrayValues[i] != (Boolean) signal[i].getValue()) {
                     changed = true;
-                    booleanArrayValues[i] = newVal;
+                    booleanArrayValues[i] = (Boolean) signal[i].getValue();
                 }
-            } else{
-                String newVal = (val == null) ? "null" : val.toString();
-                if (!Objects.equals(stringArrayValues[i], newVal)) {
+            }
+        } else{
+            if (stringArrayValues == null) return;
+            for (int i = 0; i < length; i++) {
+                if (!Objects.equals(stringArrayValues[i], (signal[i].getValue() == null) ? "null" : signal[i].getValue().toString())) {
                     changed = true;
-                    stringArrayValues[i] = newVal;
+                    stringArrayValues[i] = (signal[i].getValue() == null) ? "null" : signal[i].getValue().toString();
                 }
             }
         }
@@ -209,29 +206,33 @@ public class Data<T> {
      */
     private void refreshSupplier() {
         changed = false;
-        if (values == null) return; 
-        for (int i = 0; i < length; i++) {
-            T val = supplier[i].get();
-            values[i] = val;
-            if (isDouble) {
-                double newVal = ((Number) val).doubleValue();
-                if (doubleArrayValues[i] != newVal) {
-                    changed = true;
-                    doubleArrayValues[i] = newVal;
-                }
-                float newFloatVal = ((Number) val).floatValue();
+        if (isDouble) {
+            if (doubleArrayValues == null) return;
+            for (int i = 0; i < length; i++) {
+            double newVal = ((Number) supplier[i].get()).doubleValue();
+            if (doubleArrayValues[i] != newVal) {
+                changed = true;
+                doubleArrayValues[i] = newVal;
+            }
+            float newFloatVal = ((Number) supplier[i].get()).floatValue();
                 if (floatArrayValues[i] != newFloatVal) {
                     changed = true;
                     floatArrayValues[i] = newFloatVal;
                 }
-            } else if (isBoolean) {
-                boolean newVal = (Boolean) val;
+            }
+        } else if (isBoolean) {
+            if (booleanArrayValues == null) return;
+            for (int i = 0; i < length; i++) {
+                boolean newVal = (Boolean) supplier[i].get();
                 if (booleanArrayValues[i] != newVal) {
                     changed = true;
                     booleanArrayValues[i] = newVal;
                 }
-            } else{
-                String newVal = (val == null) ? "null" : val.toString();
+            }
+        } else{
+            if (stringArrayValues == null) return;
+            for (int i = 0; i < length; i++) {
+                String newVal = (supplier[i].get() == null) ? "null" : supplier[i].get().toString();
                 if (!Objects.equals(stringArrayValues[i], newVal)) {
                     changed = true;
                     stringArrayValues[i] = newVal;
@@ -262,20 +263,6 @@ public class Data<T> {
      * @return true if the data has changed since the last refresh
      */
     public boolean hasChanged() { return changed; }
-
-    /**
-     * @return The first value in the data set
-     */
-    public T getValue() {
-        return values[0];
-    }
-
-    /**
-     * @return The array of all values
-     */
-    public T[] getValueArray() {
-        return values;
-    }
 
     /**
      * @return The value as a double (1.0 for true if boolean)
@@ -473,7 +460,6 @@ public class Data<T> {
         
         signal = null; 
         supplier = null; 
-        values = null;
         doubleArrayValues = null; 
         floatArrayValues = null; 
         booleanArrayValues = null; 
