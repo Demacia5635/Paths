@@ -4,6 +4,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.motors.MotorInterface;
 import frc.demacia.utils.sensors.SensorInterface;
 
@@ -43,7 +44,13 @@ public class StateBaseMechanism extends BaseMechanism {
     private final MechanismState IDLE_STATE = new MechanismState() {
         @Override 
         public double[] getValues() { 
-            return new double[motors != null ? motors.size() : 0]; 
+            double[] idleValues = new double[motors != null ? motors.size() : 0];
+            if (isPosMechanism){
+                for (int i = 0; i < idleValues.length; i++){
+                    idleValues[i] = motorsArray[i].getCurrentPosition();
+                }
+            }
+            return idleValues; 
         }
         @Override
         public String name() {
@@ -69,6 +76,8 @@ public class StateBaseMechanism extends BaseMechanism {
     /** Stores the values used when in TESTING state */
     protected double[] testValues;
 
+    private boolean isPosMechanism;
+
     /**
      * Constructs a new StateBaseMechanism.
      * @param name The name of the mechanism
@@ -87,6 +96,7 @@ public class StateBaseMechanism extends BaseMechanism {
      * Adds TESTING, IDLE, and all values from the provided Enum.
      * @param enumClass The state Enum class
      */
+    @SuppressWarnings("unchecked")
     private void addNT(Class<? extends MechanismState> enumClass) {
         stateChooser.addOption("TESTING", TESTING_STATE);
         stateChooser.addOption("IDLE", IDLE_STATE);
@@ -99,7 +109,14 @@ public class StateBaseMechanism extends BaseMechanism {
         // Listener to update the local state variable when dashboard selection changes
         stateChooser.onChange(state -> this.state = state);
         
-        SmartDashboard.putData(getName() + "/State Chooser", stateChooser);
+        SmartDashboard.putData(getName() + "/State Chooser2", stateChooser);
+        SmartDashboard.putString(getName() + "/State", getState().name());
+
+        for (int i = 0; i < getState().getValues().length; i++){
+            final int index = i;
+            LogManager.addEntry(getName() + ": targetValue " + i, () -> getValue(index))
+            .withLogLevel(LogLevel.LOG_AND_NT).build();
+        }
     }
 
     /**
@@ -113,6 +130,14 @@ public class StateBaseMechanism extends BaseMechanism {
         }
 
         stateChooser.setDefaultOption(state.name(), state);
+    }
+
+    /**
+     * Sets the default option selected in the dashboard chooser on startup.
+     * @param state The state to be default
+     */
+    public void setPositionMechanism(){
+        isPosMechanism = true;
     }
 
     /**
@@ -136,7 +161,23 @@ public class StateBaseMechanism extends BaseMechanism {
      * @return The current state of the mechanism
      */
     public MechanismState getState() {
-        return state;
+        return state != null ? state : IDLE_STATE;
+    }
+
+    /**
+     * @return The array of current state values
+     */
+    public double[] getValues() {
+        double[] values = getState().getValues();
+        return values != null ? values : new double[0];
+    }
+
+    /**
+     * @return The current state value in the index
+     */
+    public double getValue(int index) {
+        double value = getState().getValues()[index];
+        return value;
     }
 
     /**

@@ -89,7 +89,7 @@ public class DigitalEncoder extends DutyCycleEncoder implements AnalogSensorInte
      */
     @Override
     public double get(){
-        return super.get() * 2 * Math.PI;
+        return super.get();
     }
 
     /**

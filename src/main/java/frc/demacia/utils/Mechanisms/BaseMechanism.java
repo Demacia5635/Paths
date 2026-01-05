@@ -29,6 +29,8 @@ public class BaseMechanism extends SubsystemBase{
     /** Map of sensors belonging to this mechanism, keyed by their name */
     protected HashMap<String, SensorInterface> sensors;
 
+    protected MotorInterface[] motorsArray;
+
     /**
      * Constructs a new BaseMechanism.
      * Initializes the motor and sensor maps and creates debug buttons on the Dashboard.
@@ -39,7 +41,7 @@ public class BaseMechanism extends SubsystemBase{
     public BaseMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors) {
         this.name = name;
         setName(name);
-        
+        motorsArray = motors;
         // Initialize motors map
         this.motors = new HashMap<>();
         for (MotorInterface motor : motors) {
@@ -186,6 +188,10 @@ public class BaseMechanism extends SubsystemBase{
             return null;
         }
         return motors.get(motorName);
+    }
+
+    public MotorInterface[] getMotors() {
+        return motorsArray;
     }
 
     /**
