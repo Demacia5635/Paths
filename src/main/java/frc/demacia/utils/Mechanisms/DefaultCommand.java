@@ -4,18 +4,60 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.demacia.utils.motors.MotorInterface;
 import frc.demacia.utils.motors.MotorInterface.ControlMode;
 
+/**
+ * A command that continuously applies the current state values of a StateBaseMechanism.
+ * <p>
+ * This command maps a specific ControlMode to each motor and executes the corresponding
+ * set method (e.g., setPower, setVelocity) using values retrieved from the mechanism's state.
+ * </p>
+ */
 public class DefaultCommand extends Command {
   StateBaseMechanism mechanism;
   MotorInterface[] motors;
   int length;
-  ControlMode[] controlModes;
+  Runnable[] Controls;
 
-  /** Creates a new DriveCommand. */
+  /** * Creates a new DefaultCommand.
+   * Initializes a set of runnables to control each motor based on the provided control modes.
+   * * @param mechanism The StateBaseMechanism to control
+   * @param controlModes Array of ControlModes, one for each motor in the mechanism
+   */
   public DefaultCommand(StateBaseMechanism mechanism, ControlMode[] controlModes) {
     this.mechanism = mechanism;
-    this.controlModes = controlModes;
     motors = mechanism.getMotors();
-    length = motors.length;
+    length = Math.min(motors.length, controlModes.length);
+    Controls = new Runnable[length];
+    for (int i = 0; i < length; i++) {
+      switch (controlModes[i]) {
+        case DUTYCYCLE:
+          final int powerIndex = i;
+          Controls[i] = () -> mechanism.setPower(powerIndex, mechanism.getValue(powerIndex));
+          break;
+        case VOLTAGE:
+          final int voltageIndex = i;
+          Controls[i] = () -> mechanism.setVoltage(voltageIndex, mechanism.getValue(voltageIndex));
+          break;
+        case VELOCITY:
+          final int velocityIndex = i;
+          Controls[i] = () -> mechanism.setVelocity(velocityIndex, mechanism.getValue(velocityIndex));
+          break;
+        case POSITION_VOLTAGE:
+          final int positionVoltageIndex = i;
+          Controls[i] = () -> mechanism.setPositionVoltage(positionVoltageIndex, mechanism.getValue(positionVoltageIndex));
+          break;
+        case MOTION:
+          final int motionIndex = i;
+          Controls[i] = () -> mechanism.setMotion(motionIndex, mechanism.getValue(motionIndex));
+          break;
+        case ANGLE:
+          final int angleIndex = i;
+          Controls[i] = () -> mechanism.setAngle(angleIndex, mechanism.getValue(angleIndex));
+          break;
+        default:
+          Controls[i] = () -> {};
+          break;
+      }
+  }
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(mechanism);
   }
@@ -28,28 +70,7 @@ public class DefaultCommand extends Command {
   @Override
   public void execute() {
     for (int i = 0; i < length; i++) {
-        switch (controlModes[i]) {
-            case DUTYCYCLE:
-                motors[i].setDuty(mechanism.getValue(i));
-                break;
-            case VOLTAGE:
-                motors[i].setVoltage(mechanism.getValue(i));
-                break;
-            case VELOCITY:
-                motors[i].setPositionVoltage(mechanism.getValue(i));
-                break;
-            case POSITION_VOLTAGE:
-                motors[i].setPositionVoltage(mechanism.getValue(i));
-                break;
-            case MOTION:
-                motors[i].setMotion(mechanism.getValue(i));
-                break;
-            case ANGLE:
-                motors[i].setAngle(mechanism.getValue(i));
-                break;
-            default:
-                break;
-        }
+      Controls[i].run();
     }
   }
 

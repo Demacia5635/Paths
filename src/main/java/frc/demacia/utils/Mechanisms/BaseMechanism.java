@@ -29,7 +29,9 @@ public class BaseMechanism extends SubsystemBase{
     /** Map of sensors belonging to this mechanism, keyed by their name */
     protected HashMap<String, SensorInterface> sensors;
 
-    protected MotorInterface[] motorsArray;
+    protected MotorInterface[] motorArray;
+
+    protected boolean hasCalibrated = true;
 
     /**
      * Constructs a new BaseMechanism.
@@ -41,7 +43,7 @@ public class BaseMechanism extends SubsystemBase{
     public BaseMechanism(String name, MotorInterface[] motors, SensorInterface[] sensors) {
         this.name = name;
         setName(name);
-        motorsArray = motors;
+        motorArray = motors;
         // Initialize motors map
         this.motors = new HashMap<>();
         for (MotorInterface motor : motors) {
@@ -77,6 +79,29 @@ public class BaseMechanism extends SubsystemBase{
     public String getName(){
         return name;
     }
+    
+    /**
+     * Marks that this mechanism requires calibration.
+     * Sets the calibration status to false.
+     */
+    public void withCalibration(){
+        hasCalibrated = false;
+    }
+
+    /**
+     * @return true if the mechanism is calibrated and ready for control, false otherwise.
+     */
+    public boolean getCalibration(){
+        return hasCalibrated;
+    }
+
+    /**
+     * Sets the calibration status of the mechanism.
+     * @param hasCalibrated true if calibrated, false otherwise.
+     */
+    public void setCalibration(boolean hasCalibrated){
+        this.hasCalibrated = hasCalibrated;
+    }
 
     /**
      * Stops all motors in this mechanism.
@@ -93,8 +118,18 @@ public class BaseMechanism extends SubsystemBase{
      * @param motorName The name of the motor to stop
      */
     public void stop(String motorName){
-        if (isValidMotorIndex(motorName)){
+        if (isValidMotor(motorName)){
             motors.get(motorName).setDuty(0);
+        }
+    }
+
+    /**
+     * Stops a specific motor by index.
+     * @param motorIndex The index of the motor to stop
+     */
+    public void stop(int motorIndex){
+        if (isValidMotor(motorIndex)){
+            motorArray[motorIndex].setDuty(0);
         }
     }
 
@@ -103,7 +138,7 @@ public class BaseMechanism extends SubsystemBase{
      * @param power The power to set [-1.0, 1.0]
      */
     public void setPowerAll(double power) {
-        if (motors == null) return;
+        if (motors == null || !hasCalibrated) return;
         for (MotorInterface motor : motors.values()){
             motor.setDuty(power);
         }
@@ -115,8 +150,184 @@ public class BaseMechanism extends SubsystemBase{
      * @param power The power to set [-1.0, 1.0]
      */
     public void setPower(String motorName, double power){
-        if (isValidMotorIndex(motorName)){
+        if (isValidMotor(motorName) && hasCalibrated){
             motors.get(motorName).setDuty(power);
+        }
+    }
+
+    /**
+     * Sets the duty cycle (power) for a specific motor.
+     * @param motorIndex The index of the motor
+     * @param power The power to set [-1.0, 1.0]
+     */
+    public void setPower(int motorIndex, double power){
+        if (isValidMotor(motorIndex) && hasCalibrated){
+            motorArray[motorIndex].setDuty(power);
+        }
+    }
+
+    /**
+     * Sets the Voltage for all motors.
+     * @param voltage The Voltage to set
+     */
+    public void setVoltageAll(double voltage) {
+        if (motors == null || !hasCalibrated) return;
+        for (MotorInterface motor : motors.values()){
+            motor.setVoltage(voltage);
+        }
+    }
+
+    /**
+     * Sets the Voltage for a specific motor.
+     * @param motorName The name of the motor
+     * @param voltage The Voltage to set
+     */
+    public void setVoltage(String motorName, double voltage){
+        if (isValidMotor(motorName) && hasCalibrated){
+            motors.get(motorName).setVoltage(voltage);
+        }
+    }
+
+    /**
+     * Sets the Voltage for a specific motor.
+     * @param motorIndex The index of the motor
+     * @param voltage The Voltage to set
+     */
+    public void setVoltage(int motorIndex, double voltage){
+        if (isValidMotor(motorIndex) && hasCalibrated){
+            motorArray[motorIndex].setVoltage(voltage);
+        }
+    }
+
+    /**
+     * Sets the Velocity for all motors.
+     * @param velocity The Velocity to set
+     */
+    public void setVelocityAll(double Velocity) {
+        if (motors == null || !hasCalibrated) return;
+        for (MotorInterface motor : motors.values()){
+            motor.setVelocity(Velocity);
+        }
+    }
+
+    /**
+     * Sets the Velocity for a specific motor.
+     * @param motorName The name of the motor
+     * @param velocity The Velocity to set
+     */
+    public void setVelocity(String motorName, double velocity){
+        if (isValidMotor(motorName) && hasCalibrated){
+            motors.get(motorName).setVelocity(velocity);
+        }
+    }
+
+    /**
+     * Sets the Velocity for a specific motor.
+     * @param motorIndex The index of the motor
+     * @param velocity The Velocity to set
+     */
+    public void setVelocity(int motorIndex, double velocity){
+        if (isValidMotor(motorIndex) && hasCalibrated){
+            motorArray[motorIndex].setVelocity(velocity);
+        }
+    }
+
+    /**
+     * Sets the Position using PositionVoltage for all motors.
+     * @param position The Position to set
+     */
+    public void setPositionVoltageAll(double position) {
+        if (motors == null || !hasCalibrated) return;
+        for (MotorInterface motor : motors.values()){
+            motor.setPositionVoltage(position);
+        }
+    }
+
+    /**
+     * Sets the position using PositionVoltage for a specific motor.
+     * @param motorName The name of the motor
+     * @param position The position to set
+     */
+    public void setPositionVoltage(String motorName, double position){
+        if (isValidMotor(motorName) && hasCalibrated){
+            motors.get(motorName).setPositionVoltage(position);
+        }
+    }
+
+    /**
+     * Sets the position using PositionVoltage for a specific motor.
+     * @param motorIndex The index of the motor
+     * @param position The position to set
+     */
+    public void setPositionVoltage(int motorIndex, double position){
+        if (isValidMotor(motorIndex) && hasCalibrated){
+            motorArray[motorIndex].setPositionVoltage(position);
+        }
+    }
+
+    /**
+     * Sets the Motion for all motors.
+     * @param motion The Motion to set
+     */
+    public void setMotionAll(double motion) {
+        if (motors == null || !hasCalibrated) return;
+        for (MotorInterface motor : motors.values()){
+            motor.setMotion(motion);
+        }
+    }
+
+    /**
+     * Sets the Motion for a specific motor.
+     * @param motorName The name of the motor
+     * @param motion The Motion to set
+     */
+    public void setMotion(String motorName, double motion){
+        if (isValidMotor(motorName) && hasCalibrated){
+            motors.get(motorName).setMotion(motion);
+        }
+    }
+
+    /**
+     * Sets the Motion for a specific motor.
+     * @param motorIndex The index of the motor
+     * @param motion The Motion to set
+     */
+    public void setMotion(int motorIndex, double motion){
+        if (isValidMotor(motorIndex) && hasCalibrated){
+            motorArray[motorIndex].setMotion(motion);
+        }
+    }
+
+    /**
+     * Sets the Angle for all motors.
+     * @param angle The Angle to set
+     */
+    public void setAngleAll(double angle) {
+        if (motors == null || !hasCalibrated) return;
+        for (MotorInterface motor : motors.values()){
+            motor.setAngle(angle);
+        }
+    }
+
+    /**
+     * Sets the Angle for a specific motor.
+     * @param motorName The name of the motor
+     * @param angle The Angle to set
+     */
+    public void setAngle(String motorName, double angle){
+        if (isValidMotor(motorName) && hasCalibrated){
+            motors.get(motorName).setAngle(angle);
+        }
+    }
+
+    /**
+     * Sets the Angle for a specific motor.
+     * @param motorIndex The index of the motor
+     * @param angle The Angle to set
+     */
+    public void setAngle(int motorIndex, double angle){
+        if (isValidMotor(motorIndex) && hasCalibrated){
+            motorArray[motorIndex].setAngle(angle);
         }
     }
 
@@ -137,8 +348,19 @@ public class BaseMechanism extends SubsystemBase{
      * @param isBrake true for Brake mode, false for Coast mode
      */
     public void setNeutralMode(String motorName, boolean isBrake){
-        if (isValidMotorIndex(motorName)){
+        if (isValidMotor(motorName)){
             motors.get(motorName).setNeutralMode(isBrake);
+        }
+    }
+
+    /**
+     * Sets the neutral mode (Brake or Coast) for a specific motor.
+     * @param motorIndex The index of the motor
+     * @param isBrake true for Brake mode, false for Coast mode
+     */
+    public void setNeutralMode(int motorIndex, boolean isBrake){
+        if (isValidMotor(motorIndex)){
+            motorArray[motorIndex].setNeutralMode(isBrake);
         }
     }
 
@@ -161,8 +383,18 @@ public class BaseMechanism extends SubsystemBase{
      * @param motorName The name of the motor
      */
     public void checkElectronicsMotor(String motorName){
-        if (isValidMotorIndex(motorName)){
+        if (isValidMotor(motorName)){
             motors.get(motorName).checkElectronics();
+        }
+    }
+
+    /**
+     * Checks electronics for a specific motor.
+     * @param motorIndex The index of the motor
+     */
+    public void checkElectronicsMotor(int motorIndex){
+        if (isValidMotor(motorIndex)){
+            motorArray[motorIndex].checkElectronics();
         }
     }
 
@@ -171,7 +403,7 @@ public class BaseMechanism extends SubsystemBase{
      * @param sensorName The name of the sensor
      */
     public void checkElectronicsSensor(String sensorName){
-        if (isValidSensorIndex(sensorName)){
+        if (isValidSensor(sensorName)){
             sensors.get(sensorName).checkElectronics();
         }
     }
@@ -183,15 +415,29 @@ public class BaseMechanism extends SubsystemBase{
      * @return The MotorInterface object, or null if not found
      */
     public MotorInterface getMotor(String motorName) {
-        if (!isValidMotorIndex(motorName)){
+        if (!isValidMotor(motorName)){
             LogManager.log("Invalid motor: " + motorName);
             return null;
         }
         return motors.get(motorName);
     }
 
+    /**
+     * Retrieves a motor object by its index.
+     * Logs an error if the motor index is invalid.
+     * @param motorIndex The index of the motor
+     * @return The MotorInterface object, or null if not found
+     */
+    public MotorInterface getMotor(int motorIndex) {
+        if (!isValidMotor(motorIndex)){
+            LogManager.log("Invalid motor index: " + motorIndex);
+            return null;
+        }
+        return motorArray[motorIndex];
+    }
+
     public MotorInterface[] getMotors() {
-        return motorsArray;
+        return motorArray;
     }
 
     /**
@@ -201,7 +447,7 @@ public class BaseMechanism extends SubsystemBase{
      * @return The SensorInterface object, or null if not found
      */
     public SensorInterface getSensor(String sensorName) {
-        if (!isValidSensorIndex(sensorName)){
+        if (!isValidSensor(sensorName)){
             LogManager.log("Invalid sensor: " + sensorName);
             return null;
         }
@@ -213,8 +459,17 @@ public class BaseMechanism extends SubsystemBase{
      * @param motorName The name to check
      * @return true if valid, false otherwise
      */
-    protected boolean isValidMotorIndex(String motorName) {
+    protected boolean isValidMotor(String motorName) {
         return motors.containsKey(motorName);
+    }
+
+    /**
+     * Checks if a motor index exists.
+     * @param motorIndex The index to check
+     * @return true if valid, false otherwise
+     */
+    protected boolean isValidMotor(int motorIndex) {
+        return motorIndex >= 0 && motorIndex < motorArray.length;
     }
 
     /**
@@ -222,7 +477,7 @@ public class BaseMechanism extends SubsystemBase{
      * @param sensorName The name to check
      * @return true if valid, false otherwise
      */
-    protected boolean isValidSensorIndex(String sensorName) {
+    protected boolean isValidSensor(String sensorName) {
         return sensors.containsKey(sensorName);
     }
 }

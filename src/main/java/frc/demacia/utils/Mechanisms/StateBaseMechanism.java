@@ -47,7 +47,7 @@ public class StateBaseMechanism extends BaseMechanism {
             double[] idleValues = new double[motors != null ? motors.size() : 0];
             if (isPosMechanism){
                 for (int i = 0; i < idleValues.length; i++){
-                    idleValues[i] = motorsArray[i].getCurrentPosition();
+                    idleValues[i] = motorArray[i].getCurrentPosition();
                 }
             }
             return idleValues; 
