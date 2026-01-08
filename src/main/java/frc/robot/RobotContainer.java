@@ -7,84 +7,68 @@ package frc.robot;
 import frc.demacia.utils.chassis.Chassis;
 import frc.demacia.utils.controller.CommandController;
 import frc.demacia.utils.controller.CommandController.ControllerType;
-import frc.demacia.utils.mechanisms.DefaultCommand;
 import frc.demacia.utils.mechanisms.DriveCommand;
-import frc.demacia.utils.motors.MotorInterface.ControlMode;
 import frc.robot.chassisConstants.Robot1ChassisConstants;
-import frc.robot.testMechanism.Arm.Arm;
-
+import frc.robot.testMechanism.arm.commands.ArmCalibration;
+import frc.robot.testMechanism.arm.commands.ArmCommand;
+import frc.robot.testMechanism.arm.subsystems.Arm;
+import frc.robot.testMechanism.arm.ArmConstants.TelescopeConstants;
+import frc.robot.testMechanism.arm.ArmConstants.AngleChangeConstants;
+import frc.robot.testMechanism.shooter.subsystems.Shooter;
+import frc.robot.testMechanism.shooter.commands.ShooterAutoFire;
+import frc.robot.testMechanism.shooter.commands.AngleCalibration;
+import frc.robot.testMechanism.intake.subsystems.IntakeSubsystem;
+import frc.robot.testMechanism.intake.commands.IntakeToggle;
+import frc.robot.testMechanism.intake.commands.OuttakeToggle;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-/**
- * This class is where the bulk of the robot should be declared. Since
- * Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in
- * the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of
- * the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
- */
 public class RobotContainer {
 
-  Chassis chassis;
-  // DriveCommand driveCommand;
+  private final Chassis chassis;
+  private final frc.demacia.utils.chassis.DriveCommand driveCommand;
 
   public static CommandController driverController;
 
-  Arm arm;
+  private final Arm arm;
+  private final Shooter shooter;
+  private final IntakeSubsystem intake;
 
-  // The robot's subsystems and commands are defined here...
-
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
   public RobotContainer() {
     driverController = new CommandController(0, ControllerType.kXbox);
 
     chassis = new Chassis(Robot1ChassisConstants.CHASSIS_CONFIG);
-    // driveCommand = new DriveCommand(chassis, driverController);
+    driveCommand = new frc.demacia.utils.chassis.DriveCommand(chassis, driverController);
 
     arm = new Arm();
+    shooter = new Shooter();
+    intake = new IntakeSubsystem();
 
-    // Configure the trigger bindings
     configureBindings();
   }
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be
-   * created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
-   * an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
-   * {@link
-   * CommandXboxController
-   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or
-   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
   private void configureBindings() {
-    arm.setDefaultCommand(
-        new DefaultCommand(arm, new ControlMode[] { ControlMode.MOTION, ControlMode.MOTION }));
-    driverController.getLeftStickMove().onTrue(
-        new DriveCommand(arm, "telescopMotor", () -> driverController.getLeftY() * -0.3));
-    driverController.getRightStickMove().onTrue(
-      new DriveCommand(arm, "Change Angle Motor", () -> driverController.getRightY() * 0.3)
+    chassis.setDefaultCommand(driveCommand);
+    arm.setDefaultCommand(new ArmCommand(arm));
+    
+    driverController.upButton().onTrue(new ArmCalibration(arm));
+    driverController.downButton().onTrue(new AngleCalibration(shooter));
+
+    driverController.getLeftStickMove().whileTrue(
+      new DriveCommand(arm, TelescopeConstants.MOTOR_NAME, () -> driverController.getLeftY() * -0.3)
     );
+    
+    driverController.getRightStickMove().whileTrue(
+      new DriveCommand(arm, AngleChangeConstants.MOTOR_NAME, () -> driverController.getRightY() * 0.3)
+    );
+
+    driverController.leftButton().whileTrue(new ShooterAutoFire(shooter));
+
+    driverController.rightButton().whileTrue(new IntakeToggle(intake));
+    
+    driverController.leftBumper().whileTrue(new OuttakeToggle(intake));
   }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
     return null;
   }
 }

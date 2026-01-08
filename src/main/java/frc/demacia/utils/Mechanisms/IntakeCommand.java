@@ -13,7 +13,7 @@ import frc.demacia.utils.motors.MotorInterface;
  * </p>
  */
 public class IntakeCommand extends Command {
-  StateBaseMechanism mechanism;
+  BaseMechanism mechanism;
   MotorInterface[] motors;
   int[] motorIndexes;
   double power;
@@ -27,7 +27,7 @@ public class IntakeCommand extends Command {
    * @param power The power to apply to the motors.
    * @param stopCondition Condition to finish the intake process (e.g., proximity sensor).
    */
-  public IntakeCommand(StateBaseMechanism mechanism, int[] motorIndexes, double power, BooleanSupplier stopCondition) {
+  public IntakeCommand(BaseMechanism mechanism, int[] motorIndexes, double power, BooleanSupplier stopCondition) {
     this.mechanism = mechanism;
     this.motorIndexes = motorIndexes;
     this.power = power;
@@ -45,7 +45,7 @@ public class IntakeCommand extends Command {
    * @param power The power to apply to the motors.
    * @param stopCondition Condition to finish the intake process.
    */
-  public IntakeCommand(StateBaseMechanism mechanism, double power, BooleanSupplier stopCondition) {
+  public IntakeCommand(BaseMechanism mechanism, double power, BooleanSupplier stopCondition) {
     this(mechanism, generateSequentialIndexes(mechanism.motorArray.length), power, stopCondition);
   }
 

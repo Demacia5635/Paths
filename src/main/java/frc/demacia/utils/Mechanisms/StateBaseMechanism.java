@@ -45,9 +45,11 @@ public class StateBaseMechanism extends BaseMechanism {
         @Override 
         public double[] getValues() { 
             double[] idleValues = new double[motors != null ? motors.size() : 0];
-            if (isPosMechanism){
+            if (isPosMotors != null){
                 for (int i = 0; i < idleValues.length; i++){
-                    idleValues[i] = motorArray[i].getCurrentPosition();
+                    if (isPosMotors[i]){
+                        idleValues[i] = motorArray[i].getCurrentPosition();
+                    }
                 }
             }
             return idleValues; 
@@ -76,7 +78,7 @@ public class StateBaseMechanism extends BaseMechanism {
     /** Stores the values used when in TESTING state */
     protected double[] testValues;
 
-    private boolean isPosMechanism;
+    private boolean[] isPosMotors;
 
     /**
      * Constructs a new StateBaseMechanism.
@@ -133,11 +135,29 @@ public class StateBaseMechanism extends BaseMechanism {
     }
 
     /**
-     * Sets the default option selected in the dashboard chooser on startup.
-     * @param state The state to be default
+     * Configures all motors in the mechanism as position-controlled motors.
+     * In IDLE state, these motors will hold their current position.
      */
     public void setPositionMechanism(){
-        isPosMechanism = true;
+        isPosMotors = new boolean[motorArray.length];
+        for (int i = 0; i < isPosMotors.length; i++) {
+            isPosMotors[i] = true;
+        }
+    }
+
+    /**
+     * Configures specific motors in the mechanism as position-controlled motors.
+     * @param indexes The indexes of the motors that should maintain their position during IDLE.
+     */
+    public void setPositionMechanism(int... indexes){
+        if (isPosMotors == null) {
+            isPosMotors = new boolean[motorArray.length];
+        }
+        for (int index : indexes) {
+            if (isValidMotor(index)) {
+                isPosMotors[index] = true;
+            }
+        }
     }
 
     /**
