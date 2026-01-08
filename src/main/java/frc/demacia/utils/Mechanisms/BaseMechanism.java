@@ -1,10 +1,12 @@
 package frc.demacia.utils.mechanisms;
 
 import java.util.HashMap;
+import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.demacia.utils.LookUpTable;
 import frc.demacia.utils.log.LogManager;
 import frc.demacia.utils.motors.MotorInterface;
 import frc.demacia.utils.sensors.SensorInterface;
@@ -32,6 +34,9 @@ public class BaseMechanism extends SubsystemBase{
     protected MotorInterface[] motorArray;
 
     protected boolean hasCalibrated = true;
+
+    LookUpTable lookUpTable;
+    DoubleSupplier distance;
 
     /**
      * Constructs a new BaseMechanism.
@@ -104,6 +109,41 @@ public class BaseMechanism extends SubsystemBase{
     }
 
     /**
+     * Attaches a lookup table and a distance source to the mechanism.
+     * @param lookUpTable The table for interpolation.
+     * @param distance A supplier for the input value (e.g., limelight distance).
+     */
+    public void withLookUpTable(LookUpTable lookUpTable, DoubleSupplier distance){
+        this.lookUpTable = lookUpTable;
+        this.distance = distance;
+    }
+
+    /**
+     * Interpolates all values from the lookup table based on current distance.
+     * @return Array of interpolated values, or empty array if table not set.
+     */
+    public double[] getLookUpTableValues(){
+        if (lookUpTable == null){
+            LogManager.log("you didn't set the lookUpTable");
+            return new double[0];
+        }
+        return lookUpTable.get(distance.getAsDouble());
+    }
+
+    /**
+     * Gets a specific interpolated value from the lookup table.
+     * @param i The index of the output value.
+     * @return The interpolated value at index i.
+     */
+    public double getLookUpTableValue(int i){
+        if (lookUpTable == null){
+            LogManager.log("you didn't set the lookUpTable");
+            return 0;
+        }
+        return lookUpTable.get(distance.getAsDouble())[i];
+    }
+
+    /**
      * Stops all motors in this mechanism.
      */
     public void stopAll(){
@@ -167,17 +207,6 @@ public class BaseMechanism extends SubsystemBase{
     }
 
     /**
-     * Sets the Voltage for all motors.
-     * @param voltage The Voltage to set
-     */
-    public void setVoltageAll(double voltage) {
-        if (motors == null || !hasCalibrated) return;
-        for (MotorInterface motor : motors.values()){
-            motor.setVoltage(voltage);
-        }
-    }
-
-    /**
      * Sets the Voltage for a specific motor.
      * @param motorName The name of the motor
      * @param voltage The Voltage to set
@@ -200,17 +229,6 @@ public class BaseMechanism extends SubsystemBase{
     }
 
     /**
-     * Sets the Velocity for all motors.
-     * @param velocity The Velocity to set
-     */
-    public void setVelocityAll(double Velocity) {
-        if (motors == null || !hasCalibrated) return;
-        for (MotorInterface motor : motors.values()){
-            motor.setVelocity(Velocity);
-        }
-    }
-
-    /**
      * Sets the Velocity for a specific motor.
      * @param motorName The name of the motor
      * @param velocity The Velocity to set
@@ -229,17 +247,6 @@ public class BaseMechanism extends SubsystemBase{
     public void setVelocity(int motorIndex, double velocity){
         if (isValidMotor(motorIndex) && hasCalibrated){
             motorArray[motorIndex].setVelocity(velocity);
-        }
-    }
-
-    /**
-     * Sets the Position using PositionVoltage for all motors.
-     * @param position The Position to set
-     */
-    public void setPositionVoltageAll(double position) {
-        if (motors == null || !hasCalibrated) return;
-        for (MotorInterface motor : motors.values()){
-            motor.setPositionVoltage(position);
         }
     }
 

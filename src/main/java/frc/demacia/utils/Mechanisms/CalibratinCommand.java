@@ -57,16 +57,7 @@ public class CalibratinCommand extends Command {
    * @param resetPos The position value to set the encoder to upon completion
    */
   public CalibratinCommand(BaseMechanism mechanism, String motorName, double power, BooleanSupplier stopSupplier, double resetPos) {
-    this.mechanism = mechanism;
-    this.motorName = motorName;
-    this.power = power;
-    this.stopSupplier = stopSupplier;
-    this.resetPos = resetPos;
-    startPower = 0;
-    sec = 0;
-    timer = new Timer();
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(mechanism);
+    this(mechanism, motorName, power, stopSupplier, resetPos, 0, 0);
   }
 
   // Called when the command is initially scheduled.

@@ -173,7 +173,8 @@ public class StateBaseMechanism extends BaseMechanism {
     }
 
     /**
-     * @return The current state value in the index
+     * @return The current target value for a specific motor index from the active state.
+     * @param index The index of the motor in the motorArray.
      */
     public double getValue(int index) {
         double value = getState().getValues()[index];
