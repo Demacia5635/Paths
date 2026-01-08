@@ -24,19 +24,19 @@ public class ShooterCommand extends Command {
   int[] motorIndexes;
   int length;
   Runnable[] Controls;
-  BooleanSupplier hadShoot;
+  BooleanSupplier stopCondition;
 
   /**
    * Creates a ShooterCommand for specific motors in the mechanism.
    * @param mechanism The subsystem.
    * @param motorIndexes The indexes of motors to be controlled.
    * @param controlModes The control mode for each motor.
-   * @param hadShoot Finished condition.
+   * @param stopCondition Finished condition.
    */
-  public ShooterCommand(StateBaseMechanism mechanism, int[] motorIndexes, ControlMode[] controlModes, BooleanSupplier hadShoot) {
+  public ShooterCommand(StateBaseMechanism mechanism, int[] motorIndexes, ControlMode[] controlModes, BooleanSupplier stopCondition) {
     this.mechanism = mechanism;
     this.motorIndexes = motorIndexes;
-    this.hadShoot = hadShoot;
+    this.stopCondition = stopCondition;
     motors = mechanism.getMotors();
     length = Math.min(Math.min(motors.length, controlModes.length), motorIndexes.length);
     Controls = new Runnable[length];
@@ -78,8 +78,8 @@ public class ShooterCommand extends Command {
   /**
    * Creates a ShooterCommand that controls ALL motors in the mechanism in sequence.
    */
-  public ShooterCommand(StateBaseMechanism mechanism, ControlMode[] controlModes, BooleanSupplier hadShoot) {
-    this(mechanism, generateSequentialIndexes(mechanism.motorArray.length), controlModes, hadShoot);
+  public ShooterCommand(StateBaseMechanism mechanism, ControlMode[] controlModes, BooleanSupplier stopCondition) {
+    this(mechanism, generateSequentialIndexes(mechanism.motorArray.length), controlModes, stopCondition);
   }
 
   /**
@@ -117,7 +117,7 @@ public class ShooterCommand extends Command {
 
   @Override
   public boolean isFinished() {
-    return hadShoot.getAsBoolean();
+    return stopCondition.getAsBoolean();
   }
 }
 
