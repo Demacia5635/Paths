@@ -26,7 +26,7 @@ public class Arm extends StateBaseMechanism {
      * Initializes motors, sensors, and starting configurations.
      */
     public Arm() {
-        super(TelescopeConstants.MOTOR_NAME, new MotorInterface[] {
+        super("Arm", new MotorInterface[] {
             new TalonFXMotor(AngleChangeConstants.MOTOR_CONFIG), 
             new TalonFXMotor(TelescopeConstants.MOTOR_CONFIG)
         }, new SensorInterface[] {

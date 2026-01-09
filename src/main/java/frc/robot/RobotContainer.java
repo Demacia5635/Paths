@@ -16,6 +16,7 @@ import frc.robot.testMechanism.arm.ArmConstants.TelescopeConstants;
 import frc.robot.testMechanism.arm.ArmConstants.AngleChangeConstants;
 import frc.robot.testMechanism.shooter.subsystems.Shooter;
 import frc.robot.testMechanism.shooter.commands.ShooterAutoFire;
+import frc.robot.testMechanism.shooter.commands.ShooterStateFire;
 import frc.robot.testMechanism.shooter.commands.AngleCalibration;
 import frc.robot.testMechanism.intake.subsystems.IntakeSubsystem;
 import frc.robot.testMechanism.intake.commands.IntakeToggle;
@@ -49,6 +50,7 @@ public class RobotContainer {
   private void configureBindings() {
     chassis.setDefaultCommand(driveCommand);
     arm.setDefaultCommand(new ArmCommand(arm));
+    shooter.setDefaultCommand(new ShooterStateFire(shooter));
     
     driverController.upButton().onTrue(new ArmCalibration(arm));
     driverController.downButton().onTrue(new AngleCalibration(shooter));
@@ -61,7 +63,7 @@ public class RobotContainer {
       new DriveCommand(arm, AngleChangeConstants.MOTOR_NAME, () -> driverController.getRightY() * 0.3)
     );
 
-    driverController.leftButton().whileTrue(new ShooterAutoFire(shooter));
+    driverController.povDown().whileTrue(new ShooterAutoFire(shooter));
 
     driverController.rightButton().whileTrue(new IntakeToggle(intake));
     

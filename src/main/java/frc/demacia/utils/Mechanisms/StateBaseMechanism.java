@@ -1,9 +1,12 @@
 package frc.demacia.utils.mechanisms;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.LookUpTable;
 import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 import frc.demacia.utils.motors.MotorInterface;
 import frc.demacia.utils.sensors.SensorInterface;
@@ -75,6 +78,21 @@ public class StateBaseMechanism extends BaseMechanism {
         }
     };
 
+    /**
+     * Special TESTING state.
+     * Uses values from a specific 'Test Values' array that can be edited on the Dashboard.
+     */
+    private final MechanismState LOOKUPTABLE_STATE = new MechanismState() {
+        @Override 
+        public double[] getValues() { 
+            return getLookUpTableValues(); 
+        }
+        @Override
+        public String name() {
+            return "LOOKUPTABLE";
+        }
+    };
+
     /** Stores the values used when in TESTING state */
     protected double[] testValues;
 
@@ -100,9 +118,9 @@ public class StateBaseMechanism extends BaseMechanism {
      */
     @SuppressWarnings("unchecked")
     private void addNT(Class<? extends MechanismState> enumClass) {
-        stateChooser.addOption("TESTING", TESTING_STATE);
-        stateChooser.addOption("IDLE", IDLE_STATE);
-        stateChooser.addOption("IDLE2", IDLE_STATE); 
+        stateChooser.addOption(TESTING_STATE.name(), TESTING_STATE);
+        stateChooser.addOption(IDLE_STATE.name(), IDLE_STATE);
+        stateChooser.addOption(IDLE_STATE.name() + "2", IDLE_STATE); 
         
         for (MechanismState state : enumClass.getEnumConstants()) {
             stateChooser.addOption(state.name(), state);
@@ -158,6 +176,18 @@ public class StateBaseMechanism extends BaseMechanism {
                 isPosMotors[index] = true;
             }
         }
+    }
+
+    /**
+     * Attaches a lookup table and a distance source to the mechanism.
+     * @param lookUpTable The table for interpolation.
+     * @param distance A supplier for the input value (e.g., limelight distance).
+     */
+    @Override
+    public void withLookUpTable(LookUpTable lookUpTable, DoubleSupplier distance){
+        super.lookUpTable = lookUpTable;
+        super.distance = distance;
+        stateChooser.addOption(LOOKUPTABLE_STATE.name(), LOOKUPTABLE_STATE);
     }
 
     /**
