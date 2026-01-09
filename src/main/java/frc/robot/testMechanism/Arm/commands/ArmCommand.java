@@ -14,6 +14,6 @@ public class ArmCommand extends DefaultCommand {
      * @param arm The Arm subsystem to control.
      */
     public ArmCommand(Arm arm) {
-        super(arm, new ControlMode[] { ControlMode.MOTION, ControlMode.MOTION });
+        super(arm, new ControlMode[] {ControlMode.MOTION, ControlMode.MOTION});
     }
 }

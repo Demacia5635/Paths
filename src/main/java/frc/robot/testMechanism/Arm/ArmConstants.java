@@ -41,6 +41,8 @@ public class ArmConstants {
         }
     }
 
+    public static final String NAME = "Arm";
+
     /** Constants for the telescoping extension mechanism. */
     public static class TelescopeConstants {
         // Hardware & ID
