@@ -3,6 +3,7 @@ package frc.robot.testMechanism.intake.commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.testMechanism.intake.subsystems.IntakeSubsystem;
 import frc.robot.testMechanism.intake.IntakeConstants.Config;
+import frc.robot.testMechanism.intake.IntakeConstants.Hardware;
 
 public class OuttakeToggle extends InstantCommand {
   private static boolean isActive = false;
@@ -19,7 +20,7 @@ public class OuttakeToggle extends InstantCommand {
       intake.stopAll();
       isActive = false;
     } else {
-      intake.setPower(0, Config.OUTTAKE_POWER);
+      intake.setPower(Hardware.MOTOR_NAME, Config.OUTTAKE_POWER);
       isActive = true;
     }
   }

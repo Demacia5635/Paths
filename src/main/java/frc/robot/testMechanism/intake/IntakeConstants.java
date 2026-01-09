@@ -14,6 +14,8 @@ public class IntakeConstants {
         public static final int SENSOR_ID = 2;
         public static final String SENSOR_NAME = "Intake Note Sensor";
     }
+    
+    public static final String NAME = "Intake";
 
     public static class Config {
         public static final double INTAKE_POWER = 0.7;
