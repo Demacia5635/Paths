@@ -3,6 +3,7 @@ package frc.robot.testMechanism.shooter.commands;
 import frc.demacia.utils.mechanisms.DefaultCommand;
 import frc.demacia.utils.motors.MotorInterface.ControlMode;
 import frc.robot.testMechanism.shooter.ShooterConstants.Config;
+import frc.robot.testMechanism.shooter.ShooterConstants.Hardware;
 import frc.robot.testMechanism.shooter.subsystems.Shooter;
 
 public class ShooterStateFire extends DefaultCommand {
@@ -22,11 +23,11 @@ public class ShooterStateFire extends DefaultCommand {
         // Sets target Angle, Up, and Down based on current state values
         super.execute();
 
-        // Specific logic for Feeder (Index 3)
+        // Specific logic for Feeder
         if (shooter.isReadyToShoot()) {
-            shooter.setPower(3, Config.FEEDER_POWER);
+            shooter.setPower(Hardware.FEEDER_MOTOR_NAME, Config.FEEDER_POWER);
         } else {
-            shooter.stop(3);
+            shooter.stop(Hardware.FEEDER_MOTOR_NAME);
         }
     }
 

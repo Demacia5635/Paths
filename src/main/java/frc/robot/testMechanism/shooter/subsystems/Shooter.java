@@ -1,20 +1,17 @@
 package frc.robot.testMechanism.shooter.subsystems;
 
-import edu.wpi.first.wpilibj.AnalogInput;
 import frc.demacia.utils.mechanisms.StateBaseMechanism;
 import frc.demacia.utils.motors.MotorInterface;
 import frc.demacia.utils.motors.TalonFXMotor;
 import frc.demacia.utils.sensors.LimitSwitch;
 import frc.demacia.utils.sensors.SensorInterface;
+import frc.robot.testMechanism.shooter.ShooterConstants;
 import frc.robot.testMechanism.shooter.ShooterConstants.*;
 
 public class Shooter extends StateBaseMechanism {
-    
-    private final AnalogInput noteSensor;
-    private final double VOLTAGE_THRESHOLD = 4.7;
 
     public Shooter() {
-        super("Shooter", 
+        super(ShooterConstants.NAME, 
             new MotorInterface[] {
                 new TalonFXMotor(Config.ANGLE_CONFIG),
                 new TalonFXMotor(Config.SHOOTER_UP_CONFIG),
@@ -26,15 +23,10 @@ public class Shooter extends StateBaseMechanism {
             }, 
             SHOOTER_STATE.class);
 
-        noteSensor = new AnalogInput(Hardware.ANALOG_INPUT_ID);
         withLookUpTable(Config.SHOOTING_TABLE, () -> 0.0);
         
         setPositionMechanism(0);
         setStartingOption(SHOOTER_STATE.IDLE);
-    }
-
-    public boolean isNoteIn() {
-        return noteSensor.getVoltage() < VOLTAGE_THRESHOLD;
     }
 
     public boolean isLimitPressed() {

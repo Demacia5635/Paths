@@ -3,6 +3,7 @@ package frc.robot.testMechanism.shooter.commands;
 import frc.demacia.utils.mechanisms.ShooterCommand;
 import frc.demacia.utils.motors.MotorInterface.ControlMode;
 import frc.robot.testMechanism.shooter.ShooterConstants.Config;
+import frc.robot.testMechanism.shooter.ShooterConstants.Hardware;
 import frc.robot.testMechanism.shooter.subsystems.Shooter;
 
 public class ShooterAutoFire extends ShooterCommand {
@@ -24,9 +25,9 @@ public class ShooterAutoFire extends ShooterCommand {
     public void execute() {
         super.execute();
         if (shooter.isReadyToShoot()) {
-            shooter.setPower(3, Config.FEEDER_POWER);
+            shooter.setPower(Hardware.FEEDER_MOTOR_NAME, Config.FEEDER_POWER);
         } else {
-            shooter.stop(3);
+            shooter.stop(Hardware.FEEDER_MOTOR_NAME);
         }
     }
 }

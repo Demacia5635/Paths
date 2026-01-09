@@ -18,6 +18,8 @@ public class ShooterConstants {
         SHOOTER_STATE(double... values) { this.values = values; }
         @Override public double[] getValues() { return values; }
     }
+    
+    public static final String NAME = "Shooter";
 
     public static class Hardware {
         public static final int MOTOR_ANGLE_ID = 33;
