@@ -8,6 +8,7 @@ import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.demacia.utils.motors.MotorInterface;
 
 /**
  * A command used to calibrate a mechanism's motor position.
@@ -19,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class CalibratinCommand extends Command {
   BaseMechanism mechanism;
-  String motorName;
+  MotorInterface motor;
   double power;
   BooleanSupplier stopSupplier;
   double resetPos;
@@ -38,7 +39,7 @@ public class CalibratinCommand extends Command {
    */
   public CalibratinCommand(BaseMechanism mechanism, String motorName, double power, BooleanSupplier stopSupplier, double resetPos, double startPower, double sec) {
     this.mechanism = mechanism;
-    this.motorName = motorName;
+    motor = mechanism.getMotor(motorName);
     this.power = power;
     this.stopSupplier = stopSupplier;
     this.resetPos = resetPos;
@@ -72,10 +73,10 @@ public class CalibratinCommand extends Command {
   @Override
   public void execute() {
     if (timer.hasElapsed(sec)) {
-      mechanism.setPower(motorName, power);
+      motor.setDuty(power);
     }
     else {
-      mechanism.setPower(motorName, startPower);
+      motor.setDuty(startPower);
     }
   }
 
@@ -86,8 +87,8 @@ public class CalibratinCommand extends Command {
   public void end(boolean interrupted) {
     timer.stop();
     timer.reset();
-    mechanism.stop(motorName);
-    mechanism.getMotor(motorName).setEncoderPosition(resetPos);
+    motor.stop();
+    motor.setEncoderPosition(resetPos);
     mechanism.setCalibration(true);
   }
 
