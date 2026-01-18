@@ -6,10 +6,66 @@
   "configurations": [
     {
       "type": "java",
+<<<<<<< HEAD
       "name": "Main",
       "request": "launch",
       "mainClass": "frc.robot.Main",
       "projectName": "Paths"
+=======
+      "name": "SysidApp",
+      "request": "launch",
+      "mainClass": "frc.demacia.sysID.SysidApp",
+      "projectName": "offseason2026-7"
+    },
+    {
+      "type": "java",
+      "name": "SysidApp",
+      "request": "launch",
+      "mainClass": "frc.demacia.sysID.SysidApp",
+      "projectName": "offseason2026"
+    },
+    {
+      "type": "java",
+      "name": "LogConverter",
+      "request": "launch",
+      "mainClass": "frc.demacia.utils.Log.LogConverter",
+      "projectName": "offseason2026"
+    },
+    {
+      "type": "java",
+      "name": "LogConverterUI",
+      "request": "launch",
+      "mainClass": "frc.demacia.utils.Log.LogConverterUI",
+      "projectName": "offseason2026"
+    },
+    {
+      "type": "java",
+      "name": "SysidApp",
+      "request": "launch",
+      "mainClass": "frc.demacia.SysID.SysidApp",
+      "projectName": "offseason2026"
+    },
+    {
+      "type": "java",
+      "name": "ChassisConfig",
+      "request": "launch",
+      "mainClass": "frc.demacia.utils.chassis.ChassisConfig",
+      "projectName": "offseason2026"
+    },
+    {
+      "type": "java",
+      "name": "Sysid",
+      "request": "launch",
+      "mainClass": "frc.demacia.SysID.Sysid",
+      "projectName": "offseason2026"
+    },
+    {
+      "type": "java",
+      "name": "Main",
+      "request": "launch",
+      "mainClass": "frc.robot.Main",
+      "projectName": "offseason2026"
+>>>>>>> i-add-kinmatiks-and-chassis/TestUtils
     },
     {
       "type": "wpilib",
