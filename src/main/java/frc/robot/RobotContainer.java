@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.demacia.utils.chassis.Chassis;
+import frc.demacia.utils.chassis.DriveCommand;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -46,6 +47,8 @@ public class RobotContainer {
   private final frc.demacia.utils.chassis.DriveCommand driveCommand;
 
   public RobotContainer() {
+    chassis = new Chassis(null);
+    driveCommand = new DriveCommand(chassis, null);
     configureBindings();
   }
 

@@ -1,6 +1,7 @@
 package frc.demacia.utils.Motors;
 
 import com.ctre.phoenix6.CANBus;
+import frc.demacia.utils.Motors.SparkMaxConfig;
 
 /**
  * Abstract base class for motor configurations using the Builder pattern.
@@ -28,7 +29,7 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         TalonFX {
             @Override
             public MotorInterface create(BaseMotorConfig<?> config) {
-                return new TalonFXMotor((TalonFXConfig) config);
+                return new TalonFXMotor((TalonFXConfigDemasia) config);
             }
         },
         TalonSRX {
@@ -40,13 +41,13 @@ public abstract class BaseMotorConfig<T extends BaseMotorConfig<T>> {
         SparkMax {
             @Override
             public MotorInterface create(BaseMotorConfig<?> config) {
-                return new SparkMaxMotor((SparkMaxConfig) config);
+                return new SparkMaxMotor((SparkFlexConfigDemasia) config);
             }
         },
         SparkFlex {
             @Override
             public MotorInterface create(BaseMotorConfig<?> config) {
-                return new SparkFlexMotor((SparkFlexConfig) config);
+                return new SparkFlexMotor((SparkFlexConfigDemasia) config);
             }
         };
 

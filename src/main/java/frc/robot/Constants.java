@@ -7,7 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import frc.demacia.utils.Motors.TalonFXConfig;
+import frc.demacia.utils.Motors.TalonFXConfigDemasia;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 
 /**
@@ -33,8 +33,6 @@ public final class Constants {
   public static final class OperatorConstants {
     public static final int DRIVER_CONTROLLER_PORT = 0;
     public static final int OPERATOR_CONTROLLER_PORT = 1;
-  }
-  public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
 
@@ -71,7 +69,7 @@ public final class Constants {
         public static final double RAMP_TIME = 0.5;
 
         /* The config of the motors based on the constants above */
-        public static final TalonFXConfig CONFIG = new TalonFXConfig(ID, CAN_BUS, NAME)
+        public static final TalonFXConfigDemasia CONFIG = new TalonFXConfigDemasia(ID, CAN_BUS, NAME)
                 .withPID(KP, KI, KD, KS, KV, KA, KG)
                 .withMotionParam(MOTION_MAGIC_VELOCITY, MOTION_MAGIC_ACCELERATION, MOTION_MAGIC_JERK)
                 .withBrake(IS_BRAKE)

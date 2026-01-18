@@ -8,7 +8,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.demacia.utils.Log.LogManager;
-import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 
 import com.ctre.phoenix6.StatusSignal;
 

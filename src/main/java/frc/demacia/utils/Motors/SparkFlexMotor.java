@@ -17,7 +17,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.demacia.utils.Log.LogManager;
-import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
+import frc.demacia.utils.Motors.SparkFlexConfigDemasia;
 
 /**
  * Wrapper class for the REV Spark Flex motor controller.
@@ -28,7 +29,7 @@ import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;;
  */
 public class SparkFlexMotor extends SparkFlex implements MotorInterface {
 
-  private frc.demacia.utils.motors.SparkFlexConfig config;
+  private SparkFlexConfigDemasia config;
   private String name;
   private SparkFlexConfig cfg;
   private ClosedLoopSlot closedLoopSlot = ClosedLoopSlot.kSlot0;
@@ -46,7 +47,7 @@ public class SparkFlexMotor extends SparkFlex implements MotorInterface {
    * Creates a new Spark Flex motor wrapper.
    * @param config The configuration object
    */
-  public SparkFlexMotor(frc.demacia.utils.motors.SparkFlexConfig config) {
+  public SparkFlexMotor(SparkFlexConfigDemasia config) {
     super(config.id, SparkLowLevel.MotorType.kBrushless);
     this.config = config;
     name = config.name;

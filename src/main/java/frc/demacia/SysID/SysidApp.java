@@ -1,4 +1,4 @@
-package frc.demacia.sysID;
+package frc.demacia.SysID;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
