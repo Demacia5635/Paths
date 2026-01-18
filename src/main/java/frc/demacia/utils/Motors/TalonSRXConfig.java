@@ -1,4 +1,4 @@
-package frc.demacia.utils.motors;
+package frc.demacia.utils.Motors;
 
 
 /** * Configuration class specifically for TalonSRX motors (Phoenix 5).

@@ -4,14 +4,11 @@
 
 package frc.robot;
 
-<<<<<<< HEAD
 import com.ctre.phoenix6.CANBus;
 
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-=======
-import frc.demacia.utils.motors.TalonFXConfig;
-import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
->>>>>>> i-add-kinmatiks-and-chassis/TestUtils
+import frc.demacia.utils.Motors.TalonFXConfig;
+import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -22,7 +19,6 @@ import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-<<<<<<< HEAD
 
   public static final class CANBuses {
     public static final CANBus ARM_CAN_BUS = new CANBus("rio");
@@ -38,7 +34,6 @@ public final class Constants {
     public static final int DRIVER_CONTROLLER_PORT = 0;
     public static final int OPERATOR_CONTROLLER_PORT = 1;
   }
-=======
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
@@ -84,5 +79,4 @@ public final class Constants {
                 .withRadiansMotor(GEAR_RATIO)
                 .withRampTime(RAMP_TIME);
     }
->>>>>>> i-add-kinmatiks-and-chassis/TestUtils
 }

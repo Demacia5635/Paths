@@ -1,10 +1,10 @@
-package frc.demacia.utils.mechanisms;
+package frc.demacia.utils.Mechanisms;
 
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.demacia.utils.motors.MotorInterface;
-import frc.demacia.utils.motors.MotorInterface.ControlMode;
+import frc.demacia.utils.Motors.MotorInterface;
+import frc.demacia.utils.Motors.MotorInterface.ControlMode;;
 
 /**
  * A specialized command for shooter-like mechanisms that use a LookUpTable to determine

@@ -1,4 +1,4 @@
-package frc.demacia.utils.motors;
+package frc.demacia.utils.Motors;
 
 import java.util.function.Supplier;
 
@@ -16,8 +16,8 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.demacia.utils.log.LogManager;
-import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
+import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;;
 
 /**
  * Wrapper class for the REV Spark Flex motor controller.

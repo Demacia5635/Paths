@@ -1,4 +1,4 @@
-package frc.demacia.utils.motors;
+package frc.demacia.utils.Motors;
 
 /**
  * Container class for closed-loop control parameters (PID + feed-forward).

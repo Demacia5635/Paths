@@ -1,8 +1,8 @@
-package frc.demacia.utils.controller;  
+package frc.demacia.utils.Controller;  
 
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 
-import static frc.demacia.utils.controller.ControllerConstants.*;
+import static frc.demacia.utils.Controller.ControllerConstants.*;
 
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.PS5Controller;
@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.demacia.utils.Utilities;
-import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.Log.LogManager;
 
 /**
  * controller wrapper supporting Xbox and PS5 controllers.

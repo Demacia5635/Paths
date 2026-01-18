@@ -1,4 +1,4 @@
-package frc.demacia.utils.log;
+package frc.demacia.utils.Log;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;

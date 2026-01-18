@@ -1,7 +1,7 @@
 package frc.demacia.utils.chassis;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.demacia.utils.sensors.PigeonConfig;
+import frc.demacia.utils.Sensors.PigeonConfig;
 
 /**
  * Configuration class for swerve drive chassis.

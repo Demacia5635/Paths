@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.demacia.utils.log;
+package frc.demacia.utils.Log;
 
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -18,8 +18,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.demacia.utils.Data;
-import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
-
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 /**
  * Centralized logging system for robot telemetry and diagnostics.
  * <p>

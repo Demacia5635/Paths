@@ -1,4 +1,4 @@
-package frc.demacia.utils.sensors;
+package frc.demacia.utils.Sensors;
 
 /**
  * Interface for sensors that provide continuous analog readings.

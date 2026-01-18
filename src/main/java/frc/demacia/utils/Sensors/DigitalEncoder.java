@@ -1,10 +1,10 @@
-package frc.demacia.utils.sensors;
+package frc.demacia.utils.Sensors;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import frc.demacia.utils.log.LogManager;
-import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 
 /**
  * Digital duty-cycle encoder wrapper (e.g., REV Through Bore in digital mode).

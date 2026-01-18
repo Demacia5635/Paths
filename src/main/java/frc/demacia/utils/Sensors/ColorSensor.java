@@ -1,10 +1,12 @@
-package frc.demacia.utils.sensors;
+package frc.demacia.utils.Sensors;
+
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
-import frc.demacia.utils.log.LogManager;
-import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
+
+import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 
 import com.revrobotics.ColorSensorV3;
 import com.revrobotics.ColorMatch;

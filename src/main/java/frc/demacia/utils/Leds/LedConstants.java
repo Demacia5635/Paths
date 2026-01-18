@@ -1,4 +1,4 @@
-package frc.demacia.utils.leds;
+package frc.demacia.utils.Leds;
 
 /**constants for leds */
 public class LedConstants {

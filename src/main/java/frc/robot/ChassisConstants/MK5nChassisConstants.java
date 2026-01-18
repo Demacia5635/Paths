@@ -1,12 +1,12 @@
-package frc.robot.chassisConstants;
+package frc.robot.ChassisConstants;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.demacia.utils.chassis.ChassisConfig;
 import frc.demacia.utils.chassis.SwerveModuleConfig;
-import frc.demacia.utils.motors.TalonFXConfig;
-import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
-import frc.demacia.utils.sensors.CancoderConfig;
-import frc.demacia.utils.sensors.PigeonConfig;
+import frc.demacia.utils.Motors.TalonFXConfig;
+import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.Sensors.CancoderConfig;
+import frc.demacia.utils.Sensors.PigeonConfig;
 
 public class MK5nChassisConstants {
     

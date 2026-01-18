@@ -1,9 +1,8 @@
-package frc.demacia.utils.sensors;
+package frc.demacia.utils.Sensors;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.AnalogInput;
-import frc.demacia.utils.log.LogManager;
-import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
-
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
+import frc.demacia.utils.Log.LogManager;
 /**
  * A wrapper for analog optical sensors that measure voltage levels.
  * 

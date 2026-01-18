@@ -1,4 +1,4 @@
-package frc.demacia.utils.sensors;
+package frc.demacia.utils.Sensors;
 
 /**
  * Configuration class for ColorSensor instances.

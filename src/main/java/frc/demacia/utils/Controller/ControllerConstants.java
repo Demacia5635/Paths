@@ -1,4 +1,4 @@
-package frc.demacia.utils.controller;
+package frc.demacia.utils.Controller;
 
 public class ControllerConstants {
     public static final double XBOX_STICK_DEADBAND = 0.13;

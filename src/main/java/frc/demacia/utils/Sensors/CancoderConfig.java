@@ -2,9 +2,9 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.demacia.utils.sensors;
+package frc.demacia.utils.Sensors;
 
-import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
 
 /**
  * Configuration for CTRE CANcoder absolute encoder.
