@@ -7,8 +7,8 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import frc.demacia.utils.Motors.TalonFXConfigDemasia;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.Motors.TalonFXConfig;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -69,7 +69,7 @@ public final class Constants {
         public static final double RAMP_TIME = 0.5;
 
         /* The config of the motors based on the constants above */
-        public static final TalonFXConfigDemasia CONFIG = new TalonFXConfigDemasia(ID, CAN_BUS, NAME)
+        public static final TalonFXConfig CONFIG = new TalonFXConfig(ID, CAN_BUS, NAME)
                 .withPID(KP, KI, KD, KS, KV, KA, KG)
                 .withMotionParam(MOTION_MAGIC_VELOCITY, MOTION_MAGIC_ACCELERATION, MOTION_MAGIC_JERK)
                 .withBrake(IS_BRAKE)
