@@ -6,12 +6,10 @@
   "configurations": [
     {
       "type": "java",
-<<<<<<< HEAD
       "name": "Main",
       "request": "launch",
       "mainClass": "frc.robot.Main",
-      "projectName": "Paths"
-=======
+      "projectName": "Paths",
       "name": "SysidApp",
       "request": "launch",
       "mainClass": "frc.demacia.sysID.SysidApp",
@@ -65,7 +63,6 @@
       "request": "launch",
       "mainClass": "frc.robot.Main",
       "projectName": "offseason2026"
->>>>>>> i-add-kinmatiks-and-chassis/TestUtils
     },
     {
       "type": "wpilib",
