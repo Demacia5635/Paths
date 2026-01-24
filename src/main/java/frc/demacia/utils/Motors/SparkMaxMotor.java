@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
-import frc.demacia.utils.Motors.SparkFlexConfigDemasia;
 
 /**
  * Wrapper class for the REV Spark Max motor controller.

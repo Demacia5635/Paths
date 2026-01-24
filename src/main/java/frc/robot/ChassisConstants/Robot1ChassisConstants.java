@@ -3,7 +3,7 @@ package frc.robot.ChassisConstants;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.demacia.utils.chassis.ChassisConfig;
 import frc.demacia.utils.chassis.SwerveModuleConfig;
-import frc.demacia.utils.Motors.TalonFXConfigDemasia;
+import frc.demacia.utils.Motors.TalonFXConfig;
 import frc.demacia.utils.Sensors.CancoderConfig;
 import frc.demacia.utils.Sensors.PigeonConfig;
 import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
@@ -56,15 +56,15 @@ public class Robot1ChassisConstants {
     public static final double RAMP_TIME_STEER = 0.25;
     
     public static class SwerveModuleConfigs {
-        public final TalonFXConfigDemasia STEER_CONFIG;
-        public final TalonFXConfigDemasia DRIVE_CONFIG;
+        public final TalonFXConfig STEER_CONFIG;
+        public final TalonFXConfig DRIVE_CONFIG;
         public final CancoderConfig CANCODER_CONFIG;
         public final Translation2d POSITION;
         public final double STEER_OFFSET;
         public final String NAME;
         public SwerveModuleConfig SWERVE_MODULE_CONFIG;
 
-        public SwerveModuleConfigs(TalonFXConfigDemasia steerConfig, TalonFXConfigDemasia driveConfig, CancoderConfig cancoderConfig, Translation2d position, double steerOffset, String name) {
+        public SwerveModuleConfigs(TalonFXConfig steerConfig, TalonFXConfig driveConfig, CancoderConfig cancoderConfig, Translation2d position, double steerOffset, String name) {
             STEER_CONFIG = steerConfig;
             DRIVE_CONFIG = driveConfig;
             CANCODER_CONFIG = cancoderConfig;
@@ -92,14 +92,13 @@ public class Robot1ChassisConstants {
                     NAME = "";
                     break;
             }
-            STEER_CONFIG = new TalonFXConfigDemasia(swerveId * 3 + 2, CAN_BUS, NAME + " Steer")
+            STEER_CONFIG = new TalonFXConfig(swerveId * 3 + 2, CAN_BUS, NAME + " Steer")
                 .withPID(STEER_KP, STEER_KI, STEER_KD, STEER_KS, STEER_KV, STEER_KA, 0)
                 .withMotionParam(MOTION_MAGIC_VEL, MOTION_MAGIC_ACCEL, MOTION_MAGIC_JERK)
                 .withBrake(true)
                 .withRadiansMotor(STEER_GEAR_RATIO)
                 .withRampTime(RAMP_TIME_STEER);
-            DRIVE_CONFIG = new TalonFXConfigDemasia(swerveId * 3 + 
-            1, CAN_BUS, NAME + " Drive")
+            DRIVE_CONFIG = new TalonFXConfig(swerveId * 3 + 1, CAN_BUS, NAME + " Drive")
                 .withPID(DRIVE_KP, DRIVE_KI, DRIVE_KD, DRIVE_KS, DRIVE_KV, DRIVE_KA, 0)
                 .withBrake(true)
                 .withInvert(true)

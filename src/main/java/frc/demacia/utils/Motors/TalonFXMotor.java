@@ -41,7 +41,7 @@ import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;;
  */
 public class TalonFXMotor extends TalonFX implements MotorInterface {
 
-    TalonFXConfigDemasia config;
+    TalonFXConfig config;
     String name;
     TalonFXConfiguration cfg;
 
@@ -70,7 +70,7 @@ public class TalonFXMotor extends TalonFX implements MotorInterface {
      * Creates a new TalonFX motor wrapper.
      * @param config The configuration object for this motor
      */
-    public TalonFXMotor(TalonFXConfigDemasia config) {
+    public TalonFXMotor(TalonFXConfig config) {
         super(config.id, config.canbus.canbus);
         this.config = config;
         name = config.name;

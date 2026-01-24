@@ -6,7 +6,6 @@ package frc.robot.chassis.Paths;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /** Add your docs here. */
 public class LineSegment extends SegmentBase{
@@ -19,16 +18,11 @@ public class LineSegment extends SegmentBase{
         this.finishVelocity = finishVelocity;
         this.startToFinishVector = finishPoint.getTranslation().minus(startToFinishVector);
     }
+    
     public LineSegment(Pose2d startingPoint, Pose2d finishPoint){
         this(startingPoint, finishPoint, PathsConstants.MAX_LINEAR_VELOCITY);
     }
 
-
     public Translation2d getStartToFinishVector(){return this.startToFinishVector;}
     public double getFinishVelocity(){return this.finishVelocity;}
-    
-    
-
-
-
 }

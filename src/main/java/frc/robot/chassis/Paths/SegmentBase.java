@@ -5,8 +5,6 @@
 package frc.robot.chassis.Paths;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /** Add your docs here. */
 public abstract class SegmentBase {
