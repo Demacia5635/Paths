@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.demacia.utils.chassis.Chassis;
 import frc.demacia.utils.chassis.DriveCommand;
@@ -45,9 +46,9 @@ public class RobotContainer {
   }
 
   Pose2d[] pathPoint = {
-    new Pose2d(0, 0, null),
-    new Pose2d(0, 0, null),
-    new Pose2d(0, 0, null)
+    new Pose2d(0, 0, new Rotation2d(0)),
+    new Pose2d(0, 0, new Rotation2d(0, 0)),
+    new Pose2d(0, 0, new Rotation2d(0, 0))
   };
 
   private void configureBindings() {
