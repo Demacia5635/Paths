@@ -13,7 +13,7 @@ import frc.demacia.utils.Controller.CommandController;
 import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.robot.ChassisConstants.MK5nChassisConstants;
 import frc.robot.chassis.kinematics.DemaciaKinematics;
-import frc.robot.commands.tstingPathCommand;
+import frc.robot.commands.PathCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -52,7 +52,7 @@ public class RobotContainer {
   };
 
   private void configureBindings() {
-    CommandController.leftButton().onTrue(new tstingPathCommand(kinematics, chassis, pathPoint));
+    CommandController.leftButton().onTrue(new PathCommand(kinematics, chassis, pathPoint));
     chassis.setDefaultCommand(driveCommand);
   }
 

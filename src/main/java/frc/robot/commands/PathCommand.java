@@ -15,7 +15,7 @@ import frc.demacia.utils.chassis.Chassis;
 import frc.robot.chassis.Paths.DemaciaTrajectory;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class tstingPathCommand extends Command {
+public class PathCommand extends Command {
   /** Creates a new tstingPathCommand. */
 
    DemaciaKinematics kinematics;
@@ -23,7 +23,7 @@ public class tstingPathCommand extends Command {
    DemaciaTrajectory demaciaTrajectory;
   ArrayList<Pose2d> pointList = new ArrayList<>();
   Pose2d[] point;
-  public tstingPathCommand(DemaciaKinematics kinematics,Chassis chassis, Pose2d[] point) {
+  public PathCommand(DemaciaKinematics kinematics,Chassis chassis, Pose2d[] point) {
     this.kinematics = kinematics;
     this.chassis = chassis;
     demaciaTrajectory = new DemaciaTrajectory(pointList);
