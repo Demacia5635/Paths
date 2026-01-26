@@ -22,15 +22,19 @@ public class tstingPathCommand extends Command {
    Chassis chassis;
    DemaciaTrajectory demaciaTrajectory;
   ArrayList<Pose2d> pointList = new ArrayList<>();
-  public tstingPathCommand(DemaciaKinematics kinematics,Chassis chassis) {
+  Pose2d[] point;
+  public tstingPathCommand(DemaciaKinematics kinematics,Chassis chassis, Pose2d[] point) {
     this.kinematics = kinematics;
     this.chassis = chassis;
     demaciaTrajectory = new DemaciaTrajectory(pointList);
+    this.point = point;
     // Use addRequirements() here to declare subsystem dependencies.
   }
   
   public void addPoint(){
-    pointList.add(new Pose2d());
+    for (int i = 0; i < point.length; i++) {
+      pointList.add(point[i]);
+    }
 
   }
 
@@ -41,17 +45,23 @@ public class tstingPathCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    ChassisSpeeds needSpeed = demaciaTrajectory.calculateSpeeds(null, null);
+    ChassisSpeeds needSpeed = demaciaTrajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose());
     chassis.setVelocities(needSpeed);
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    chassis.stop();
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    if(demaciaTrajectory.isFinishedTrajectory()){
+      return true;
+    }else{
+      return false;
+    }
   }
 }
