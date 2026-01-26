@@ -26,9 +26,6 @@ import frc.robot.commands.PathCommand;
 
 
 public class RobotContainer {
-
-
-  
   public static boolean isRed = true;
   public static RobotContainer robotContainer;
 
