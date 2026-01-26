@@ -7,6 +7,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.demacia.utils.chassis.Chassis;
 import frc.demacia.utils.chassis.DriveCommand;
+import frc.demacia.utils.Controller.CommandController;
+import frc.robot.ChassisConstants.MK5nChassisConstants;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -27,10 +29,14 @@ public class RobotContainer {
 
   private final Chassis chassis;
   private final frc.demacia.utils.chassis.DriveCommand driveCommand;
+  public static CommandController CommandController;
 
   public RobotContainer() {
-    chassis = new Chassis(null);
-    driveCommand = new DriveCommand(chassis, null);
+    CommandController = new CommandController(0, null);
+    chassis = new Chassis(MK5nChassisConstants.CHASSIS_CONFIG);
+    chassis.setDefaultCommand(new DriveCommand(chassis, CommandController));
+    driveCommand = new DriveCommand(chassis, CommandController);
+    
     configureBindings();
   }
 
