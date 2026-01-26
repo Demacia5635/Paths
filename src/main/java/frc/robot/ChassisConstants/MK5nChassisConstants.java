@@ -151,4 +151,11 @@ public class MK5nChassisConstants {
     FRONT_RIGHT.POSITION,
     BACK_LEFT.POSITION,
     BACK_RIGHT.POSITION);
+
+    public static final Translation2d[] MODOLES_POSE = {
+        FRONT_LEFT.POSITION,
+        FRONT_RIGHT.POSITION,
+        BACK_LEFT.POSITION,
+        BACK_RIGHT.POSITION
+    };
 }

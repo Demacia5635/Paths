@@ -38,7 +38,7 @@ public class RobotContainer {
   public static DemaciaKinematics kinematics;
 
   public RobotContainer() {
-    kinematics = new DemaciaKinematics(null);
+    kinematics = new DemaciaKinematics(MK5nChassisConstants.MODOLES_POSE);
     CommandController = new CommandController(0, ControllerType.kPS5);
     chassis = new Chassis(MK5nChassisConstants.CHASSIS_CONFIG);
     driveCommand = new DriveCommand(chassis, CommandController);
