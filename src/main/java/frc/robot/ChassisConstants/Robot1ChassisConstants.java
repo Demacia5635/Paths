@@ -151,4 +151,11 @@ public class Robot1ChassisConstants {
     FRONT_RIGHT.POSITION,
     BACK_LEFT.POSITION,
     BACK_RIGHT.POSITION);
+
+    public static final Translation2d[] MODOLE_POSE={
+        FRONT_LEFT.POSITION,
+        FRONT_RIGHT.POSITION,
+        BACK_LEFT.POSITION,
+        BACK_RIGHT.POSITION
+    };
 }
