@@ -43,9 +43,9 @@ public class RobotContainer {
   }
 
   Pose2d[] pathPoint = {
-    new Pose2d(0, 0, new Rotation2d(0)),
-    new Pose2d(0, 0, new Rotation2d(0)),
-    new Pose2d(0, 0, new Rotation2d(0))
+    new Pose2d(3, 2, new Rotation2d(68)),
+    new Pose2d(4.4, 3.55, new Rotation2d(50)),
+    new Pose2d(1.45, 1, new Rotation2d(49))
   };
 
   private void configureBindings() {
