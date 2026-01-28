@@ -26,6 +26,7 @@ public class PathCommand extends Command {
   public PathCommand(DemaciaKinematics kinematics,Chassis chassis, Pose2d[] point) {
     this.kinematics = kinematics;
     this.chassis = chassis;
+    addPoint(); 
     demaciaTrajectory = new DemaciaTrajectory(pointList);
     this.point = point;
     // Use addRequirements() here to declare subsystem dependencies.
