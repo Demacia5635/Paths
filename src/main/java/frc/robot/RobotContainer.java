@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.demacia.utils.chassis.Chassis;
 import frc.demacia.utils.chassis.DriveCommand;
 import frc.demacia.utils.Controller.CommandController;
@@ -32,6 +33,7 @@ public class RobotContainer {
   private final frc.demacia.utils.chassis.DriveCommand driveCommand;
   public static CommandController CommandController;
   public static DemaciaKinematics kinematics;
+  public static PathCommand pathCommand;
   Pose2d[] pathPoint;
 
   public RobotContainer() {
@@ -45,12 +47,13 @@ public class RobotContainer {
     new Pose2d(4.4, 3.55, new Rotation2d(50)),
     new Pose2d(1.45, 1, new Rotation2d(49))
   };
+  pathCommand = new PathCommand(pathPoint);
     configureBindings();
   }
 
 
   private void configureBindings() {
-    CommandController.leftButton().onTrue(new PathCommand(kinematics, chassis, pathPoint));
+    CommandController.leftButton().onTrue(pathCommand);
     chassis.setDefaultCommand(driveCommand);
   }
 

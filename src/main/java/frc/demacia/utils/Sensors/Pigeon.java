@@ -325,9 +325,10 @@ public class Pigeon extends Pigeon2 implements SensorInterface{
     /**
      * Resets all gyro angles to zero.
      */
-    public void reset() {
-        super.reset();
-    }
+
+    // public void reset(){
+    //     super.reset();
+    // }
 
     @Override
     public void initSendable(SendableBuilder builder) {
