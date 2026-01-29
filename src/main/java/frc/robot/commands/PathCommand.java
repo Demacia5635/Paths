@@ -8,7 +8,10 @@ import frc.robot.chassis.kinematics.DemaciaKinematics;
 
 import java.util.ArrayList;
 
+import org.opencv.core.Point;
+
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.demacia.utils.chassis.Chassis;
@@ -21,19 +24,15 @@ public class PathCommand extends Command {
    DemaciaKinematics kinematics;
    Chassis chassis;
    DemaciaTrajectory demaciaTrajectory;
-  ArrayList<Pose2d> pointList = new ArrayList<>();
-  Pose2d[] point;
-  public PathCommand(Pose2d[] point) {
-    demaciaTrajectory = new DemaciaTrajectory(pointList);
-    this.point = point;
-    // Use addRequirements() here to declare subsystem dependencies.
-  }
-  
-  public void addPoint(){
-    for (int i = 0; i < point.length; i++) {
-      pointList.add(point[i]);
-    }
+  ArrayList<Pose2d> pointList = new ArrayList<>();  
+  pointList.add(new Pose2d(chassis.getPose()))
+  pointList.add(new Pose2d(3, 2, new Rotation2d(68)))
+  pointList.add(new Pose2d(4.4, 3.55, new Rotation2d(50)))
+  pointList.add(new Pose2d(1.45, 1, new Rotation2d(49)))
 
+  public PathCommand() {
+    demaciaTrajectory = new DemaciaTrajectory(pointList);
+    // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.

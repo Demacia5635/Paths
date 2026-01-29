@@ -116,7 +116,7 @@ public class DemaciaTrajectory {
     }
 
     private void createCenterCircles(){
-        for(int i = 0; i <= trajectoryPoints.size() - 2; i++){
+        for(int i = 0; i < trajectoryPoints.size() - 2; i++){
            CenterCircleWithDirection center = PathsUtils.ArcUtils.calculateCenterCircle(trajectoryPoints.get(i), trajectoryPoints.get(i+1), trajectoryPoints.get(i+2));
             circleCenters.add(center);
         }
@@ -126,7 +126,7 @@ public class DemaciaTrajectory {
         pathPoints.add(trajectoryPoints.get(0));
         Translation2d firstPointOnArc = calculateP1OnIntialArc(trajectoryPoints.get(0).getTranslation(), circleCenters.get(0));
         pathPoints.add(new Pose2d(firstPointOnArc, trajectoryPoints.get(1).getRotation()));
-        for(int i = 0; i < arcCount - 1; i++){
+        for(int i = 0; i < arcCount -1; i++){ 
             if(circleCenters.get(i).isTurningRight() == circleCenters.get(i+1).isTurningRight()){
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateExitPointOfArc(trajectoryPoints.get(i).getTranslation(), circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateEntryPointOfArc(trajectoryPoints.get(i+1).getTranslation(), circleCenters.get(i+1).centerCircle(), circleCenters.get(i+2).centerCircle()), trajectoryPoints.get(i+1).getRotation()));

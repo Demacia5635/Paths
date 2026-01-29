@@ -34,20 +34,13 @@ public class RobotContainer {
   public static CommandController CommandController;
   public static DemaciaKinematics kinematics;
   public static PathCommand pathCommand;
-  Pose2d[] pathPoint;
 
   public RobotContainer() {
     kinematics = new DemaciaKinematics(MK5nChassisConstants.MODOLES_POSE);
     CommandController = new CommandController(0, ControllerType.kPS5);
     chassis = new Chassis(MK5nChassisConstants.CHASSIS_CONFIG);
     driveCommand = new DriveCommand(chassis, CommandController);
-    pathPoint = new Pose2d[]{
-    new Pose2d(chassis.getPose().getX(), chassis.getPose().getY(), chassis.getPose().getRotation()),
-    new Pose2d(3, 2, new Rotation2d(68)),
-    new Pose2d(4.4, 3.55, new Rotation2d(50)),
-    new Pose2d(1.45, 1, new Rotation2d(49))
-  };
-  pathCommand = new PathCommand(pathPoint);
+  pathCommand = new PathCommand();
     configureBindings();
   }
 
