@@ -34,30 +34,20 @@ public class DemaciaTrajectory {
         this.arcCount = trajectoryPoints.size() - 2;
         this.isFinishedTrajectory = false;
         int lastIndex = segments.size() - 1;
-        if(PathsUtils.isLineSegment(currentSegment)){
-            createSimplePath(currentSegment.getStartingPoint(), currentSegment.getFinishPoint());
-        }else{
-            createCenterCircles();
-            createPathPoints();
-            createSegments();
-        }
 
-        for (int i = 0; i < trajectoryPoints.size(); i++) {
-            if(i%2==0){
-                
-            }else{
-                
-            }
 
-            if(PathsUtils.isLineSegment(segments.get(lastIndex))){
+
+            if(trajectoryPoints.size() < 3){
                 SegmentBase lestSegment = segments.get(lastIndex);
                 createSimplePath(lestSegment.getStartingPoint(), lestSegment.getFinishPoint());
-            }else{
                 createCenterCircles();
                 createPathPoints();
+            }else{
+                createPathPoints();
+                createCenterCircles();
                 createSegments();
             }
-        }
+        
 
         if(!segments.isEmpty()){
             currentSegmentIndex = 0;
