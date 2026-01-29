@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.demacia.utils.Log.LogManager;
 
 /** Add your docs here. */
 public class DemaciaTrajectory {
@@ -32,6 +33,7 @@ public class DemaciaTrajectory {
         this.segments = new ArrayList<SegmentBase>();
         this.arcCount = trajectoryPoints.size() - 2;
         this.isFinishedTrajectory = false;
+        int lastIndex = segments.size() - 1;
         if(PathsUtils.isLineSegment(currentSegment)){
             createSimplePath(currentSegment.getStartingPoint(), currentSegment.getFinishPoint());
         }else{
@@ -39,10 +41,35 @@ public class DemaciaTrajectory {
             createPathPoints();
             createSegments();
         }
+
+        for (int i = 0; i < trajectoryPoints.size(); i++) {
+            if(i%2==0){
+                
+            }else{
+                
+            }
+
+            if(PathsUtils.isLineSegment(segments.get(lastIndex))){
+                SegmentBase lestSegment = segments.get(lastIndex);
+                createSimplePath(lestSegment.getStartingPoint(), lestSegment.getFinishPoint());
+            }else{
+                createCenterCircles();
+                createPathPoints();
+                createSegments();
+            }
+        }
+
+        if(!segments.isEmpty()){
+            currentSegmentIndex = 0;
+            currentSegment = segments.get(currentSegmentIndex);
+        }else{
+            isFinishedTrajectory = true;
+            LogManager.log("field to biuled path");
+        }
+        
+
         currentSegmentIndex = 0;
         currentSegment = segments.get(currentSegmentIndex);
-
-        
         
     }
 
