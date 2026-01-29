@@ -3,13 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands;
-
-import frc.robot.chassis.kinematics.DemaciaKinematics;
-
 import java.util.ArrayList;
-
-import org.opencv.core.Point;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -21,17 +15,18 @@ import frc.robot.chassis.Paths.DemaciaTrajectory;
 public class PathCommand extends Command {
   /** Creates a new tstingPathCommand. */
 
-   DemaciaKinematics kinematics;
    Chassis chassis;
    DemaciaTrajectory demaciaTrajectory;
   ArrayList<Pose2d> pointList = new ArrayList<>();  
-  pointList.add(new Pose2d(chassis.getPose()))
-  pointList.add(new Pose2d(3, 2, new Rotation2d(68)))
-  pointList.add(new Pose2d(4.4, 3.55, new Rotation2d(50)))
-  pointList.add(new Pose2d(1.45, 1, new Rotation2d(49)))
 
-  public PathCommand() {
+  public PathCommand(Chassis chassis) {
+    this.chassis = chassis;
+    pointList.add(new Pose2d(chassis.getPose().getX(), chassis.getPose().getY(), chassis.getGyroAngle()));
+    pointList.add(new Pose2d(3, 2, new Rotation2d(Math.toRadians(0))));
+    pointList.add(new Pose2d(4.4, 3.55, new Rotation2d(Math.toRadians(90))));
+    // pointList.add(new Pose2d(1.45, 1, new Rotation2d(Math.toRadians(60))));
     demaciaTrajectory = new DemaciaTrajectory(pointList);
+  
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -55,10 +50,6 @@ public class PathCommand extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(demaciaTrajectory.isFinishedTrajectory()){
-      return true;
-    }else{
-      return false;
-    }
+    return demaciaTrajectory.isFinishedTrajectory();
   }
 }

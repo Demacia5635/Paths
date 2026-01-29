@@ -4,15 +4,12 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.demacia.utils.chassis.Chassis;
 import frc.demacia.utils.chassis.DriveCommand;
 import frc.demacia.utils.Controller.CommandController;
 import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.robot.ChassisConstants.MK5nChassisConstants;
-import frc.robot.chassis.kinematics.DemaciaKinematics;
 import frc.robot.commands.PathCommand;
 
 /**
@@ -32,15 +29,13 @@ public class RobotContainer {
   private final Chassis chassis;
   private final frc.demacia.utils.chassis.DriveCommand driveCommand;
   public static CommandController CommandController;
-  public static DemaciaKinematics kinematics;
   public static PathCommand pathCommand;
 
   public RobotContainer() {
-    kinematics = new DemaciaKinematics(MK5nChassisConstants.MODOLES_POSE);
     CommandController = new CommandController(0, ControllerType.kPS5);
     chassis = new Chassis(MK5nChassisConstants.CHASSIS_CONFIG);
     driveCommand = new DriveCommand(chassis, CommandController);
-  pathCommand = new PathCommand();
+    pathCommand = new PathCommand(chassis);
     configureBindings();
   }
 

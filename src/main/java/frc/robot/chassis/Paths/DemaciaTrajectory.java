@@ -32,14 +32,18 @@ public class DemaciaTrajectory {
         this.segments = new ArrayList<SegmentBase>();
         this.arcCount = trajectoryPoints.size() - 2;
         this.isFinishedTrajectory = false;
-                
-        createCenterCircles();
-        createPathPoints();
-        createSegments();
+        if(PathsUtils.isLineSegment(currentSegment)){
+            createSimplePath(currentSegment.getStartingPoint(), currentSegment.getFinishPoint());
+        }else{
+            createCenterCircles();
+            createPathPoints();
+            createSegments();
+        }
         currentSegmentIndex = 0;
         currentSegment = segments.get(currentSegmentIndex);
 
-
+        
+        
     }
 
     private boolean isFinishedSegment(ChassisSpeeds currentSpeeds, Pose2d currentPose, SegmentBase currentSegment){
@@ -70,6 +74,13 @@ public class DemaciaTrajectory {
 
             return (distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH) || ((distanceFromFinishPoint < (PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH * 3)) && isHeadingTowardesNextSegment);
         }
+    }
+
+
+
+
+    public void createSimplePath(Pose2d firstPoint, Pose2d lestPoint){
+        segments.add(new LineSegment(trajectoryPoints.get(0), trajectoryPoints.get(1)));
     }
 
     public ChassisSpeeds calculateSpeeds(ChassisSpeeds currentSpeeds, Pose2d currentPose) {
@@ -126,7 +137,7 @@ public class DemaciaTrajectory {
         pathPoints.add(trajectoryPoints.get(0));
         Translation2d firstPointOnArc = calculateP1OnIntialArc(trajectoryPoints.get(0).getTranslation(), circleCenters.get(0));
         pathPoints.add(new Pose2d(firstPointOnArc, trajectoryPoints.get(1).getRotation()));
-        for(int i = 0; i < arcCount -1; i++){ 
+        for(int i = 0; i < circleCenters.size() -1; i++){ 
             if(circleCenters.get(i).isTurningRight() == circleCenters.get(i+1).isTurningRight()){
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateExitPointOfArc(trajectoryPoints.get(i).getTranslation(), circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateEntryPointOfArc(trajectoryPoints.get(i+1).getTranslation(), circleCenters.get(i+1).centerCircle(), circleCenters.get(i+2).centerCircle()), trajectoryPoints.get(i+1).getRotation()));
@@ -153,8 +164,6 @@ public class DemaciaTrajectory {
     public boolean isFinishedTrajectory(){
         return this.isFinishedTrajectory;
     }
-
-
 
 
     public record CenterCircleWithDirection(Translation2d centerCircle, boolean isTurningRight) {}
