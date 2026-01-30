@@ -32,7 +32,7 @@ public class RobotContainer {
   public static PathCommand pathCommand;
 
   public RobotContainer() {
-    CommandController = new CommandController(0, ControllerType.kPS5);
+    CommandController = new CommandController(0, ControllerType.kXbox);
     chassis = new Chassis(MK5nChassisConstants.CHASSIS_CONFIG);
     driveCommand = new DriveCommand(chassis, CommandController);
     pathCommand = new PathCommand(chassis);
