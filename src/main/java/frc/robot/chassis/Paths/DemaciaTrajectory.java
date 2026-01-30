@@ -21,7 +21,7 @@ public class DemaciaTrajectory {
     private ArrayList<SegmentBase> segments;
     private ArrayList<CenterCircleWithDirection> circleCenters;
     private SegmentBase currentSegment;
-    private int arcCount;
+    // private int arcCount;
     private int currentSegmentIndex;
     private boolean isFinishedTrajectory;
     
@@ -31,7 +31,7 @@ public class DemaciaTrajectory {
         this.pathPoints = new ArrayList<Pose2d>();
         this.circleCenters = new ArrayList<CenterCircleWithDirection>();
         this.segments = new ArrayList<SegmentBase>();
-        this.arcCount = trajectoryPoints.size() - 2;
+        // this.arcCount = trajectoryPoints.size() - 2;
         this.isFinishedTrajectory = false;
 
         if(trajectoryPoints.size() == 2){
@@ -153,12 +153,12 @@ public class DemaciaTrajectory {
         for(int i = 0; i < circleCenters.size() -1; i++){ 
             if(circleCenters.get(i).isTurningRight() == circleCenters.get(i+1).isTurningRight()){
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateExitPointOfArc(trajectoryPoints.get(i).getTranslation(), circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
-                pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateEntryPointOfArc(trajectoryPoints.get(i+1).getTranslation(), circleCenters.get(i+1).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i+1).getRotation()));
-            }                                                                                                                                                                                  //i+2
+                pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateEntryPointOfArc(trajectoryPoints.get(i+1).getTranslation(), circleCenters.get(i+1).centerCircle(), circleCenters.get(i+2).centerCircle()), trajectoryPoints.get(i+1).getRotation()));
+            }
             else{
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateExitPointOfArc(circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
-                pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateEntryPointOfArc(circleCenters.get(i+1).centerCircle(), circleCenters.get(i+1).centerCircle(), pathPoints.get(pathPoints.size()-1).getTranslation()), trajectoryPoints.get(i).getRotation()));
-            }                                                                                                                                            // i+2
+                pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateEntryPointOfArc(circleCenters.get(i+1).centerCircle(), circleCenters.get(i+2).centerCircle(), pathPoints.get(pathPoints.size()-1).getTranslation()), trajectoryPoints.get(i).getRotation()));
+            }
         }
         
         Translation2d lastTrajPoint = trajectoryPoints.get(trajectoryPoints.size()-1).getTranslation();
@@ -168,7 +168,6 @@ public class DemaciaTrajectory {
 
     private void createSegments(){
         for(int i = 0; i < pathPoints.size() / 2; i++){
-            LogManager.log("i" + " " + pathPoints.get(i) + "i +1" + " " + pathPoints.get(i+1) + " " +"i+2" + " " + pathPoints.get(i+2) + "circleCenters" +circleCenters.get(i).centerCircle()  + " " +"end");
             segments.add(new LineSegment(pathPoints.get(i), pathPoints.get(i+1)));
             segments.add(new ArcSegment(pathPoints.get(i+1), pathPoints.get(i+2), circleCenters.get(i).centerCircle()));
         }
