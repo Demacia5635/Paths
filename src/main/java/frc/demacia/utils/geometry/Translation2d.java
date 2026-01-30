@@ -35,7 +35,7 @@ public class Translation2d {
         this.y += other.getY();
         return this;
     }
-    
+      
     public Translation2d minus(Translation2d other) {
         this.x -= other.getX();
         this.y -= other.getY();

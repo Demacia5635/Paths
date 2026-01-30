@@ -152,9 +152,10 @@ public class DemaciaTrajectory {
         pathPoints.add(new Pose2d(firstPointOnArc, trajectoryPoints.get(1).getRotation()));
         for(int i = 0; i < circleCenters.size() -1; i++){ 
             if(circleCenters.get(i).isTurningRight() == circleCenters.get(i+1).isTurningRight()){
+                LogManager.log("print"+ " " + "trajectory point size"+ " " +trajectoryPoints.size() + " " +"circleCenters" + " " + circleCenters.size() + " " + "end");
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateExitPointOfArc(trajectoryPoints.get(i).getTranslation(), circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
-                pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateEntryPointOfArc(trajectoryPoints.get(i+1).getTranslation(), circleCenters.get(i+1).centerCircle(), circleCenters.get(i+2).centerCircle()), trajectoryPoints.get(i+1).getRotation()));
-            }
+                pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateEntryPointOfArc(trajectoryPoints.get(i+1).getTranslation(), circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i+1).getRotation()));
+            }//                                                                                                                                           i+1                                    i+2                                        
             else{
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateExitPointOfArc(circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateEntryPointOfArc(circleCenters.get(i+1).centerCircle(), circleCenters.get(i+2).centerCircle(), pathPoints.get(pathPoints.size()-1).getTranslation()), trajectoryPoints.get(i).getRotation()));
