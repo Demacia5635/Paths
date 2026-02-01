@@ -22,8 +22,8 @@ public class PathCommand extends Command {
   public PathCommand(Chassis chassis) {
     this.chassis = chassis;
     pointList.clear();
-    pointList.add(new Pose2d(chassis.getPose().getX(), chassis.getPose().getY(), chassis.getGyroAngle()));
-    pointList.add(new Pose2d(1.5, 7.9, new Rotation2d(Math.toRadians(0))));
+    pointList.add(new Pose2d(0, 0, new Rotation2d(Math.toRadians(0))));
+    pointList.add(new Pose2d(0.5, 0, new Rotation2d(Math.toRadians(0))));
     // pointList.add(new Pose2d(4.4, 3.55, new Rotation2d(Math.toRadians(90))));
     // pointList.add(new Pose2d(1.45, 1, new Rotation2d(Math.toRadians(60))));
     demaciaTrajectory = new DemaciaTrajectory(pointList);
