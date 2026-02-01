@@ -34,6 +34,8 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.demacia.odometry.DemaciaPoseEstimator;
 import frc.demacia.odometry.DemaciaPoseEstimator.OdometryObservation;
@@ -111,13 +113,25 @@ public class Chassis extends SubsystemBase {
         wpilibKinematics = new SwerveDriveKinematics(modulePositions);
         demaciaPoseEstimator = new DemaciaPoseEstimator(
                 modulePositions,
-                getSTD(),
+                getSTD(), 
                 getSTD());
         poseEstimator = new SwerveDrivePoseEstimator(wpilibKinematics, getGyroAngle(), getModulePositions(), new Pose2d());
 
         SimpleMatrix std = new SimpleMatrix(new double[] { 0.02, 0.02, 0 });
         poseEstimator.setVisionMeasurementStdDevs(new Matrix<>(std));
         field = new Field2d();
+
+        SmartDashboard.putData("reset gyro",  new InstantCommand(() -> {
+            setYaw(new Rotation2d(0));
+        }));
+
+        SmartDashboard.putData("reset gyro 180 ", new InstantCommand(() -> {
+            setYaw(new Rotation2d(Math.PI));
+        }));
+
+        SmartDashboard.putData("reset Robot Pose", new InstantCommand(() -> {
+            resetPose(new Pose2d());
+        })  );
     }
 
     /**
@@ -157,6 +171,7 @@ public class Chassis extends SubsystemBase {
     public Pose2d getPose() {
         return demaciaPoseEstimator.getEstimatedPose();
     }
+
 
 
     /**
