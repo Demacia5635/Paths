@@ -35,14 +35,12 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.demacia.odometry.DemaciaPoseEstimator;
+import frc.demacia.odometry.DemaciaPoseEstimator.OdometryObservation;
+import frc.demacia.odometry.DemaciaPoseEstimator.VisionMeasurment;
 import frc.demacia.utils.Utilities;
 import frc.demacia.utils.Sensors.PigeonConfig;
 import frc.demacia.utils.Sensors.Pigeon;
-import frc.demacia.vision.subsystem.Quest;;
-import frc.demacia.vision.subsystem.Tag;
-import frc.demacia.vision.subsystem.ObjectPose;
-import frc.demacia.vision.utils.VisionFuse;
-import static frc.demacia.vision.utils.VisionConstants.*;
 
 /**
  * Main swerve drive chassis controller.
@@ -82,18 +80,13 @@ public class Chassis extends SubsystemBase {
   
     ChassisConfig chassisConfig;
     private SwerveModule[] modules;
-    private PigeonConfig gyro;
+    private Pigeon gyro;
 
     private DemaciaKinematics demaciaKinematics;
     private SwerveDriveKinematics wpilibKinematics;
     private DemaciaPoseEstimator demaciaPoseEstimator;
     private SwerveDrivePoseEstimator poseEstimator;
     private Field2d field;
-
-    public Tag[] tags;
-    public Quest quest;
-    public VisionFuse visionFuse;
-    public ObjectPose objectPose;
 
     private StatusSignal<Angle> gyroYawStatus;
     private Rotation2d lastGyroYaw;
@@ -106,7 +99,6 @@ public class Chassis extends SubsystemBase {
         new SwerveModule(chassisConfig.backLeftModuleConfig),
         new SwerveModule(chassisConfig.backRightModuleConfig),
         };
-        quest = new Quest();
         gyro = new Pigeon(chassisConfig.pigeonConfig);
         addStatus();
         Translation2d[] modulePositions = new Translation2d[] {
@@ -118,10 +110,9 @@ public class Chassis extends SubsystemBase {
         demaciaKinematics = new DemaciaKinematics(modulePositions);
         wpilibKinematics = new SwerveDriveKinematics(modulePositions);
         demaciaPoseEstimator = new DemaciaPoseEstimator(
-            modulePositions, 
-            getSTD(), 
-            getSTD()
-        );
+                modulePositions,
+                getSTD(),
+                getSTD());
         poseEstimator = new SwerveDrivePoseEstimator(wpilibKinematics, getGyroAngle(), getModulePositions(), new Pose2d());
 
         SimpleMatrix std = new SimpleMatrix(new double[] { 0.02, 0.02, 0 });
@@ -271,61 +262,10 @@ public class Chassis extends SubsystemBase {
         demaciaPoseEstimator.addVisionMeasurement(measurement);
     }
 
-    private void updateQuest(Pose2d pose){
-        demaciaPoseEstimator.updateVisionSTD(getSTDQuest());
-        
-        VisionMeasurment measurement = new VisionMeasurment(
-            quest.getTimestamp(),
-            pose.getTranslation(),
-            Optional.of(pose.getRotation())
-        );
-        demaciaPoseEstimator.addVisionMeasurement(measurement);
-    }
-
-    private Matrix<N3,N1> getSTDQuest(){
-        double x =0.005; 
-        double y =0.005; 
-        double theta =0.035; 
-
-        return new Matrix<N3, N1>(new SimpleMatrix(new double[] { x, y, theta }));
-    }
-
     private Matrix<N3, N1> getSTD() {
         double x = 0.05;
         double y = 0.05;
         double theta = 0.03;
-
-        ChassisSpeeds currentSpeeds = getChassisSpeedsRobotRel();
-        double speed = Utilities.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
-
-        // Vision confidence adjustment
-        if (visionFuse.getVisionConfidence() < 0.3) {
-            x += 0.3;
-            y += 0.3;
-        }
-
-        // Speed-based confidence calculation
-        if (speed > WORST_RELIABLE_SPEED) {
-            // Maximum uncertainty for high speeds
-            x += 0.02;
-            y += 0.02;
-        } else if (speed <= BEST_RELIABLE_SPEED) {
-            // Minimum uncertainty for low speeds
-            x -= 0.02;
-            y -= 0.02;
-        } else {
-            // Calculate normalized speed for the falloff range
-            double normalizedSpeed = (speed - BEST_RELIABLE_SPEED)
-                    / (WORST_RELIABLE_SPEED - BEST_RELIABLE_SPEED);
-
-            // Apply exponential falloff to calculate additional uncertainty
-            double speedConfidence = Math.exp(-3 * normalizedSpeed);
-
-            // Scale the uncertainty adjustment based on confidence
-            double adjustment = 0.02 * (1 - speedConfidence);
-            x += adjustment;
-            y += adjustment;
-        }
 
         return new Matrix<N3, N1>(new SimpleMatrix(new double[] { x, y, theta }));
     }
@@ -337,8 +277,6 @@ public class Chassis extends SubsystemBase {
 
     @Override
     public void periodic() {
-        visionFusePoseEstimation = visionFuse.getPoseEstemation();
-        questPoseEstimation = quest.getRobotPose();
         gyroAngle = getGyroAngle();
 
         OdometryObservation observation = new OdometryObservation(
@@ -346,17 +284,7 @@ public class Chassis extends SubsystemBase {
             gyroAngle, 
             getModulePositions()
         );
-        demaciaPoseEstimator.addOdomteryCalculation(observation, new Translation2d()); 
-
-        if (visionFusePoseEstimation != null) {
-            updateVision(new Pose2d(visionFusePoseEstimation.getTranslation(), gyroAngle));
-        }
-        else if(quest.isCalibrated() && questPoseEstimation != null){
-            updateQuest(questPoseEstimation);
-        }
-        else if(visionFusePoseEstimation != null){
-            quest.setQuestPose(new Pose3d(new Pose2d(visionFusePoseEstimation.getTranslation(), gyroAngle)));
-        }
+        demaciaPoseEstimator.addOdometryCalculation(observation, new Translation2d()); 
 
         field.setRobotPose(demaciaPoseEstimator.getEstimatedPose());
     }

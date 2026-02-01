@@ -65,7 +65,8 @@ public class DriveCommand extends Command {
 
     if(precisionMode) chassis.setVelocities(speeds);
     else {
-        chassis.setVelocitiesWithAccel(speeds);}
+        chassis.setVelocities(speeds);
+      }
   }
 
   // Called once the command ends or is interrupted.
