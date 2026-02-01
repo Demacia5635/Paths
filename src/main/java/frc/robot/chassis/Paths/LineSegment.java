@@ -16,7 +16,7 @@ public class LineSegment extends SegmentBase{
     public LineSegment(Pose2d startingPoint, Pose2d finishPoint, double finishVelocity){
         super(startingPoint, finishPoint);
         this.finishVelocity = finishVelocity;
-        this.startToFinishVector = finishPoint.getTranslation().minus(startToFinishVector);
+        this.startToFinishVector = finishPoint.getTranslation().minus(startingPoint.getTranslation());
     }
     
     public LineSegment(Pose2d startingPoint, Pose2d finishPoint){

@@ -127,21 +127,23 @@ public class DemaciaTrajectory {
 
     private Translation2d calculateP2OnLastArc(CenterCircleWithDirection lastCenterCircle, Translation2d lastTrajPoint){
         double distance = lastTrajPoint.minus(lastCenterCircle.centerCircle()).getNorm();
-        Rotation2d angle = new Rotation2d(Math.acos(PathsConstants.MAX_ALLOWED_RADIUS/distance));
+        LogManager.log("distance" + distance);
+        Rotation2d angle = new Rotation2d(Math.acos(distance/PathsConstants.MAX_ALLOWED_RADIUS));
+         LogManager.log("angle " + angle.getDegrees());
         Translation2d vectorToReturn = Translation2d.kZero;
         if(lastCenterCircle.isTurningRight()){
             vectorToReturn = lastCenterCircle.centerCircle().plus(new Translation2d(distance, angle));
         }
         else{
-            
             vectorToReturn = lastCenterCircle.centerCircle().minus(new Translation2d(distance, angle));
         }
+        LogManager.log("vector to return " + vectorToReturn);
         return vectorToReturn;
     }
 
-    private void createCenterCircles(){
+    private void  createCenterCircles(){
         for(int i = 0; i < trajectoryPoints.size() - 2; i++){
-           CenterCircleWithDirection center = PathsUtils.ArcUtils.calculateCenterCircle(trajectoryPoints.get(i), trajectoryPoints.get(i+1), trajectoryPoints.get(i+2));
+           CenterCircleWp   ithDirection center = PathsUtils.ArcUtils.calculateCenterCircle(trajectoryPoints.get(i), trajectoryPoints.get(i+1), trajectoryPoints.get(i+2));
             circleCenters.add(center);
         }
     }
@@ -152,23 +154,29 @@ public class DemaciaTrajectory {
         pathPoints.add(new Pose2d(firstPointOnArc, trajectoryPoints.get(1).getRotation()));
         for(int i = 0; i < circleCenters.size() -1; i++){ 
             if(circleCenters.get(i).isTurningRight() == circleCenters.get(i+1).isTurningRight()){
-                LogManager.log("print"+ " " + "trajectory point size"+ " " +trajectoryPoints.size() + " " +"circleCenters" + " " + circleCenters.size() + " " + "end");
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateExitPointOfArc(trajectoryPoints.get(i).getTranslation(), circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Same.calculateEntryPointOfArc(trajectoryPoints.get(i+1).getTranslation(), circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i+1).getRotation()));
+                LogManager.log("nir1" +new Pose2d(PathsUtils.ArcUtils.Same.calculateExitPointOfArc(trajectoryPoints.get(i).getTranslation(), circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
+                LogManager.log("nir2 " + new Pose2d(PathsUtils.ArcUtils.Same.calculateEntryPointOfArc(trajectoryPoints.get(i + 1).getTranslation(), circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i+1).getRotation()));
             }//                                                                                                                                           i+1                                    i+2                                        
             else{
+                LogManager.log(2);
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateExitPointOfArc(circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateEntryPointOfArc(circleCenters.get(i+1).centerCircle(), circleCenters.get(i+2).centerCircle(), pathPoints.get(pathPoints.size()-1).getTranslation()), trajectoryPoints.get(i).getRotation()));
+                Translation2d vaDouble = PathsUtils.ArcUtils.Different.calculateExitPointOfArc(circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle());//, trajectoryPoints.get(i).getRotation()
             }
         }
         
         Translation2d lastTrajPoint = trajectoryPoints.get(trajectoryPoints.size()-1).getTranslation();
         pathPoints.add(new Pose2d(calculateP2OnLastArc(circleCenters.get(circleCenters.size()-1), lastTrajPoint), trajectoryPoints.get(trajectoryPoints.size() - 1).getRotation()));
         pathPoints.add(trajectoryPoints.get(trajectoryPoints.size() - 1));
+        LogManager.log( "banna" +" "+ new Pose2d(calculateP2OnLastArc(circleCenters.get(circleCenters.size()-1), lastTrajPoint), trajectoryPoints.get(trajectoryPoints.size() - 1).getRotation()));
     }
 
     private void createSegments(){
         for(int i = 0; i < pathPoints.size() / 2; i++){
+            //  LogManager.log("path point" + pathPoints.get(i) + " " + "centerCircle" + circleCenters.size() + " " + "trjectory point" +trajectoryPoints + "i" + " " + i + "                      ");
+
             segments.add(new LineSegment(pathPoints.get(i), pathPoints.get(i+1)));
             segments.add(new ArcSegment(pathPoints.get(i+1), pathPoints.get(i+2), circleCenters.get(i).centerCircle()));
         }
