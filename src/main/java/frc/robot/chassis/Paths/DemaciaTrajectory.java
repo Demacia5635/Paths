@@ -143,7 +143,7 @@ public class DemaciaTrajectory {
 
     private void  createCenterCircles(){
         for(int i = 0; i < trajectoryPoints.size() - 2; i++){
-           CenterCircleWp   ithDirection center = PathsUtils.ArcUtils.calculateCenterCircle(trajectoryPoints.get(i), trajectoryPoints.get(i+1), trajectoryPoints.get(i+2));
+           CenterCircleWithDirection center = PathsUtils.ArcUtils.calculateCenterCircle(trajectoryPoints.get(i), trajectoryPoints.get(i+1), trajectoryPoints.get(i+2));
             circleCenters.add(center);
         }
     }
@@ -163,7 +163,6 @@ public class DemaciaTrajectory {
                 LogManager.log(2);
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateExitPointOfArc(circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateEntryPointOfArc(circleCenters.get(i+1).centerCircle(), circleCenters.get(i+2).centerCircle(), pathPoints.get(pathPoints.size()-1).getTranslation()), trajectoryPoints.get(i).getRotation()));
-                Translation2d vaDouble = PathsUtils.ArcUtils.Different.calculateExitPointOfArc(circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle());//, trajectoryPoints.get(i).getRotation()
             }
         }
         
