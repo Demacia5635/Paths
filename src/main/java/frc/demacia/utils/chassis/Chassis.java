@@ -34,9 +34,6 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.demacia.utils.Utilities;
 import frc.demacia.utils.Sensors.PigeonConfig;
@@ -130,35 +127,6 @@ public class Chassis extends SubsystemBase {
         SimpleMatrix std = new SimpleMatrix(new double[] { 0.02, 0.02, 0 });
         poseEstimator.setVisionMeasurementStdDevs(new Matrix<>(std));
         field = new Field2d();
-
-        tags = chassisConfig.tags;
-        visionFuse = new VisionFuse(tags);
-        if (chassisConfig.objectCamera != null) {
-            objectPose = new ObjectPose(
-                chassisConfig.objectCamera, 
-                this::getGyroAngle, 
-                this::getPose
-            );
-       }
-
-        SmartDashboard.putData("reset gyro", new InstantCommand(() -> setYaw(Rotation2d.kZero)).ignoringDisable(true));
-        SmartDashboard.putData("reset gyro 180", new InstantCommand(() -> setYaw(Rotation2d.kPi)).ignoringDisable(true));
-        SmartDashboard.putData("set gyro to 3D tag", new InstantCommand(() -> setYaw(
-                Rotation2d.fromDegrees(visionFuse.get3DAngle()))).ignoringDisable(true));
-        SmartDashboard.putData("change camera dimension", new Command() {
-            private static boolean is3d = false;
-            
-            public void initialize() {
-                visionFuse.set3D(!is3d);
-                is3d = !is3d;
-            };
-            
-            public boolean isFinished() {return true;}
-            public boolean runsWhenDisabled() {return true;};
-        });
-        SmartDashboard.putData("field", field);
-        SmartDashboard.putData("Chassis/set coast", new InstantCommand(() -> setNeutralMode(false)).ignoringDisable(true));
-        SmartDashboard.putData("Chassis/set brake", new InstantCommand(() -> setNeutralMode(true)).ignoringDisable(true));
     }
 
     /**

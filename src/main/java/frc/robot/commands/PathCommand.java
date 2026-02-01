@@ -15,9 +15,9 @@ import frc.robot.chassis.Paths.DemaciaTrajectory;
 public class PathCommand extends Command {
   /** Creates a new tstingPathCommand. */
 
-  Chassis chassis;
-  DemaciaTrajectory demaciaTrajectory;
-  public static ArrayList<Pose2d> pointList = new ArrayList<>();  
+   Chassis chassis;
+   DemaciaTrajectory demaciaTrajectory;
+  ArrayList<Pose2d> pointList = new ArrayList<>();  
 
   public PathCommand(Chassis chassis) {
     this.chassis = chassis;
