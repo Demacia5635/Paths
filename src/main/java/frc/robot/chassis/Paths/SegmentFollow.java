@@ -4,10 +4,13 @@
 
 package frc.robot.chassis.Paths;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.demacia.utils.log.LogManager;
+
 import static frc.robot.chassis.Paths.PathsConstants.*;
 
 /** Add your docs here. */
@@ -21,6 +24,7 @@ public class SegmentFollow {
     private SegmentFollow(){
         this.driveTrapezoid = new TrapezoidExpo(MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCEL, MAX_JERK);
         this.rotationTrapezoid = new Trapezoid(MAX_OMEGA_ACCEL, MAX_OMEGA_VELOCITY);
+        // this.rotationPid = new PIDController(1, 0, 0);
 
     }
     public static SegmentFollow getInstance(){
@@ -41,6 +45,7 @@ public class SegmentFollow {
             double velocity = driveTrapezoid.calculate(posToFinish.getNorm(), currentVelocityVector.getNorm(), finishVelocity);
             Rotation2d velocityHeadingError = segment.getStartToFinishVector().getAngle().minus(posToFinish.getAngle());
             Rotation2d fixedVelocityHeading = posToFinish.getAngle().minus(velocityHeadingError);
+            LogManager.log("fixed velocity heading " + fixedVelocityHeading + " velocity heading error " + velocityHeadingError);
             
             calculatedVelocity = new Translation2d(velocity, fixedVelocityHeading);
         }
@@ -57,7 +62,9 @@ public class SegmentFollow {
         }
 
         double angleError = currentSegment.getFinishPoint().getRotation().minus(chassisPose.getRotation()).getRadians();
+        // double angleError = chassisPose.getRotation().minus(currentSegment.getFinishPoint().getRotation()).getRadians();
         double omega = rotationTrapezoid.calculate(angleError, currentVelocity.omegaRadiansPerSecond, 0);
+        LogManager.log("wanted omega " + omega + " angle error " + angleError + " current omega velocity " + currentVelocity.omegaRadiansPerSecond);
         return new ChassisSpeeds(calculatedVelocity.getX(), calculatedVelocity.getY(), omega);
 
 
