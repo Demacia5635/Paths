@@ -173,7 +173,7 @@ public class DemaciaTrajectory {
     }
 
     private void createSegments(){
-        for(int i = 0; i < pathPoints.size() / 2; i++){
+        for(int i = 0; i < (pathPoints.size() - 2 /*-2 for the first and last points*/) / 2; i++){
             //  LogManager.log("path point" + pathPoints.get(i) + " " + "centerCircle" + circleCenters.size() + " " + "trjectory point" +trajectoryPoints + "i" + " " + i + "                      ");
             LogManager.log(circleCenters.size() + " " + pathPoints.size() + " " + trajectoryPoints.size());
             segments.add(new LineSegment(pathPoints.get(i), pathPoints.get(i+1)));
