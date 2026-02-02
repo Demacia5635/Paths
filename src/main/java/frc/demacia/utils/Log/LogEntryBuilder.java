@@ -1,4 +1,4 @@
-package frc.demacia.utils.Log;
+package frc.demacia.utils.log;
 
 import java.util.function.Supplier;
 

@@ -1,8 +1,8 @@
-package frc.demacia.utils.Mechanisms;
+package frc.demacia.utils.mechanisms;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.demacia.utils.Motors.MotorInterface;
-import frc.demacia.utils.Motors.MotorInterface.ControlMode;;
+import frc.demacia.utils.motors.MotorInterface;
+import frc.demacia.utils.motors.MotorInterface.ControlMode;;
 
 /**
  * A command that continuously applies the current state values of a StateBaseMechanism.

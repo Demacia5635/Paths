@@ -1,12 +1,12 @@
-package frc.robot.ChassisConstants;
+package frc.robot.chassisConstants;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.demacia.utils.chassis.ChassisConfig;
 import frc.demacia.utils.chassis.SwerveModuleConfig;
-import frc.demacia.utils.Motors.TalonFXConfig;
-import frc.demacia.utils.Sensors.CancoderConfig;
-import frc.demacia.utils.Sensors.PigeonConfig;
-import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.motors.TalonFXConfig;
+import frc.demacia.utils.sensors.CancoderConfig;
+import frc.demacia.utils.sensors.PigeonConfig;
+import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
 
 public class Robot1ChassisConstants {
     
@@ -140,17 +140,17 @@ public class Robot1ChassisConstants {
 
     public static final PigeonConfig PIGEON_CONFIG = new PigeonConfig(GYRO_ID, GYRO_CAN_BUS, NAME + " pigeon");
 
-    public static final ChassisConfig CHASSIS_CONFIG = new ChassisConfig(
-    NAME,
-    FRONT_LEFT.SWERVE_MODULE_CONFIG,
-    FRONT_RIGHT.SWERVE_MODULE_CONFIG,
-    BACK_LEFT.SWERVE_MODULE_CONFIG,
-    BACK_RIGHT.SWERVE_MODULE_CONFIG,
-    PIGEON_CONFIG,
-    FRONT_LEFT.POSITION,
-    FRONT_RIGHT.POSITION,
-    BACK_LEFT.POSITION,
-    BACK_RIGHT.POSITION);
+    // public static final ChassisConfig CHASSIS_CONFIG = new ChassisConfig(
+    // NAME,
+    // FRONT_LEFT.SWERVE_MODULE_CONFIG,
+    // FRONT_RIGHT.SWERVE_MODULE_CONFIG,
+    // BACK_LEFT.SWERVE_MODULE_CONFIG,
+    // BACK_RIGHT.SWERVE_MODULE_CONFIG,
+    // PIGEON_CONFIG,
+    // FRONT_LEFT.POSITION,
+    // FRONT_RIGHT.POSITION,
+    // BACK_LEFT.POSITION,
+    // BACK_RIGHT.POSITION);
 
     public static final Translation2d[] MODOLE_POSE={
         FRONT_LEFT.POSITION,

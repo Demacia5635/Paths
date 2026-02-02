@@ -1,6 +1,6 @@
-package frc.demacia.utils.Sensors;
+package frc.demacia.utils.sensors;
 
-import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
 
 /**
  * Configuration for CTRE Pigeon2 IMU.

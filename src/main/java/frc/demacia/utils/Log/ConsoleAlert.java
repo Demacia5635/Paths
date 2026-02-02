@@ -1,4 +1,4 @@
-package frc.demacia.utils.Log;
+package frc.demacia.utils.log;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;

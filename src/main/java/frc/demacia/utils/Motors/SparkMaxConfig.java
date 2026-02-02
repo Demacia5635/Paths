@@ -1,4 +1,4 @@
-package frc.demacia.utils.Motors;
+package frc.demacia.utils.motors;
 
 /** * Configuration class specifically for REV Spark Max motors.
  * Extends the base configuration to support Spark-specific parameters.

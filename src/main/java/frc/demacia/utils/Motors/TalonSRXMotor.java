@@ -1,4 +1,4 @@
-package frc.demacia.utils.Motors;
+package frc.demacia.utils.motors;
 
 import java.util.function.Supplier;
 
@@ -9,8 +9,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
-import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
 
 /**
  * Wrapper class for the CTRE Talon SRX motor controller using Phoenix 5.

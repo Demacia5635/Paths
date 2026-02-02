@@ -16,7 +16,6 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -40,9 +39,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.demacia.odometry.DemaciaPoseEstimator;
 import frc.demacia.odometry.DemaciaPoseEstimator.OdometryObservation;
 import frc.demacia.odometry.DemaciaPoseEstimator.VisionMeasurment;
-import frc.demacia.utils.Utilities;
-import frc.demacia.utils.Sensors.PigeonConfig;
-import frc.demacia.utils.Sensors.Pigeon;
+import frc.demacia.utils.sensors.Pigeon;
 
 /**
  * Main swerve drive chassis controller.
@@ -92,30 +89,27 @@ public class Chassis extends SubsystemBase {
 
     private StatusSignal<Angle> gyroYawStatus;
     private Rotation2d lastGyroYaw;
-
+    
     public Chassis(ChassisConfig chassisConfig) {
         this.chassisConfig = chassisConfig;
-        modules = new SwerveModule[] {
-        new SwerveModule(chassisConfig.frontLeftModuleConfig),
-        new SwerveModule(chassisConfig.frontRightModuleConfig),
-        new SwerveModule(chassisConfig.backLeftModuleConfig),
-        new SwerveModule(chassisConfig.backRightModuleConfig),
-        };
+
+        modules = new SwerveModule[4];
+        Translation2d[] modulePositions = new Translation2d[4];
+        for (int i = 0; i < 4; i++) {
+            modules[i] = new SwerveModule(chassisConfig.swerveModuleConfig[i]);
+            modulePositions[i] = chassisConfig.swerveModuleConfig[i].position;
+        }
+
         gyro = new Pigeon(chassisConfig.pigeonConfig);
         addStatus();
-        Translation2d[] modulePositions = new Translation2d[] {
-            chassisConfig.frontLeftPosition,
-            chassisConfig.frontRightPosition,
-            chassisConfig.backLeftPosition,
-            chassisConfig.backRightPosition
-        };
         demaciaKinematics = new DemaciaKinematics(modulePositions);
         wpilibKinematics = new SwerveDriveKinematics(modulePositions);
         demaciaPoseEstimator = new DemaciaPoseEstimator(
                 modulePositions,
-                getSTD(), 
+                getSTD(),
                 getSTD());
-        poseEstimator = new SwerveDrivePoseEstimator(wpilibKinematics, getGyroAngle(), getModulePositions(), new Pose2d());
+        poseEstimator = new SwerveDrivePoseEstimator(wpilibKinematics, getGyroAngle(), getModulePositions(),
+                new Pose2d());
 
         SimpleMatrix std = new SimpleMatrix(new double[] { 0.02, 0.02, 0 });
         poseEstimator.setVisionMeasurementStdDevs(new Matrix<>(std));
