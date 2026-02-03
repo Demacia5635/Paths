@@ -1,4 +1,4 @@
-package frc.demacia.utils.Mechanisms;
+package frc.demacia.utils.mechanisms;
 
 import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj2.command.Command;

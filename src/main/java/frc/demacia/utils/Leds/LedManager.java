@@ -1,4 +1,4 @@
-package frc.demacia.utils.Leds;
+package frc.demacia.utils.leds;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import static frc.demacia.utils.Leds.LedConstants.*;
+import static frc.demacia.utils.leds.LedConstants.*;
 
 import java.util.Arrays;
 

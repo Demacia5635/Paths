@@ -7,8 +7,8 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import frc.demacia.utils.Motors.BaseMotorConfig.Canbus;
-import frc.demacia.utils.Motors.TalonFXConfig;
+import frc.demacia.utils.motors.BaseMotorConfig.Canbus;
+import frc.demacia.utils.motors.TalonFXConfig;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean

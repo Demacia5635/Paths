@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.demacia.utils.chassis.Chassis;
-import frc.robot.chassis.Paths.DemaciaTrajectory;
+import frc.robot.chassis.paths.DemaciaTrajectory;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class PathCommand extends Command {
@@ -22,10 +22,10 @@ public class PathCommand extends Command {
   public PathCommand(Chassis chassis) {
     this.chassis = chassis;
     pointList.clear();
-    pointList.add(new Pose2d(chassis.getPose().getX(), chassis.getPose().getY(), chassis.getGyroAngle()));
-    pointList.add(new Pose2d(3, 2, new Rotation2d(Math.toRadians(0))));
+    pointList.add(new Pose2d(0, 0, new Rotation2d(Math.toRadians(0))));
+    pointList.add(new Pose2d(0.5, 0, new Rotation2d(Math.toRadians(0))));
     pointList.add(new Pose2d(4.4, 3.55, new Rotation2d(Math.toRadians(90))));
-    pointList.add(new Pose2d(1.45, 1, new Rotation2d(Math.toRadians(60))));
+    // pointList.add(new Pose2d(1.45, 1, new Rotation2d(Math.toRadians(60))));
     demaciaTrajectory = new DemaciaTrajectory(pointList);
     addRequirements(chassis);
     // Use addRequirements() here to declare subsystem dependencies.

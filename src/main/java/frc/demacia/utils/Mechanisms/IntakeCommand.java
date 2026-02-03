@@ -1,9 +1,9 @@
-package frc.demacia.utils.Mechanisms;
+package frc.demacia.utils.mechanisms;
 
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.demacia.utils.Motors.MotorInterface;
+import frc.demacia.utils.motors.MotorInterface;
 
 /**
  * A general-purpose command for intake mechanisms.

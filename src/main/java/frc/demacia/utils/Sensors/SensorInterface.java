@@ -1,4 +1,4 @@
-package frc.demacia.utils.Sensors;
+package frc.demacia.utils.sensors;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;

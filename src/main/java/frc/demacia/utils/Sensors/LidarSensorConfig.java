@@ -1,4 +1,4 @@
-package frc.demacia.utils.Sensors;
+package frc.demacia.utils.sensors;
 
 public class LidarSensorConfig extends AnalogSensorConfig<LidarSensorConfig> {
     public LidarSensorConfig(String name, int port) {

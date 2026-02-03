@@ -4,13 +4,17 @@
 
 package frc.robot;
 
+import java.util.ArrayList;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.demacia.utils.chassis.Chassis;
 import frc.demacia.utils.chassis.DriveCommand;
-import frc.demacia.utils.Controller.CommandController;
-import frc.demacia.utils.Controller.CommandController.ControllerType;
-import frc.robot.ChassisConstants.MK5nChassisConstants;
-import frc.robot.commands.PathCommand;
+import frc.demacia.utils.controller.CommandController;
+import frc.demacia.utils.controller.CommandController.ControllerType;
+import frc.robot.chassis.paths.FollowTrajectory;
+import frc.robot.chassisConstants.MK4iChassisConstants;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -29,19 +33,24 @@ public class RobotContainer {
   private final Chassis chassis;
   private final frc.demacia.utils.chassis.DriveCommand driveCommand;
   public static CommandController CommandController;
-  public static PathCommand pathCommand;
+  private static ArrayList<Pose2d> pointList;
 
   public RobotContainer() {
-    CommandController = new CommandController(0, ControllerType.kXbox);
-    chassis = new Chassis(MK5nChassisConstants.CHASSIS_CONFIG);
+    CommandController = new CommandController(0, ControllerType.kPS5);
+    chassis = new Chassis(MK4iChassisConstants.CHASSIS_CONFIG);
     driveCommand = new DriveCommand(chassis, CommandController);
-    pathCommand = new PathCommand(chassis);
+    pointList = new ArrayList<>();
+    pointList.add(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+    // pointList.add(new Pose2d(2, 0, Rotation2d.fromDegrees(0)));
+    pointList.add(new Pose2d(0.5, -1, Rotation2d.fromDegrees(90)));
+    // pointList.add(new Pose2d(1, 0, Rotation2d.fromDegrees(0)));
+    // pointList.add(new Pose2d(1.45, 1, new Rotation2d(Math.toRadians(60))));
     configureBindings();
   }
 
 
   private void configureBindings() {
-    CommandController.leftButton().onTrue(pathCommand);
+    CommandController.leftButton().onTrue(new FollowTrajectory(pointList, (s) -> chassis.setVelocities(s), () -> chassis.getPose(), () -> chassis.getChassisSpeedsFieldRel()));
     chassis.setDefaultCommand(driveCommand);
   }
 
