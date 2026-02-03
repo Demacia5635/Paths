@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.chassis.Paths;
+package frc.robot.chassis.paths;
 
 import java.util.ArrayList;
 
@@ -33,7 +33,7 @@ public class DemaciaTrajectory {
         this.segments = new ArrayList<SegmentBase>();
         // this.arcCount = trajectoryPoints.size() - 2;
         this.isFinishedTrajectory = false;
-
+        LogManager.log(trajectoryPoints.size());
         if(trajectoryPoints.size() == 2){
             createSimplePath(trajectoryPoints.get(0), trajectoryPoints.get(1));
         }else if(trajectoryPoints.size() < 2){
@@ -47,29 +47,24 @@ public class DemaciaTrajectory {
 
         if(!segments.isEmpty()){
             currentSegmentIndex = 0;
-            currentSegment = segments.get(0);
+            currentSegment = segments.get(currentSegmentIndex);
         }else{
             isFinishedTrajectory = true;
-            LogManager.log("field to biuled path");
+            LogManager.log("field to build path");
         }
-        
-
-        currentSegmentIndex = 0;
-        currentSegment = segments.get(currentSegmentIndex);
     }
 
     private boolean isFinishedSegment(ChassisSpeeds currentSpeeds, Pose2d currentPose, SegmentBase currentSegment){
         double distanceFromFinishPoint = currentSegment.getFinishPoint().getTranslation().getDistance(currentPose.getTranslation());
         Rotation2d currentVelocityHeading = new Translation2d(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond).getAngle();
 
-        if(currentSegment instanceof LineSegment){
+        if(PathsUtils.isLineSegment(currentSegment)){
 
-            
             boolean isVelocityHeadingTowardesFinishPoint = PathsUtils.isVelocityHeadingInRange(currentVelocityHeading, ((LineSegment)currentSegment).getStartToFinishVector().getAngle());
+            // LogManager.log(currentSegmentIndex + " " + segments.size());
             if(currentSegmentIndex == segments.size() -1){
                 return (distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_FINAL_POINT);
             }
-            
             return (distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH) || ((distanceFromFinishPoint < (PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH * 3)) && isVelocityHeadingTowardesFinishPoint);
             
             
@@ -101,6 +96,7 @@ public class DemaciaTrajectory {
         double finishVelocity = currentSegmentIndex == segments.size() - 1 ? 0 : PathsConstants.MAX_LINEAR_VELOCITY;
         ChassisSpeeds speeds = SegmentFollow.getInstance().calculateSpeeds(segments.get(currentSegmentIndex), currentSpeeds, currentPose, finishVelocity);
         if(isFinishedSegment(currentSpeeds, currentPose, currentSegment)){
+            LogManager.log("Finished Segment");
             if(currentSegmentIndex == segments.size() - 1) {
                 isFinishedTrajectory = true;
             }else{
@@ -109,6 +105,7 @@ public class DemaciaTrajectory {
                 currentSegment = segments.get(currentSegmentIndex);
             }
         }
+        // LogManager.log("" + currentSegmentIndex + isFinishedSegment(currentSpeeds, currentPose, currentSegment));
 
         return speeds;
     }
