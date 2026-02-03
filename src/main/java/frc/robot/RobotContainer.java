@@ -13,8 +13,8 @@ import frc.demacia.utils.chassis.Chassis;
 import frc.demacia.utils.chassis.DriveCommand;
 import frc.demacia.utils.controller.CommandController;
 import frc.demacia.utils.controller.CommandController.ControllerType;
-import frc.robot.chassis.paths.FollowTrajectory;
 import frc.robot.chassisConstants.MK4iChassisConstants;
+import frc.robot.chassis.Paths.FollowTrajectory;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -41,8 +41,9 @@ public class RobotContainer {
     driveCommand = new DriveCommand(chassis, CommandController);
     pointList = new ArrayList<>();
     pointList.add(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
-    pointList.add(new Pose2d(3.10, -1, Rotation2d.fromDegrees(90)));
-    pointList.add(new Pose2d(1.45, 120, Rotation2d.fromDegrees(0)));
+    // pointList.add(new Pose2d(2, 0, Rotation2d.fromDegrees(0)));
+    pointList.add(new Pose2d(0.5, -1, Rotation2d.fromDegrees(90)));
+    // pointList.add(new Pose2d(1, 0, Rotation2d.fromDegrees(0)));
     // pointList.add(new Pose2d(1.45, 1, new Rotation2d(Math.toRadians(60))));
     configureBindings();
   }

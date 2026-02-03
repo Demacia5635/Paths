@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.chassis.paths;
+package frc.robot.chassis.Paths;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -37,7 +37,7 @@ public class FollowTrajectory extends Command {
 
   @Override
   public void execute() {
-    LogManager.log("currentPose: " + currentPose + " currentSpeeds: " + currentSpeeds);
+    // LogManager.log(trajectory.calculateSpeeds(currentSpeeds.get(), currentPose.get()));
     setSpeeds.accept(trajectory.calculateSpeeds(currentSpeeds.get(), currentPose.get()));
     
   }
@@ -45,7 +45,6 @@ public class FollowTrajectory extends Command {
   @Override
   public void end(boolean interrupted) {
     setSpeeds.accept(new ChassisSpeeds());
-    LogManager.log("FollowTrajectory Ended");
   }
 
   @Override
