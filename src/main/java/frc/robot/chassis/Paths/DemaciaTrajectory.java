@@ -36,6 +36,7 @@ public class DemaciaTrajectory {
 
         if(trajectoryPoints.size() == 2){
             createSimplePath(trajectoryPoints.get(0), trajectoryPoints.get(1));
+            isFinishedTrajectory = true;
         }else if(trajectoryPoints.size() < 2){
             isFinishedTrajectory = true;
             LogManager.log("not enafe point");
@@ -83,7 +84,7 @@ public class DemaciaTrajectory {
 
 
             
-            
+
             return (distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH) || ((distanceFromFinishPoint < (PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH * 3)) && isHeadingTowardesNextSegment);
         }
     }
@@ -96,18 +97,14 @@ public class DemaciaTrajectory {
     }
 
     public ChassisSpeeds calculateSpeeds(ChassisSpeeds currentSpeeds, Pose2d currentPose) {
-        // LogManager.log("currentSpeeds: " + currentSpeeds);
-        // LogManager.log("currentPose: " + currentPose);
+        
         double finishVelocity = currentSegmentIndex == segments.size() - 1 ? 0 : PathsConstants.MAX_LINEAR_VELOCITY;
         ChassisSpeeds speeds = SegmentFollow.getInstance().calculateSpeeds(segments.get(currentSegmentIndex), currentSpeeds, currentPose, finishVelocity);
+
         if(isFinishedSegment(currentSpeeds, currentPose, currentSegment)){
-            if(currentSegmentIndex == segments.size() - 1) {
-                isFinishedTrajectory = true;
-            }else{
-                currentSegmentIndex++;
-                LogManager.log(currentSegmentIndex + " " + segments.size());
-                currentSegment = segments.get(currentSegmentIndex);
-            }
+            if(currentSegmentIndex == segments.size() - 1) isFinishedTrajectory = true;
+            currentSegmentIndex++;
+            currentSegment = segments.get(currentSegmentIndex);
         }
 
         return speeds;

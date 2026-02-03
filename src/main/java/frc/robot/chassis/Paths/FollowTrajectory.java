@@ -8,11 +8,9 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.demacia.utils.log.LogManager;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class FollowTrajectory extends Command {
@@ -31,13 +29,13 @@ public class FollowTrajectory extends Command {
       Supplier<ChassisSpeeds> currentSpeeds, DemaciaTrajectory trajectory) {
     this.currentPose = chassisPose;
     this.setSpeeds = setSpeeds;
-    this.currentSpeeds = currentSpeeds;
+    this.currentPose = chassisPose;
     this.trajectory = trajectory;
   }
 
   @Override
   public void execute() {
-    // LogManager.log(trajectory.calculateSpeeds(currentSpeeds.get(), currentPose.get()));
+
     setSpeeds.accept(trajectory.calculateSpeeds(currentSpeeds.get(), currentPose.get()));
     
   }
