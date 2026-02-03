@@ -178,6 +178,7 @@ public class DemaciaTrajectory {
 
             segments.add(new LineSegment(pathPoints.get(i), pathPoints.get(i+1)));
             segments.add(new ArcSegment(pathPoints.get(i+1), pathPoints.get(i+2), circleCenters.get(i).centerCircle()));
+            LogManager.log("ArcSegment " +new ArcSegment(pathPoints.get(i+1), pathPoints.get(i+2), circleCenters.get(i).centerCircle()));
         }
         segments.add(new LineSegment(pathPoints.get(pathPoints.size() - 2), pathPoints.get(pathPoints.size() - 1)));
     }
