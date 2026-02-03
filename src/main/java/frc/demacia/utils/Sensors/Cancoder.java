@@ -9,8 +9,8 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import frc.demacia.utils.log.LogManager;
-import frc.demacia.utils.log.LogEntryBuilder.LogLevel;;
+import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 
 /**
  * CTRE CANcoder absolute magnetic encoder wrapper.

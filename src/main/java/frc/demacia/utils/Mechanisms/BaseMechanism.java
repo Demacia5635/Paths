@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.demacia.utils.LookUpTable;
 import frc.demacia.utils.motors.MotorInterface;
 import frc.demacia.utils.sensors.SensorInterface;
-import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.Log.LogManager;
 
 /**
  * A base class for robot mechanisms (subsystems) that manage a collection of motors and sensors.

@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.demacia.utils.LookUpTable;
 import frc.demacia.utils.motors.MotorInterface;
 import frc.demacia.utils.sensors.SensorInterface;
-import frc.demacia.utils.log.LogManager;
-import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
+import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 
 /**
  * An extension of BaseMechanism that introduces the concept of States.

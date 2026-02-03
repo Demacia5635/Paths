@@ -1,4 +1,4 @@
-package frc.demacia.utils.log;
+package frc.demacia.utils.Log;
 
 public class ConsoleConstants {
   public static double CONSOLE_MESSEGE_TIME = 0;

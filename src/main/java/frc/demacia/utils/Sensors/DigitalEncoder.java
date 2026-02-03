@@ -2,8 +2,8 @@ package frc.demacia.utils.sensors;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import frc.demacia.utils.log.LogManager;
-import frc.demacia.utils.log.LogEntryBuilder.LogLevel;
+import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 
 /**

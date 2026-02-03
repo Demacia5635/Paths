@@ -1,4 +1,4 @@
-package frc.demacia.utils.log;
+package frc.demacia.utils.Log;
 
 import java.io.DataInputStream;
 import java.io.EOFException;

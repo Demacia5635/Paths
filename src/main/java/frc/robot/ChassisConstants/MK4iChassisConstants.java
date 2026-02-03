@@ -1,5 +1,4 @@
-package frc.robot.chassisConstants;
-
+package frc.robot.ChassisConstants;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.demacia.utils.chassis.ChassisConfig;
 import frc.demacia.utils.chassis.SwerveModuleConfig;

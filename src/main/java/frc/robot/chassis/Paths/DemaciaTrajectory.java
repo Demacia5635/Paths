@@ -10,7 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.Log.LogManager;
 
 /** Add your docs here. */
 public class DemaciaTrajectory {

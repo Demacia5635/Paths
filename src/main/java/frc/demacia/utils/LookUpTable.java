@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.Log.LogManager;
 
 /**
  * Linear interpolation lookup table.

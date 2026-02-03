@@ -1,8 +1,8 @@
 package frc.demacia.utils.sensors;
 
 import edu.wpi.first.wpilibj.Servo;
-import frc.demacia.utils.log.LogManager;
-import frc.demacia.utils.log.LogEntryBuilder.LogLevel;;
+import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.Log.LogEntryBuilder.LogLevel;
 
 public class ServoMotor extends Servo {
 

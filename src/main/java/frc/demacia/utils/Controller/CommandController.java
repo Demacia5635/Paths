@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.demacia.utils.Utilities;
-import frc.demacia.utils.log.LogManager;
+import frc.demacia.utils.Log.LogManager;
 
 /**
  * controller wrapper supporting Xbox and PS5 controllers.
