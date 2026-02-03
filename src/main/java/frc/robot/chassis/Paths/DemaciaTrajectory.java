@@ -178,8 +178,6 @@ public class DemaciaTrajectory {
             LogManager.log(circleCenters.size() + " " + pathPoints.size() + " " + trajectoryPoints.size());
             segments.add(new LineSegment(pathPoints.get(i), pathPoints.get(i+1)));
             segments.add(new ArcSegment(pathPoints.get(i+1), pathPoints.get(i+2), circleCenters.get(i).centerCircle()));
-            LogManager.log("ArcSegment " +new ArcSegment(pathPoints.get(i+1), pathPoints.get(i+2), circleCenters.get(i).centerCircle()));
-            LogManager.log("Path point" + pathPoints.get(i+1) + " centerCircle" + circleCenters.get(i).centerCircle() + " Path point 2 " + pathPoints.get(i+2));
         }
         segments.add(new LineSegment(pathPoints.get(pathPoints.size() - 2), pathPoints.get(pathPoints.size() - 1)));
     }
