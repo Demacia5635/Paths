@@ -1,4 +1,4 @@
-package frc.demacia.utils.controller;  
+package frc.demacia.utils.controller;
 
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 
