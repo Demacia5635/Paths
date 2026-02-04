@@ -43,7 +43,7 @@ public class RobotContainer {
     pointList = new ArrayList<>();
     pointList.add(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
     pointList.add(new Pose2d(1.45, 1, new Rotation2d(Math.toRadians(60))));
-    // pointList.add(new Pose2d(4.4, 3.55, Rotation2d.fromDegrees(90)));
+    pointList.add(new Pose2d(4.4, 3.55, Rotation2d.fromDegrees(90)));
     configureBindings();
   }
 
