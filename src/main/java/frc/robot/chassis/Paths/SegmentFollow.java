@@ -58,7 +58,7 @@ public class SegmentFollow {
             else velocity = driveTrapezoid.calculate(chassisPos.minus(segment.getFinishPoint().getTranslation()).getNorm(), currentVelocityVector.getNorm(), finishVelocity);
             calculatedVelocity = new Translation2d(velocity, fixedVelocityHeadingWithRatio);
         }
-        LogManager.log("calculatedVelocity " + calculatedVelocity);
+        // LogManager.log("calculatedVelocity " + calculatedVelocity);
         // if (calculatedVelocity.getNorm() > 2) {
         //     calculatedVelocity = new Translation2d(2, calculatedVelocity.getAngle());
         // }
