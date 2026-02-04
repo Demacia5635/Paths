@@ -11,6 +11,8 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.demacia.utils.chassis.Chassis;
+import frc.robot.RobotContainer;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class FollowTrajectory extends Command {
@@ -25,11 +27,11 @@ public class FollowTrajectory extends Command {
     this(setSpeeds, chassisPose, currentSpeeds, new DemaciaTrajectory(trajectoryPoints));
   }
 
-  public FollowTrajectory(Consumer<ChassisSpeeds> setSpeeds, Supplier<Pose2d> chassisPose,
-      Supplier<ChassisSpeeds> currentSpeeds, DemaciaTrajectory trajectory) {
+  public FollowTrajectory(Consumer<ChassisSpeeds> setSpeeds, Supplier<Pose2d> chassisPose, Supplier<ChassisSpeeds> currentSpeeds, DemaciaTrajectory trajectory) {
+    this.currentSpeeds = currentSpeeds;
     this.currentPose = chassisPose;
     this.setSpeeds = setSpeeds;
-    this.currentPose = chassisPose;
+    this.currentPose = chassisPose; 
     this.trajectory = trajectory;
   }
 
