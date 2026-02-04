@@ -126,6 +126,7 @@ public class Chassis extends SubsystemBase {
         SmartDashboard.putData("reset Robot Pose", new InstantCommand(() -> {
             resetPose(new Pose2d());
         })  );
+        SmartDashboard.putData("Field", field);
     }
 
     /**

@@ -4,8 +4,11 @@
 
 package frc.robot.chassis.Paths;
 
+import static frc.robot.chassis.Paths.PathsConstants.MAX_ALLOWED_RADIUS;
+
 import java.util.ArrayList;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -44,6 +47,7 @@ public class DemaciaTrajectory {
             createCenterCircles();
             createPathPoints(); 
             createSegments();
+            LogManager.log("path point: " + pathPoints);
         }
 
         if(!segments.isEmpty()){
@@ -51,7 +55,7 @@ public class DemaciaTrajectory {
             currentSegment = segments.get(0);
         }else{
             isFinishedTrajectory = true;
-            LogManager.log("field to biuled path");
+            LogManager.log("field to build path");
         }
         
 
@@ -99,12 +103,14 @@ public class DemaciaTrajectory {
     public ChassisSpeeds calculateSpeeds(ChassisSpeeds currentSpeeds, Pose2d currentPose) {
         
         double finishVelocity = currentSegmentIndex == segments.size() - 1 ? 0 : PathsConstants.MAX_LINEAR_VELOCITY;
+        // LogManager.log("Current Segment Index: " + currentSegmentIndex);
         ChassisSpeeds speeds = SegmentFollow.getInstance().calculateSpeeds(segments.get(currentSegmentIndex), currentSpeeds, currentPose, finishVelocity);
 
         if(isFinishedSegment(currentSpeeds, currentPose, currentSegment)){
             if(currentSegmentIndex == segments.size() - 1) isFinishedTrajectory = true;
             currentSegmentIndex++;
             currentSegment = segments.get(currentSegmentIndex);
+            LogManager.log("Current Segment Index: " + currentSegmentIndex + " Current Segment " + currentSegment + " Current Pose " + currentPose);
         }
 
         return speeds;
@@ -121,19 +127,21 @@ public class DemaciaTrajectory {
         else{
             toP1Angle = p1ToCenter.getAngle().minus(new Rotation2d(Math.asin(radius / p1ToCenter.getNorm())));
         }
-        double toP1Norm = Math.sqrt((radius * radius) + (p1ToCenter.getNorm() * p1ToCenter.getNorm()));
-        return new Translation2d(toP1Norm, toP1Angle);
+        
+        double toP1Norm = Math.sqrt((p1ToCenter.getNorm() * p1ToCenter.getNorm()-(radius * radius)));
+        return startingPoint.plus(new Translation2d(toP1Norm, toP1Angle));
     }
 
     private Translation2d calculateP2OnLastArc(CenterCircleWithDirection lastCenterCircle, Translation2d lastTrajPoint){
-        double distance = lastTrajPoint.minus(lastCenterCircle.centerCircle()).getNorm();
-        Rotation2d angle = new Rotation2d(Math.acos(distance/PathsConstants.MAX_ALLOWED_RADIUS));
+        Translation2d centerToPoint = lastTrajPoint.minus(lastCenterCircle.centerCircle());
+        double distance = centerToPoint.getNorm();
+        Rotation2d angle = new Rotation2d(Math.acos(Math.min(MAX_ALLOWED_RADIUS, distance)/distance));
         Translation2d vectorToReturn = Translation2d.kZero;
         if(lastCenterCircle.isTurningRight()){
-            vectorToReturn = lastCenterCircle.centerCircle().plus(new Translation2d(distance, angle));
+            vectorToReturn = lastCenterCircle.centerCircle().minus(new Translation2d(MAX_ALLOWED_RADIUS, centerToPoint.getAngle().plus(angle)));
         }
         else{
-            vectorToReturn = lastCenterCircle.centerCircle().minus(new Translation2d(distance, angle));
+            vectorToReturn = lastCenterCircle.centerCircle().plus(new Translation2d(MAX_ALLOWED_RADIUS, centerToPoint.getAngle().minus(angle)));
         }
         LogManager.log("vector to return " + vectorToReturn);
         return vectorToReturn;

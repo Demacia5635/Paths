@@ -8,6 +8,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.demacia.utils.Log.LogManager;
+
 import static frc.robot.chassis.Paths.PathsConstants.*;
 
 /** Add your docs here. */
@@ -43,6 +45,7 @@ public class SegmentFollow {
             Rotation2d fixedVelocityHeading = posToFinish.getAngle().minus(velocityHeadingError);
             
             calculatedVelocity = new Translation2d(velocity, fixedVelocityHeading);
+            
         }
 
         else{
@@ -55,6 +58,10 @@ public class SegmentFollow {
             else velocity = driveTrapezoid.calculate(chassisPos.minus(segment.getFinishPoint().getTranslation()).getNorm(), currentVelocityVector.getNorm(), finishVelocity);
             calculatedVelocity = new Translation2d(velocity, fixedVelocityHeadingWithRatio);
         }
+        LogManager.log("calculatedVelocity " + calculatedVelocity);
+        // if (calculatedVelocity.getNorm() > 2) {
+        //     calculatedVelocity = new Translation2d(2, calculatedVelocity.getAngle());
+        // }
 
         double angleError = currentSegment.getFinishPoint().getRotation().minus(chassisPose.getRotation()).getRadians();
         double omega = rotationTrapezoid.calculate(angleError, currentVelocity.omegaRadiansPerSecond, 0);

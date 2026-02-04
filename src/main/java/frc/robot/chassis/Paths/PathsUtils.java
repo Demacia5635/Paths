@@ -8,6 +8,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import frc.demacia.utils.Log.LogManager;
 import frc.robot.chassis.Paths.DemaciaTrajectory.CenterCircleWithDirection;
 
 /** Add your docs here. */
@@ -25,16 +26,19 @@ public class PathsUtils {
 
     public static class ArcUtils {
         public static CenterCircleWithDirection calculateCenterCircle(Pose2d p1, Pose2d p2, Pose2d p3) {
+            // LogManager.log("p1 " + p1 + " p2 " + p2 + " p3 " + p3);
             return calculateCenterWithDirection(p1.getTranslation(), p2.getTranslation(), p3.getTranslation());
         }
 
         public static CenterCircleWithDirection calculateCenterWithDirection(Translation2d trajP1, Translation2d trajP2,Translation2d trajP3){
             Translation2d p1p2 = trajP2.minus(trajP1);
             Translation2d p2p3 = trajP3.minus(trajP2);
-            Rotation2d middleAngle = (p1p2.getAngle().plus(Rotation2d.k180deg).plus(p2p3.getAngle())).div(2);
-            Rotation2d turningAngle = p2p3.getAngle().minus(p1p2.getAngle());
-            boolean isTurningRight = MathUtil.angleModulus(turningAngle.getRadians()) > 0;
-            return new CenterCircleWithDirection(new Translation2d(PathsConstants.MAX_ALLOWED_RADIUS, middleAngle), isTurningRight);
+            double p1p2Angle = p1p2.getAngle().getRadians();
+            double p2p3Angle = p2p3.getAngle().getRadians();
+    
+            double middleAngle = (p1p2Angle + Math.PI + p2p3Angle) * 0.5;
+            boolean isTurningRight = MathUtil.angleModulus(p2p3Angle - p1p2Angle) < 0;
+            return new CenterCircleWithDirection(trajP2.plus(new Translation2d(PathsConstants.MAX_ALLOWED_RADIUS, new Rotation2d(middleAngle))), isTurningRight);
         }
 
         public static class Same {
