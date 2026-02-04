@@ -49,8 +49,9 @@ public class RobotContainer {
 
 
   private void configureBindings() {
-    CommandController.leftButton().onTrue(new FollowTrajectory(pointList, (s) -> chassis.setVelocities(s), () -> chassis.getPose(), () -> chassis.getChassisSpeedsFieldRel()));
-    chassis.setDefaultCommand(driveCommand);
+    // CommandController.leftButton().onTrue(new FollowTrajectory(pointList, (s) -> chassis.setVelocities(s), () -> chassis.getPose(), () -> chassis.getChassisSpeedsFieldRel()));
+    chassis.setDefaultCommand(new FollowTrajectory(pointList, (s) -> chassis.setVelocities(s), () -> chassis.getPose(), ()-> chassis.getChassisSpeedsFieldRel()));
+    //chassis.setDefaultCommand(driveCommand);
   }
 
   public Command getAutonomousCommand() {
