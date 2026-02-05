@@ -14,6 +14,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.demacia.utils.Log.LogManager;
+import frc.demacia.utils.chassis.Chassis;
+import frc.robot.RobotContainer;
 
 /** Add your docs here. */
 public class DemaciaTrajectory {
@@ -42,7 +44,7 @@ public class DemaciaTrajectory {
             isFinishedTrajectory = true;
         }else if(trajectoryPoints.size() < 2){
             isFinishedTrajectory = true;
-            LogManager.log("not enafe point");
+                LogManager.log("not enafe point");
         }else{
             createCenterCircles();
             createPathPoints(); 
@@ -112,7 +114,7 @@ public class DemaciaTrajectory {
             currentSegment = segments.get(currentSegmentIndex);
             LogManager.log("Current Segment Index: " + currentSegmentIndex + " Current Segment " + currentSegment);
         }
-        LogManager.log("Current Segment Index: " + currentSegmentIndex + " Current Pose " + currentPose);
+        LogManager.log("Current Segment Index: " + currentSegmentIndex + " Current Pose " + currentPose + " whanned speed " + speeds + " current speed " + RobotContainer.chassis.getChassisSpeedsRobotRel() );
 
         return speeds;
     }
