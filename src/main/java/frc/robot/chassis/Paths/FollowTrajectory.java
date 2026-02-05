@@ -38,8 +38,8 @@ public class FollowTrajectory extends Command {
 
   @Override
   public void execute() {
-    // setSpeeds.accept(trajectory.calculateSpeeds(currentSpeeds.get(), currentPose.get()));
-    chassis.setVelocities(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
+    setSpeeds.accept(trajectory.calculateSpeeds(currentSpeeds.get(), currentPose.get()));
+    // chassis.setVelocities(trajectory.calculateSpeeds(chassis.gitgetChassisSpeedsRobotRel(), chassis.getPose()));
   }
 
   @Override
