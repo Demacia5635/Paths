@@ -51,7 +51,7 @@ public class RobotContainer {
 
 
   private void configureBindings() {
-    CommandController.leftButton().onTrue(new FollowTrajectory(pointList, (s) -> chassis.setVelocities(s), () -> chassis.getPose(), () -> chassis.getChassisSpeedsFieldRel()));
+    CommandController.leftButton().onTrue(new FollowTrajectory(pointList, (s) -> chassis.setVelocities(s), chassis));
     // chassis.setDefaultCommand(new FollowTrajectory(pointList, (s) -> chassis.setVelocities(s), () -> chassis.getPose(), ()-> chassis.getChassisSpeedsFieldRel()));
     chassis.setDefaultCommand(driveCommand);
   }

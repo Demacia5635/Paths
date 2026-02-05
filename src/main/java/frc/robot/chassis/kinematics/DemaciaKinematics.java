@@ -68,9 +68,8 @@ public class DemaciaKinematics {
      */
     public SwerveModuleState[] toSwerveModuleStatesWithLimit(ChassisSpeeds fieldRelWantedSpeeds,
             ChassisSpeeds fieldRelCurrentSpeeds, Rotation2d currentGyroAngle) {
-                //TODO: RETURN IT
-        // ChassisSpeeds limitedWantedVel = limitVelocities(fieldRelWantedSpeeds, fieldRelCurrentSpeeds);
-        // limitedWantedVel = ChassisSpeeds.fromFieldRelativeSpeeds(limitedWantedVel, currentGyroAngle);
+        ChassisSpeeds limitedWantedVel = limitVelocities(fieldRelWantedSpeeds, fieldRelCurrentSpeeds);
+        limitedWantedVel = ChassisSpeeds.fromFieldRelativeSpeeds(limitedWantedVel, currentGyroAngle);
         swerveStates = toSwerveModuleStates(fieldRelWantedSpeeds);
         return swerveStates;
     }
@@ -94,52 +93,52 @@ public class DemaciaKinematics {
 
     //TODO:RETURN IT
 
-    // private ChassisSpeeds limitVelocities(ChassisSpeeds wantedSpeeds, ChassisSpeeds currentSpeeds) {
-    //     double currentVelocity = Math.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
-    //     double wantedVelocity = Math.hypot(wantedSpeeds.vxMetersPerSecond, wantedSpeeds.vyMetersPerSecond);
+    private ChassisSpeeds limitVelocities(ChassisSpeeds wantedSpeeds, ChassisSpeeds currentSpeeds) {
+        double currentVelocity = Math.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
+        double wantedVelocity = Math.hypot(wantedSpeeds.vxMetersPerSecond, wantedSpeeds.vyMetersPerSecond);
 
-    //     if (currentVelocity < MIN_VELOCITY) { // we are standing
-    //         return chassisFromRest(currentVelocity, wantedVelocity, wantedSpeeds);
-    //     }
+        if (currentVelocity < MIN_VELOCITY) { // we are standing
+            return chassisFromRest(currentVelocity, wantedVelocity, wantedSpeeds);
+        }
 
-    //     if (wantedVelocity < MIN_VELOCITY) { // target is stop
-    //         // just deaccelrate to stop
-    //         double ratio = Math.max(currentVelocity - MAX_DELTA_V, wantedVelocity) / currentVelocity;
-    //         return new ChassisSpeeds(currentSpeeds.vxMetersPerSecond * ratio, currentSpeeds.vyMetersPerSecond * ratio,
-    //                 wantedSpeeds.omegaRadiansPerSecond);
-    //     }
-    //     // we are moving and target is moving
-    //     double currentVelocityHeading = Math.atan2(currentSpeeds.vyMetersPerSecond, currentSpeeds.vxMetersPerSecond);
-    //     double targetVelocityHeading = Math.atan2(wantedSpeeds.vyMetersPerSecond, wantedSpeeds.vxMetersPerSecond);
-    //     double velocityHeadingDiff = MathUtil.angleModulus(targetVelocityHeading - currentVelocityHeading);
-    //     double targetVelocity = wantedVelocity;
+        if (wantedVelocity < MIN_VELOCITY) { // target is stop
+            // just deaccelrate to stop
+            double ratio = Math.max(currentVelocity - MAX_DELTA_V, wantedVelocity) / currentVelocity;
+            return new ChassisSpeeds(currentSpeeds.vxMetersPerSecond * ratio, currentSpeeds.vyMetersPerSecond * ratio,
+                    wantedSpeeds.omegaRadiansPerSecond);
+        }
+        // we are moving and target is moving
+        double currentVelocityHeading = Math.atan2(currentSpeeds.vyMetersPerSecond, currentSpeeds.vxMetersPerSecond);
+        double targetVelocityHeading = Math.atan2(wantedSpeeds.vyMetersPerSecond, wantedSpeeds.vxMetersPerSecond);
+        double velocityHeadingDiff = MathUtil.angleModulus(targetVelocityHeading - currentVelocityHeading);
+        double targetVelocity = wantedVelocity;
 
-    //     if (Math.abs(velocityHeadingDiff) < MAX_FAST_TURN_ANGLE) { // small heading change
-    //         // accelerate to target v
-    //         targetVelocity = MathUtil.clamp(targetVelocity, currentVelocity - MAX_DELTA_V, currentVelocity + MAX_DELTA_V);
-    //     } else if (Math.abs(velocityHeadingDiff) > MIN_REVERSE_ANGLE) { // optimization - deaccdelerate and turn the other way
+        if (Math.abs(velocityHeadingDiff) < MAX_FAST_TURN_ANGLE) { // small heading change
+            // accelerate to target v
+            targetVelocity = MathUtil.clamp(targetVelocity, currentVelocity - MAX_DELTA_V, currentVelocity + MAX_DELTA_V);
+        } else if (Math.abs(velocityHeadingDiff) > MIN_REVERSE_ANGLE) { // optimization - deaccdelerate and turn the other way
 
-    //         targetVelocity = currentVelocity - MAX_DELTA_V;
-    //         velocityHeadingDiff = optimizeAngleChange(velocityHeadingDiff);
+            targetVelocity = currentVelocity - MAX_DELTA_V;
+            velocityHeadingDiff = optimizeAngleChange(velocityHeadingDiff);
 
-    //     } else {
-    //         targetVelocity = MathUtil.clamp(Math.min(MAX_ROTATION_VELOCITY, targetVelocity), currentVelocity - MAX_DELTA_V, currentVelocity + MAX_DELTA_V);
-    //     }
+        } else {
+            targetVelocity = MathUtil.clamp(Math.min(MAX_ROTATION_VELOCITY, targetVelocity), currentVelocity - MAX_DELTA_V, currentVelocity + MAX_DELTA_V);
+        }
 
-    //     if (targetVelocity < MIN_VELOCITY) {
-    //         return new ChassisSpeeds(0, 0, wantedSpeeds.omegaRadiansPerSecond);
-    //     }
-    //     // calculate the maximum heading change using the target velocity and allowed
-    //     // radial acceleration
-    //     double maxAngleChange = (MAX_RADIAL_ACCEL / targetVelocity) * CYCLE_DT;
-    //     // set the target angle
-    //     velocityHeadingDiff = MathUtil.clamp(velocityHeadingDiff, -maxAngleChange, maxAngleChange);
-    //     targetVelocityHeading = currentVelocityHeading + velocityHeadingDiff;
+        if (targetVelocity < MIN_VELOCITY) {
+            return new ChassisSpeeds(0, 0, wantedSpeeds.omegaRadiansPerSecond);
+        }
+        // calculate the maximum heading change using the target velocity and allowed
+        // radial acceleration
+        double maxAngleChange = (MAX_RADIAL_ACCEL / targetVelocity) * CYCLE_DT;
+        // set the target angle
+        velocityHeadingDiff = MathUtil.clamp(velocityHeadingDiff, -maxAngleChange, maxAngleChange);
+        targetVelocityHeading = currentVelocityHeading + velocityHeadingDiff;
 
-    //     // return the speeds - using target velocity and target angle
-    //     return new ChassisSpeeds(targetVelocity * Math.cos(targetVelocityHeading), targetVelocity * Math.sin(targetVelocityHeading),
-    //             wantedSpeeds.omegaRadiansPerSecond);
-    // }
+        // return the speeds - using target velocity and target angle
+        return new ChassisSpeeds(targetVelocity * Math.cos(targetVelocityHeading), targetVelocity * Math.sin(targetVelocityHeading),
+                wantedSpeeds.omegaRadiansPerSecond);
+    }
 
     public ChassisSpeeds toChassisSpeeds(SwerveModuleState[] swerveStates, double omegaFromGyro) {
         double sumVx = 0;

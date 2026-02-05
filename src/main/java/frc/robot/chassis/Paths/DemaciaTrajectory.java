@@ -107,7 +107,7 @@ public class DemaciaTrajectory {
         double finishVelocity = currentSegmentIndex == segments.size() - 1 ? 0 : PathsConstants.MAX_LINEAR_VELOCITY;
         // LogManager.log("Current Segment Index: " + currentSegmentIndex);
         ChassisSpeeds speeds = SegmentFollow.getInstance().calculateSpeeds(segments.get(currentSegmentIndex), currentSpeeds, currentPose, finishVelocity);
-
+        
         if(isFinishedSegment(currentSpeeds, currentPose, currentSegment)){
             if(currentSegmentIndex == segments.size() - 1) isFinishedTrajectory = true;
             currentSegmentIndex++;

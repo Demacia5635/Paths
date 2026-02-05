@@ -12,7 +12,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.demacia.utils.chassis.Chassis;
-import frc.robot.RobotContainer;
+
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class FollowTrajectory extends Command {
@@ -21,10 +21,11 @@ public class FollowTrajectory extends Command {
   Supplier<Pose2d> currentPose;
   Supplier<ChassisSpeeds> currentSpeeds;
   DemaciaTrajectory trajectory;
+  Chassis chassis;
 
-  public FollowTrajectory(ArrayList<Pose2d> trajectoryPoints, Consumer<ChassisSpeeds> setSpeeds,
-      Supplier<Pose2d> chassisPose, Supplier<ChassisSpeeds> currentSpeeds) {
-    this(setSpeeds, chassisPose, currentSpeeds, new DemaciaTrajectory(trajectoryPoints));
+  public FollowTrajectory(ArrayList<Pose2d> trajectoryPoints, Consumer<ChassisSpeeds> setSpeeds, Chassis chassis) {
+    // this(setSpeeds, , new DemaciaTrajectory(trajectoryPoints));
+    this.chassis = chassis;
   }
 
   public FollowTrajectory(Consumer<ChassisSpeeds> setSpeeds, Supplier<Pose2d> chassisPose, Supplier<ChassisSpeeds> currentSpeeds, DemaciaTrajectory trajectory) {
@@ -37,9 +38,8 @@ public class FollowTrajectory extends Command {
 
   @Override
   public void execute() {
-
-    setSpeeds.accept(trajectory.calculateSpeeds(currentSpeeds.get(), currentPose.get()));
-    
+    // setSpeeds.accept(trajectory.calculateSpeeds(currentSpeeds.get(), currentPose.get()));
+    chassis.setVelocities(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
   }
 
   @Override

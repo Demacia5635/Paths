@@ -14,14 +14,14 @@ import static frc.robot.chassis.Paths.PathsConstants.*;
 
 /** Add your docs here. */
 public class SegmentFollow {
-    private TrapezoidExpo driveTrapezoid;
+    // private Trapezoid driveTrapezoid;
     
     private Trapezoid rotationTrapezoid;
     private static SegmentFollow instace;
     
    
     private SegmentFollow(){
-        this.driveTrapezoid = new TrapezoidExpo(MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCEL, MAX_JERK);
+        // this.driveTrapezoid = new Trapezoid(MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCEL);
         this.rotationTrapezoid = new Trapezoid(MAX_OMEGA_ACCEL, MAX_OMEGA_VELOCITY);
 
     }
@@ -39,8 +39,8 @@ public class SegmentFollow {
             LineSegment segment = (LineSegment) currentSegment;
             
             Translation2d posToFinish = segment.getFinishPoint().getTranslation().minus(chassisPos);
-
-            double velocity = driveTrapezoid.calculate(posToFinish.getNorm(), currentVelocityVector.getNorm(), finishVelocity);
+            double velocity = Math.min(posToFinish.getNorm() * 2, MAX_LINEAR_VELOCITY);
+            // double velocity = driveTrapezoid.calculate(posToFinish.getNorm(), currentVelocityVector.getNorm(), finishVelocity);
             Rotation2d velocityHeadingError = segment.getStartToFinishVector().getAngle().minus(posToFinish.getAngle());
             Rotation2d fixedVelocityHeading = posToFinish.getAngle().minus(velocityHeadingError);
             
@@ -55,7 +55,7 @@ public class SegmentFollow {
             Rotation2d fixedVelocityHeadingWithRatio = tanToCircleAngle.times(centerToChassis.getNorm() / PathsConstants.MAX_ALLOWED_RADIUS);
             double velocity = 0;
             if(Math.abs(currentVelocityVector.getNorm() - PathsConstants.MAX_LINEAR_VELOCITY) < 0.1) velocity = PathsConstants.MAX_LINEAR_VELOCITY;
-            else velocity = driveTrapezoid.calculate(chassisPos.minus(segment.getFinishPoint().getTranslation()).getNorm(), currentVelocityVector.getNorm(), finishVelocity);
+            else velocity = Math.min(chassisPos.minus(segment.getFinishPoint().getTranslation()).getNorm() * 2, MAX_LINEAR_VELOCITY);
             calculatedVelocity = new Translation2d(velocity, fixedVelocityHeadingWithRatio);
         }
         double angleError = currentSegment.getFinishPoint().getRotation().minus(chassisPose.getRotation()).getRadians();
