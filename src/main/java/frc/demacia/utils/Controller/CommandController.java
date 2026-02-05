@@ -1,9 +1,8 @@
-package frc.demacia.utils.controller;
+package frc.demacia.utils.Controller;
+
+import static frc.demacia.utils.Controller.ControllerConstants.*;
 
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
-
-import static frc.demacia.utils.controller.ControllerConstants.*;
-
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.PS5Controller; 
 import edu.wpi.first.wpilibj.XboxController;

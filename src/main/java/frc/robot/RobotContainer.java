@@ -11,8 +11,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.demacia.utils.chassis.Chassis;
 import frc.demacia.utils.chassis.DriveCommand;
-import frc.demacia.utils.controller.CommandController;
-import frc.demacia.utils.controller.CommandController.ControllerType;
+import frc.demacia.utils.Controller.CommandController;
+import frc.demacia.utils.Controller.CommandController.ControllerType;
 import frc.robot.ChassisConstants.MK4iChassisConstants;
 import frc.robot.chassis.Paths.FollowTrajectory;
 
@@ -32,7 +32,7 @@ public class RobotContainer {
   public static RobotContainer robotContainer;
 
   public static Chassis chassis;
-  private final frc.demacia.utils.chassis.DriveCommand driveCommand;
+  private final DriveCommand driveCommand;
   public static CommandController CommandController;
   private static ArrayList<Pose2d> pointList;
 
