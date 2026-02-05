@@ -58,11 +58,6 @@ public class SegmentFollow {
             else velocity = driveTrapezoid.calculate(chassisPos.minus(segment.getFinishPoint().getTranslation()).getNorm(), currentVelocityVector.getNorm(), finishVelocity);
             calculatedVelocity = new Translation2d(velocity, fixedVelocityHeadingWithRatio);
         }
-        // LogManager.log("calculatedVelocity " + calculatedVelocity);
-        // if (calculatedVelocity.getNorm() > 2) {
-        //     calculatedVelocity = new Translation2d(2, calculatedVelocity.getAngle());
-        // }
-
         double angleError = currentSegment.getFinishPoint().getRotation().minus(chassisPose.getRotation()).getRadians();
         double omega = rotationTrapezoid.calculate(angleError, currentVelocity.omegaRadiansPerSecond, 0);
         return new ChassisSpeeds(calculatedVelocity.getX(), calculatedVelocity.getY(), omega);
