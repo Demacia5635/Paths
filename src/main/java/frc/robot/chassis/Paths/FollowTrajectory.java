@@ -26,20 +26,14 @@ public class FollowTrajectory extends Command {
   public FollowTrajectory(ArrayList<Pose2d> trajectoryPoints, Consumer<ChassisSpeeds> setSpeeds, Chassis chassis) {
     // this(setSpeeds, , new DemaciaTrajectory(trajectoryPoints));
     this.chassis = chassis;
-  }
-
-  public FollowTrajectory(Consumer<ChassisSpeeds> setSpeeds, Supplier<Pose2d> chassisPose, Supplier<ChassisSpeeds> currentSpeeds, DemaciaTrajectory trajectory) {
-    this.currentSpeeds = currentSpeeds;
-    this.currentPose = chassisPose;
     this.setSpeeds = setSpeeds;
-    this.currentPose = chassisPose; 
-    this.trajectory = trajectory;
+    trajectory = new DemaciaTrajectory(trajectoryPoints);
   }
 
   @Override
   public void execute() {
-    setSpeeds.accept(trajectory.calculateSpeeds(currentSpeeds.get(), currentPose.get()));
-    // chassis.setVelocities(trajectory.calculateSpeeds(chassis.gitgetChassisSpeedsRobotRel(), chassis.getPose()));
+    // setSpeeds.accept(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
+    chassis.setVelocities(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
   }
 
   @Override

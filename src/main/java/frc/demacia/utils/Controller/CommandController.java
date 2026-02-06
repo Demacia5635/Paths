@@ -1,6 +1,6 @@
-package frc.demacia.utils.Controller;
+package frc.demacia.utils.controller;
 
-import static frc.demacia.utils.Controller.ControllerConstants.*;
+import static frc.demacia.utils.controller.ControllerConstants.*;
 
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
