@@ -7,10 +7,10 @@ package frc.robot.chassis.Paths;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.chassis.Chassis;
 
 
@@ -22,11 +22,13 @@ public class FollowTrajectory extends Command {
   Supplier<ChassisSpeeds> currentSpeeds;
   DemaciaTrajectory trajectory;
   Chassis chassis;
+  ArrayList<Pose2d> trajectoryPoints;
 
   public FollowTrajectory(ArrayList<Pose2d> trajectoryPoints, Consumer<ChassisSpeeds> setSpeeds, Chassis chassis) {
     // this(setSpeeds, , new DemaciaTrajectory(trajectoryPoints));
     this.chassis = chassis;
     this.setSpeeds = setSpeeds;
+    this.trajectoryPoints = trajectoryPoints;
     trajectory = new DemaciaTrajectory(trajectoryPoints);
   }
 
@@ -34,6 +36,7 @@ public class FollowTrajectory extends Command {
   public void execute() {
     // setSpeeds.accept(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
     chassis.setVelocities(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
+    LogManager.log("the point he need to drive " + trajectoryPoints + " the robot pose " + chassis.getPose());
   }
 
   @Override

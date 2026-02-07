@@ -261,16 +261,16 @@ public class Chassis extends SubsystemBase {
         }
     }
 
-    private void updateVision(Pose2d pose) {
-        demaciaPoseEstimator.updateVisionSTD(getSTD());
+    // private void updateVision(Pose2d pose) {
+    //     demaciaPoseEstimator.updateVisionSTD(getSTD());
         
-        VisionMeasurment measurement = new VisionMeasurment(
-            Timer.getFPGATimestamp() - 0.05,
-            pose.getTranslation(),
-            Optional.of(pose.getRotation())
-        );
-        demaciaPoseEstimator.addVisionMeasurement(measurement);
-    }
+    //     VisionMeasurment measurement = new VisionMeasurment(
+    //         Timer.getFPGATimestamp() - 0.05,
+    //         pose.getTranslation(),
+    //         Optional.of(pose.getRotation())
+    //     );
+    //     demaciaPoseEstimator.addVisionMeasurement(measurement);
+    // }
 
     private Matrix<N3, N1> getSTD() {
         double x = 0.05;
