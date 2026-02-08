@@ -39,6 +39,7 @@ public class SegmentFollow {
             LineSegment segment = (LineSegment) currentSegment;
             
             Translation2d posToFinish = segment.getFinishPoint().getTranslation().minus(chassisPos);
+            LogManager.log(posToFinish);
             double velocity = Math.min(posToFinish.getNorm() * 2, MAX_LINEAR_VELOCITY);
             // double velocity = driveTrapezoid.calculate(posToFinish.getNorm(), currentVelocityVector.getNorm(), finishVelocity);
             Rotation2d velocityHeadingError = segment.getStartToFinishVector().getAngle().minus(posToFinish.getAngle());

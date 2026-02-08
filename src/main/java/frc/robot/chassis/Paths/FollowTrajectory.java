@@ -31,14 +31,17 @@ public class FollowTrajectory extends Command {
     this.setSpeeds = setSpeeds;
     this.trajectoryPoints = trajectoryPoints;
     trajectory = new DemaciaTrajectory(trajectoryPoints);
+    // LogManager.log("path point "  + trajectory.getPathPoint() + "trajectory point" + trajectory.getTrjectoryPoint());
   }
 
   @Override
   public void execute() {
     // setSpeeds.accept(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
     chassis.setVelocities(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
-    // LogManager.log("path point "  + trajectory.getPathPoint() + "trajectory point" + trajectory.getTrjectoryPoint());
-      LogManager.log("chassis pose" + chassis.getPose() +  "PathPoint" + trajectory.getPathPoint());
+      // LogManager.log("chassis pose" + chassis.getPose());
+    if(chassis.getPose() ==  trajectory.getSegmaentFinasePose()){
+        LogManager.log("finase segmant");
+      }
   }
 
   @Override
