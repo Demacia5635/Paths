@@ -4,6 +4,7 @@
 
 package frc.robot.chassis.Paths;
 
+import java.security.KeyStore.LoadStoreParameter;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -36,7 +37,7 @@ public class FollowTrajectory extends Command {
   public void execute() {
     // setSpeeds.accept(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
     chassis.setVelocities(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
-    LogManager.log("the point he need to drive " + trajectoryPoints + " the robot pose " + chassis.getPose());
+    LogManager.log("path point "  + trajectory.getPathPoint() + "trajectory point" + trajectory.getTrjectoryPoint());
   }
 
   @Override

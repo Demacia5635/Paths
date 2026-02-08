@@ -37,7 +37,7 @@ public class RobotContainer {
   private static ArrayList<Pose2d> pointList;
 
   public RobotContainer() {
-    CommandController = new CommandController(0, ControllerType.kXbox);
+    CommandController = new CommandController(0, ControllerType.kPS5);
     chassis = new Chassis(MK4iChassisConstants.CHASSIS_CONFIG);
     driveCommand = new DriveCommand(chassis, CommandController);
     pointList = new ArrayList<>();
