@@ -68,6 +68,7 @@ public class DemaciaTrajectory {
     }
 
     private boolean isFinishedSegment(ChassisSpeeds currentSpeeds, Pose2d currentPose, SegmentBase currentSegment){
+        // double distanceFromFinishPoint = currentSegment.getFinishPoint().getTranslation().getDistance(currentPose.getTranslation());
         double distanceFromFinishPoint = currentSegment.getFinishPoint().getTranslation().getDistance(currentPose.getTranslation());
         Rotation2d currentVelocityHeading = new Translation2d(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond).getAngle();
 
