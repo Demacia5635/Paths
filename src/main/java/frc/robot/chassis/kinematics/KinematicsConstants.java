@@ -10,7 +10,7 @@ public class KinematicsConstants {
     public static final double MAX_ALLOWED_MODULE_VELOCITY = 4;
     public static final double CYCLE_DT = 0.02;
     
-    public static final double MIN_VELOCITY = 0; // slower is 0
+    public static final double MIN_VELOCITY = 0.1; // slower is 0
     //TODO: RETURN TO 0.01
     public static final double MAX_RADIAL_ACCEL = 8;
     public static final double MAX_LINEAR_ACCEL = 10.0; 
