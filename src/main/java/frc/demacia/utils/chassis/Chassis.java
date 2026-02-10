@@ -83,7 +83,7 @@ public class Chassis extends SubsystemBase {
 
     private DemaciaKinematics demaciaKinematics;
     private SwerveDriveKinematics wpilibKinematics;
-    private DemaciaPoseEstimator demaciaPoseEstimator;
+    // private DemaciaPoseEstimator demaciaPoseEstimator;
     private SwerveDrivePoseEstimator poseEstimator;
     private Field2d field;
 
@@ -104,10 +104,10 @@ public class Chassis extends SubsystemBase {
         addStatus();
         demaciaKinematics = new DemaciaKinematics(modulePositions);
         wpilibKinematics = new SwerveDriveKinematics(modulePositions);
-        demaciaPoseEstimator = new DemaciaPoseEstimator(
-                modulePositions,
-                getSTD(),
-                getSTD());
+        // demaciaPoseEstimator = new DemaciaPoseEstimator(
+        //         modulePositions,
+        //         getSTD(),
+        //         getSTD());
         poseEstimator = new SwerveDrivePoseEstimator(wpilibKinematics, getGyroAngle(), getModulePositions(),
                 new Pose2d());
 
@@ -153,7 +153,7 @@ public class Chassis extends SubsystemBase {
     }
 
     public void resetPose(Pose2d pose) {
-        demaciaPoseEstimator.resetPose(pose);
+        poseEstimator.resetPose(pose);
     }
 
     private void addStatus() {
@@ -167,7 +167,7 @@ public class Chassis extends SubsystemBase {
      * @return Current pose (position and rotation) using odometry fusion
      */
     public Pose2d getPose() {
-        return demaciaPoseEstimator.getEstimatedPose();
+        return poseEstimator.getEstimatedPosition();
     }
 
 
@@ -297,9 +297,9 @@ public class Chassis extends SubsystemBase {
             gyroAngle, 
             getModulePositions()
         );
-        demaciaPoseEstimator.addOdometryCalculation(observation, new Translation2d()); 
+        poseEstimator.update(getGyroAngle(), getModulePositions()); 
 
-        field.setRobotPose(demaciaPoseEstimator.getEstimatedPose());
+        field.setRobotPose(poseEstimator.getEstimatedPosition());
     }
 
     /**

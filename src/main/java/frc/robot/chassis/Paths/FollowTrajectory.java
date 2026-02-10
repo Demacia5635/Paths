@@ -36,12 +36,11 @@ public class FollowTrajectory extends Command {
 
   @Override
   public void execute() {
+    ChassisSpeeds s = trajectory.calculateSpeeds(chassis.getChassisSpeedsFieldRel(), chassis.getPose());
     // setSpeeds.accept(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
-    chassis.setVelocities(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
-      LogManager.log("chassis pose" + chassis.getPose());  
-    if(chassis.getPose() ==  trajectory.getSegmaentFinasePose()){
-        LogManager.log("finase segmant");
-      }
+    chassis.setVelocities(s);
+    LogManager.log("chassis pose" + chassis.getPose() +  " finish point"  +  trajectory.getCurrentSegmant().getFinishPoint() + " calculated speeds: " + s + " current speeds: " + chassis.getChassisSpeedsFieldRel());
+    
   }
 
   @Override

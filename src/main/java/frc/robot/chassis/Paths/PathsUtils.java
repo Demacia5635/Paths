@@ -8,6 +8,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.demacia.utils.Log.LogManager;
 import frc.robot.chassis.Paths.DemaciaTrajectory.CenterCircleWithDirection;
 
@@ -20,6 +21,9 @@ public class PathsUtils {
                 .getRadians()) < PathsConstants.MAX_VELOCITY_HEADING_TO_FINISH_SEGMENT;
     }
 
+    public static double getVelocityNorm(ChassisSpeeds speeds){
+        return Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    }
     public static boolean isLineSegment(SegmentBase segment) {
         return segment instanceof LineSegment;
     }

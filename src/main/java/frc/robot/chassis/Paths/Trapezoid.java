@@ -60,6 +60,7 @@ public class Trapezoid {
         else if(distanceToVelocity(curentVelocity, targetVelocity, maxAcceleration) < remainingDistance - cycleDistanceNoAccel(curentVelocity)) {
             lastV = Math.min(curentVelocity, maxVelocity);
         } 
+        
         // Case for not enough distance to reach targetVelocity, must decelerate
         else {
             double t = remainingDistance * 2 / (curentVelocity + targetVelocity);
