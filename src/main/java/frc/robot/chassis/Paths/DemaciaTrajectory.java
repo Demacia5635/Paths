@@ -89,7 +89,7 @@ public class DemaciaTrajectory {
             Translation2d centerToFinish = segment.getCenterCircle().minus(segment.getFinishPoint().getTranslation());
             Rotation2d wantedVelocityHeading = centerToFinish.getAngle().minus(Rotation2d.kCW_90deg);
             boolean isHeadingTowardesNextSegment = PathsUtils.isVelocityHeadingInRange(currentVelocityHeading, wantedVelocityHeading);
-            LogManager.log("isFinishedSegment " + (distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH) + " " + (distanceFromFinishPoint < (PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH * 3)) + " "  + "isHeadingTowardesNextSegment " + isHeadingTowardesNextSegment + " " + currentVelocityHeading + "currentVelocityHeading" + " " + "wantedVelocityHeading" + wantedVelocityHeading + " " + "distanceFromFinishPoint" + distanceFromFinishPoint);
+            // LogManager.log("isFinishedSegment " + (distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH) + " " + (distanceFromFinishPoint < (PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH * 3)) + " "  + "isHeadingTowardesNextSegment " + isHeadingTowardesNextSegment + " " + currentVelocityHeading + "currentVelocityHeading" + " " + "wantedVelocityHeading" + wantedVelocityHeading + " " + "distanceFromFinishPoint" + distanceFromFinishPoint);
             return (distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH) || ((distanceFromFinishPoint < (PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH * 3)) && isHeadingTowardesNextSegment);
         }
     }
@@ -194,10 +194,21 @@ public class DemaciaTrajectory {
         return pathPoints;
     }
 
+
+    public SegmentBase getCurrentSegmant(){
+        return currentSegment;
+    }
+
+
+
     public ArrayList<Pose2d> getTrjectoryPoint(){
         return trajectoryPoints;
     }
 
+
+    public ArrayList<SegmentBase> getSegmas(){
+        return segments;
+    }
 
     public Pose2d getSegmaentFinasePose(){
         return currentSegment.getFinishPoint();
