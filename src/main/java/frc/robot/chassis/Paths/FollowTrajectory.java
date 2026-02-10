@@ -46,7 +46,8 @@ public class FollowTrajectory extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    setSpeeds.accept(new ChassisSpeeds());
+    // setSpeeds.accept(new ChassisSpeeds());
+    chassis.stop();
   }
 
   @Override
