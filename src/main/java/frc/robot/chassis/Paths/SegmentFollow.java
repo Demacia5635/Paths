@@ -50,7 +50,6 @@ public class SegmentFollow {
             Rotation2d fixedVelocityHeading = posToFinish.getAngle().minus(velocityHeadingError);
             
             calculatedVelocity = new Translation2d(velocity, fixedVelocityHeading);
-            
         }
 
         else{

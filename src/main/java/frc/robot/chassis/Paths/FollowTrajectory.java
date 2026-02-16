@@ -39,7 +39,7 @@ public class FollowTrajectory extends Command {
     ChassisSpeeds s = trajectory.calculateSpeeds(chassis.getChassisSpeedsFieldRel(), chassis.getPose());
     // setSpeeds.accept(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
     chassis.setVelocities(s);
-    LogManager.log("path point " + trajectory.getPathPoint());
+    LogManager.log(trajectory.getCurrSegment() + " current segment");
   }
 
   @Override

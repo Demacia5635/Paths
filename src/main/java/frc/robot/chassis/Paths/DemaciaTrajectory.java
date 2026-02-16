@@ -117,6 +117,8 @@ public class DemaciaTrajectory {
             currentSegmentIndex++;
             currentSegment = segments.get(currentSegmentIndex);
         }
+        LogManager.log(finishVelocity + " finsih velocity");
+        LogManager.log("speed"+ speeds);
 
         return speeds;
     }
@@ -172,7 +174,6 @@ public class DemaciaTrajectory {
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateExitPointOfArc(circleCenters.get(i).centerCircle(), circleCenters.get(i+1).centerCircle()), trajectoryPoints.get(i).getRotation()));
                 pathPoints.add(new Pose2d(PathsUtils.ArcUtils.Different.calculateEntryPointOfArc(circleCenters.get(i+1).centerCircle(), circleCenters.get(i+2).centerCircle(), pathPoints.get(pathPoints.size()-1).getTranslation()), trajectoryPoints.get(i).getRotation()));
             }
-            LogManager.log(pathPoints.get(i)+ "the path point");
         }
         
         Translation2d lastTrajPoint = trajectoryPoints.get(trajectoryPoints.size()-1).getTranslation();
@@ -215,6 +216,10 @@ public class DemaciaTrajectory {
 
     public Pose2d getSegmaentFinasePose(){
         return currentSegment.getFinishPoint();
+    }
+
+    public SegmentBase getCurrSegment(){
+        return currentSegment;
     }
 
     public record CenterCircleWithDirection(Translation2d centerCircle, boolean isTurningRight) {}
