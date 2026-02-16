@@ -7,7 +7,7 @@ package frc.robot.chassis.Paths;
 import edu.wpi.first.wpilibj.Timer;
 
 /** Add your docs here. */
-public class Trapezoid {
+public class TrapezoidNoam {
     double maxVelocity; // Maximum permissible velocity
     double maxAcceleration; // Maximum permissible acceleration
     private double deltaVelocity; // Velocity increment at each time step
@@ -18,7 +18,7 @@ public class Trapezoid {
 
 
     // Constructor to initialize with maximum velocity and acceleration
-    public Trapezoid(double maxVelocity, double maxAcceleration) {
+    public TrapezoidNoam(double maxVelocity, double maxAcceleration) {
         this.maxAcceleration = maxAcceleration;
         this.maxVelocity = maxVelocity;
         // Velocity increment calculated based on max acceleration
