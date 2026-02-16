@@ -19,13 +19,13 @@ import static frc.robot.chassis.Paths.PathsConstants.*;
 public class SegmentFollow {
     // private Trapezoid driveTrapezoid;
     private TrapezoidProfile driveTrapezoid;
-    private Trapezoid rotationTrapezoid;
+    private TrapezoidNoam rotationTrapezoid;
     private static SegmentFollow instace;
     
    
     private SegmentFollow(){
         this.driveTrapezoid = new TrapezoidProfile(new Constraints(MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCEL));
-        this.rotationTrapezoid = new Trapezoid(MAX_OMEGA_ACCEL, MAX_OMEGA_VELOCITY);
+        this.rotationTrapezoid = new TrapezoidNoam(MAX_OMEGA_ACCEL, MAX_OMEGA_VELOCITY);
 
     }
     public static SegmentFollow getInstance(){
