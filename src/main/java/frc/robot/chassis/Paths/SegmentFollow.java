@@ -4,6 +4,8 @@
 
 package frc.robot.chassis.Paths;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -17,16 +19,16 @@ import static frc.robot.chassis.Paths.PathsConstants.*;
 
 /** Add your docs here. */
 public class SegmentFollow {
-    // private Trapezoid driveTrapezoid;
-    private TrapezoidProfile driveTrapezoid;
-    private TrapezoidNoam rotationTrapezoid;
+    
+    private DemaciaTrapezoid driveTrapezoid;
+    private ProfiledPIDController rotationPID;
     private static SegmentFollow instace;
     
    
     private SegmentFollow(){
-        this.driveTrapezoid = new TrapezoidProfile(new Constraints(MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCEL));
-        this.rotationTrapezoid = new TrapezoidNoam(MAX_OMEGA_ACCEL, MAX_OMEGA_VELOCITY);
-
+        // this.driveTrapezoid = new Trapezoid(MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCEL);
+        this.driveTrapezoid = new DemaciaTrapezoid(MAX_LINEAR_VELOCITY, MAX_LINEAR_ACCEL);
+        this.rotationPID = new ProfiledPIDController(0.8, 0, 0, new Constraints(MAX_OMEGA_VELOCITY, MAX_OMEGA_ACCEL));
     }
     public static SegmentFollow getInstance(){
         if(instace == null) instace = new SegmentFollow();
@@ -42,10 +44,7 @@ public class SegmentFollow {
             LineSegment segment = (LineSegment) currentSegment;
             
             Translation2d posToFinish = segment.getFinishPoint().getTranslation().minus(chassisPos);
-
-            // double velocity = driveTrapezoid.calculate(posToFinish.getNorm(), currentVelocityVector.getNorm(), finishVelocity);
-            double velocity = driveTrapezoid.calculate(posToFinish.getNorm() / MAX_LINEAR_VELOCITY, 
-                new State(posToFinish.getNorm(), PathsUtils.getVelocityNorm(currentVelocity)), new State(0, finishVelocity)).velocity;
+            double velocity = driveTrapezoid.calculate(posToFinish.getNorm(), currentVelocityVector.getNorm(), finishVelocity);
             Rotation2d velocityHeadingError = segment.getStartToFinishVector().getAngle().minus(posToFinish.getAngle());
             Rotation2d fixedVelocityHeading = posToFinish.getAngle().minus(velocityHeadingError);
             
@@ -59,11 +58,13 @@ public class SegmentFollow {
             Rotation2d fixedVelocityHeadingWithRatio = tanToCircleAngle.times(centerToChassis.getNorm() / PathsConstants.MAX_ALLOWED_RADIUS);
             double velocity = 0;
             if(Math.abs(currentVelocityVector.getNorm() - PathsConstants.MAX_LINEAR_VELOCITY) < 0.1) velocity = PathsConstants.MAX_LINEAR_VELOCITY;
-            else velocity = Math.min(chassisPos.minus(segment.getFinishPoint().getTranslation()).getNorm() * 2, MAX_LINEAR_VELOCITY);
+            else velocity = driveTrapezoid.calculate(centerToChassis.getNorm(), currentVelocityVector.getNorm(), finishVelocity);
+             
             calculatedVelocity = new Translation2d(velocity, fixedVelocityHeadingWithRatio);
         }
-        double angleError = currentSegment.getFinishPoint().getRotation().minus(chassisPose.getRotation()).getRadians();
-        double omega = rotationTrapezoid.calculate(angleError, currentVelocity.omegaRadiansPerSecond, 0);
+        LogManager.log("wanted velocity norm: " + calculatedVelocity.getNorm() + " segment type: " + (PathsUtils.isLineSegment(currentSegment) ? "line" : "arc") + " current velocity norm: " + currentVelocityVector.getNorm() + " distance to finish: " + chassisPos.getDistance(currentSegment.getFinishPoint().getTranslation()));
+        double angleError = MathUtil.angleModulus(currentSegment.getFinishPoint().getRotation().getRadians() - chassisPose.getRotation().getRadians());
+        double omega = rotationPID.calculate(angleError, currentVelocity.omegaRadiansPerSecond);
         return new ChassisSpeeds(calculatedVelocity.getX(), calculatedVelocity.getY(), omega);
 
 

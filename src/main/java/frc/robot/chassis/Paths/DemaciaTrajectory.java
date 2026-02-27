@@ -29,7 +29,6 @@ public class DemaciaTrajectory {
     // private int arcCount;
     private int currentSegmentIndex;
     private boolean isFinishedTrajectory;
-    
 
     public DemaciaTrajectory(ArrayList<Pose2d> trajectoryPoints) {
         this.trajectoryPoints = trajectoryPoints;
@@ -38,7 +37,6 @@ public class DemaciaTrajectory {
         this.segments = new ArrayList<SegmentBase>();
         // this.arcCount = trajectoryPoints.size() - 2;
         this.isFinishedTrajectory = false;
-
         if(trajectoryPoints.size() == 2){
             createSimplePath(trajectoryPoints.get(0), trajectoryPoints.get(1));
             isFinishedTrajectory = true;
@@ -80,7 +78,6 @@ public class DemaciaTrajectory {
                 return (distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_FINAL_POINT);
             }
             // LogManager.log((distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH) + " " + (distanceFromFinishPoint < (PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH * 3)) + " " +  isVelocityHeadingTowardesFinishPoint);
-            //LogManager.log("distanceFromFinishPoint " + distanceFromFinishPoint);
             return (distanceFromFinishPoint < PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH) || ((distanceFromFinishPoint < (PathsConstants.MAX_POSITION_THRESHOLD_DURING_PATH * 3)) && isVelocityHeadingTowardesFinishPoint);
             
             
@@ -109,7 +106,6 @@ public class DemaciaTrajectory {
         ChassisSpeeds speeds = SegmentFollow.getInstance().calculateSpeeds(segments.get(currentSegmentIndex), currentSpeeds, currentPose, finishVelocity);
         
         if(isFinishedSegment(currentSpeeds, currentPose, currentSegment)){
-            LogManager.log("current segment" + currentSegmentIndex);
             if(currentSegmentIndex == segments.size() - 1) {
                 isFinishedTrajectory = true;
                 return new ChassisSpeeds(0, 0, 0);
@@ -117,8 +113,6 @@ public class DemaciaTrajectory {
             currentSegmentIndex++;
             currentSegment = segments.get(currentSegmentIndex);
         }
-        LogManager.log(finishVelocity + " finsih velocity");
-        LogManager.log("speed"+ speeds);
 
         return speeds;
     }
@@ -203,8 +197,6 @@ public class DemaciaTrajectory {
         return currentSegment;
     }
 
-
-
     public ArrayList<Pose2d> getTrjectoryPoint(){
         return trajectoryPoints;
     }
@@ -218,9 +210,6 @@ public class DemaciaTrajectory {
         return currentSegment.getFinishPoint();
     }
 
-    public SegmentBase getCurrSegment(){
-        return currentSegment;
-    }
 
     public record CenterCircleWithDirection(Translation2d centerCircle, boolean isTurningRight) {}
 }

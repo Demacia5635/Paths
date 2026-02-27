@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.demacia.utils.Log.LogManager;
 import frc.demacia.utils.chassis.Chassis;
 
-
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class FollowTrajectory extends Command {
 
@@ -26,20 +25,25 @@ public class FollowTrajectory extends Command {
   ArrayList<Pose2d> trajectoryPoints;
 
   public FollowTrajectory(ArrayList<Pose2d> trajectoryPoints, Consumer<ChassisSpeeds> setSpeeds, Chassis chassis) {
-    // this(setSpeeds, , new DemaciaTrajectory(trajectoryPoints));
     this.chassis = chassis;
     this.setSpeeds = setSpeeds;
     this.trajectoryPoints = trajectoryPoints;
+
+    for (int i = 0; i < trajectoryPoints.size(); i++) {
+      chassis.setPointOnField(trajectoryPoints.get(i), "Point #" + i);
+    }
     trajectory = new DemaciaTrajectory(trajectoryPoints);
-    // LogManager.log("path point "  + trajectory.getPathPoint() + "trajectory point" + trajectory.getTrjectoryPoint());
+
+    // LogManager.log("path point " + trajectory.getPathPoint() + "trajectory point"
+    // + trajectory.getTrjectoryPoint());
   }
 
   @Override
   public void execute() {
     ChassisSpeeds s = trajectory.calculateSpeeds(chassis.getChassisSpeedsFieldRel(), chassis.getPose());
-    // setSpeeds.accept(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(), chassis.getPose()));
+    // setSpeeds.accept(trajectory.calculateSpeeds(chassis.getChassisSpeedsRobotRel(),
+    // chassis.getPose()));
     chassis.setVelocities(s);
-    LogManager.log(trajectory.getCurrSegment() + " current segment");
   }
 
   @Override

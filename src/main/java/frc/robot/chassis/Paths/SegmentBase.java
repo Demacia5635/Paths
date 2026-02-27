@@ -17,5 +17,9 @@ public abstract class SegmentBase {
     }
     public Pose2d getFinishPoint(){return this.finishPoint;}
     public Pose2d getStartingPoint(){return this.startingPoint;}
+    @Override
+    public String toString(){
+        return "Start point: " + startingPoint + " Finish Point: " + finishPoint;
+    }
     
 }

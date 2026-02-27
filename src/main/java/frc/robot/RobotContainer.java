@@ -13,7 +13,7 @@ import frc.demacia.utils.chassis.Chassis;
 import frc.demacia.utils.chassis.DriveCommand;
 import frc.demacia.utils.controller.CommandController;
 import frc.demacia.utils.controller.CommandController.ControllerType;
-import frc.robot.ChassisConstants.MK4iChassisConstants;
+import frc.robot.ChassisConstants.RobotAChassisConstants;
 import frc.robot.chassis.Paths.FollowTrajectory;
 
 
@@ -36,16 +36,18 @@ public class RobotContainer {
   public static CommandController CommandController;
   private static ArrayList<Pose2d> pointList;
 
+
+
   public RobotContainer() {
     CommandController = new CommandController(0, ControllerType.kPS5);
-    chassis = new Chassis(MK4iChassisConstants.CHASSIS_CONFIG);
+    chassis = new Chassis(RobotAChassisConstants.CHASSIS_CONFIG);
     driveCommand = new DriveCommand(chassis, CommandController);
     pointList = new ArrayList<>();
-    pointList.add(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+    pointList.add(new Pose2d(0, 0, Rotation2d.fromDegrees(90)));
     
-    pointList.add(new Pose2d(0, 2, Rotation2d.fromDegrees(0)));
+    pointList.add(new Pose2d(-3, 0.5, Rotation2d.fromDegrees(90)));
     
-    pointList.add(new Pose2d(-1, 2, Rotation2d.fromDegrees(0)));
+    pointList.add(new Pose2d(-3.2, 2, Rotation2d.fromDegrees(125)));
     configureBindings();
   }
 

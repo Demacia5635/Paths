@@ -33,7 +33,7 @@ public class Robot1ChassisConstants {
     public static final Canbus CAN_BUS = Canbus.CANIvore;
     public static final Canbus GYRO_CAN_BUS = Canbus.Rio;
     public static final double STEER_GEAR_RATIO = 151.0/7.0;
-    public static final double DRIVE_GEAR_RATIO = 8.14;
+    public static final double DRIVE_GEAR_RATIO = 7.03;
     
     public static final double STEER_KP = 4.1;
     public static final double STEER_KI = 0.9;

@@ -181,14 +181,17 @@ public class Chassis extends SubsystemBase {
      * @param speeds Desired chassis speeds (field-relative)
      */
     public void setVelocities(ChassisSpeeds speeds) {
-        SwerveModuleState[] states = demaciaKinematics.toSwerveModuleStatesWithLimit(
-            speeds, 
-            getChassisSpeedsFieldRel(), 
-            getGyroAngle()
+        SwerveModuleState[] states = demaciaKinematics.toSwerveModuleStates(
+            ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getGyroAngle())
         );
         setModuleStates(states);
     }
 
+    
+
+    public void setPointOnField(Pose2d pose, String name) {
+        field.getObject(name).setPose(pose);
+    }
     /**
      * Sets robot-relative velocities with acceleration limiting.
      * 
